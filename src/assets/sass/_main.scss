@@ -1,0 +1,76 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  scrollbar-color: var(--lg-logo) var(--lg-input);
+}
+
+html {
+  background: transparent;
+  scroll-behavior: smooth;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+body {
+  flex: 1;
+  min-height: 100%;
+
+  border-radius: 2px;
+  background: var(--smt-background);
+  color: var(--smt-text);
+
+  font-family:
+    Poppins,
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  line-height: 1.5;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  display: flex;
+  flex-direction: column;
+
+  #app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+body:has(dialog[open]) {
+  touch-action: none;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
+}
+
+hr {
+  border: 1px solid var(--lg-accent);
+}
+
+.a11y--visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  white-space: nowrap;
+}

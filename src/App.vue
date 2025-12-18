@@ -8,8 +8,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import AppFooter from './components/AppFooter.vue';
-import { EventBus } from './scripts/event-bus';
-import { initSpritesheetCanvas } from './scripts/spritesheet-cutter';
+import { EventBus } from './core/event-bus';
+import { initSpritesheetCanvas } from './core/spritesheet-cutter';
 
 // main tick loop to synchronize every sprite
 onMounted(() => {

@@ -9,13 +9,15 @@ import GithubSprite from './sprites/GithubSprite.vue';
       <p>a smol web-toy by EepyBerry :3</p>
       <p>not affiliated with <a href="https://hempuli.com/baba/" target="_blank" rel="noreferrer noopener">Baba Is You</a> or its creators</p>
     </div>
-    <GithubSprite />
+    <a href="https://github.com/EepyBerry/site-make-text" target="_blank">
+      <GithubSprite width="3rem" />
+    </a>
   </footer>
 </template>
 
 <style lang="scss">
 #app-footer {
-  padding: 0.5rem;
+  padding: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;

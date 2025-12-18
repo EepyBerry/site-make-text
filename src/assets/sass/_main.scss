@@ -60,6 +60,11 @@ body:has(dialog[open]) {
   -webkit-overflow-scrolling: none;
 }
 
+ul,ol {
+  list-style-type: none;
+  padding: 0;
+}
+
 hr {
   border: 1px solid var(--lg-accent);
 }

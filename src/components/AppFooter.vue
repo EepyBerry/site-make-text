@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import GithubSprite from './sprites/GithubSprite.vue';
+import StaticSprite from './elements/StaticSpriteElement.vue';
 
 </script>
 
@@ -9,9 +9,14 @@ import GithubSprite from './sprites/GithubSprite.vue';
       <p>a smol web-toy by EepyBerry :3</p>
       <p>not affiliated with <a href="https://hempuli.com/baba/" target="_blank" rel="noreferrer noopener">Baba Is You</a> or its creators</p>
     </div>
-    <a href="https://github.com/EepyBerry/site-make-text" target="_blank">
-      <GithubSprite width="3rem" />
-    </a>
+    <ul id="footer-links">
+      <li><a href="https://eepyberry.me" target="_blank">
+        <StaticSprite sprite="icon-eepyberry" width="3rem" />
+      </a></li>
+      <li><a href="https://github.com/EepyBerry/site-make-text" target="_blank">
+        <StaticSprite sprite="icon-github" width="3rem" />
+      </a></li>
+    </ul>
   </footer>
 </template>
 
@@ -25,5 +30,12 @@ import GithubSprite from './sprites/GithubSprite.vue';
   z-index: 5;
 
   background: transparent;
+
+  #footer-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 }
 </style>

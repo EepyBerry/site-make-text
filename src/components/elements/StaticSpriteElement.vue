@@ -1,5 +1,5 @@
 <template>
-  <img id="sprite-github" :src="getCurrentFrameURL()">
+  <img class="sprite" :src="getCurrentFrameURL()">
 </template>
 <script setup lang="ts">
 import { EventBus } from '@/core/event-bus';
@@ -9,10 +9,10 @@ import { ref, watch, type Ref } from 'vue';
 const spriteFrameUrls: Ref<string[]> = ref([])
 const spriteFrameIndex: Ref<number> = ref(0)
 
-withDefaults(defineProps<{ width: string }>(), { width: '2rem' })
+const $props = withDefaults(defineProps<{ sprite: string, width?: string }>(), { width: '2rem' })
 watch(EventBus.spritesheetInitEvent, e => {
   if (!e) return
-  spriteFrameUrls.value.push(...getAnimatedSprite("sprite-github")!.urls)
+  spriteFrameUrls.value.push(...getAnimatedSprite($props.sprite)!.urls)
 })
 watch(EventBus.tickEvent, () => {
   spriteFrameIndex.value++
@@ -25,8 +25,8 @@ function getCurrentFrameURL(): string {
 }
 </script>
 
-<style lang="scss">
-#sprite-github {
+<style scoped lang="scss">
+img.sprite {
   aspect-ratio: 1 / 1;
   width: v-bind(width)
 }

@@ -1,7 +1,6 @@
 export interface Sprite {
   region: SpritesheetRegion
-  blob: Blob
-  blobURL: string
+  data: ImageData
 }
 
 export interface SpritesheetRegion {

@@ -1,4 +1,5 @@
 <template>
+  <AppHeader />
   <main>
 
   </main>
@@ -7,6 +8,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import AppHeader from './components/AppHeader.vue';
 import AppFooter from './components/AppFooter.vue';
 import { EventBus } from './core/event-bus';
 import { initSpritesheetCanvas } from './core/spritesheet-cutter';
@@ -14,7 +16,7 @@ import { initSpritesheetCanvas } from './core/spritesheet-cutter';
 // main tick loop to synchronize every sprite
 onMounted(() => {
   initSpritesheetCanvas()
-  setInterval(EventBus.sendTickEvent, 333)
+  setInterval(EventBus.sendTickEvent, 1000/3.0)
 })
 </script>
 

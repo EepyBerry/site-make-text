@@ -1,4 +1,4 @@
-import type { Sprite } from "@/types"
+import type { Sprite, SpritesheetRegion } from "@/types"
 
 export class AnimatedSprite {
   private _key: string
@@ -24,5 +24,8 @@ export class AnimatedSprite {
 
   public get urls(): string[] {
     return this._frames.map(f => f.blobURL)
+  }
+  public get regions(): SpritesheetRegion[] {
+    return this._frames.map(f => f.region)
   }
 }

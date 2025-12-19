@@ -22,14 +22,14 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
 
 <style lang="scss">
 #app-footer {
+  z-index: 5;
   padding: 1rem;
+  background: transparent;
+  
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  z-index: 5;
-
-  background: transparent;
 
   #footer-links {
     display: flex;

@@ -5,9 +5,8 @@ import { EventBus } from './event-bus'
 import { ref, toRaw, type Ref } from 'vue'
 import { AnimatedSprite } from './models/animated-sprite.model'
 
-const SPRITE_WORK_CANVAS: OffscreenCanvas = new OffscreenCanvas(24, 24)
 const SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(384, 72)
-const SPRITESHEET_REGIONS: Record<string, SpritesheetRegion[]> = appSpritesheetJson
+const SPRITESHEET_ANIMSPRITES: Record<string, SpritesheetRegion[]> = appSpritesheetJson
 
 export const SMTX_ANIMATED_SPRITES: Ref<AnimatedSprite[]> = ref([])
 
@@ -29,7 +28,7 @@ export function getAnimatedSprite(key: string): AnimatedSprite | undefined {
 }
 
 async function cutSpritesheet(): Promise<void> {
-  for (const region of Object.entries(SPRITESHEET_REGIONS)) {
+  for (const region of Object.entries(SPRITESHEET_ANIMSPRITES)) {
     const sprites: Sprite[] = await cutSpritesheetRegion(region[0], region[1])
     SMTX_ANIMATED_SPRITES.value.push(new AnimatedSprite(region[0], sprites))
   }
@@ -41,28 +40,18 @@ async function cutSpritesheetRegion(
   key: string,
   regionsRef: SpritesheetRegion[],
 ): Promise<Sprite[]> {
-  const frames: SpritesheetRegion[] | undefined = SPRITESHEET_REGIONS[key]
+  const frames: SpritesheetRegion[] | undefined = SPRITESHEET_ANIMSPRITES[key]
   if (!frames || frames.length === 0) throw new Error('Region does not exist for key: ' + key)
 
   const spritesheetCtx = SPRITESHEET_CANVAS.getContext('2d', { willReadFrequently: true })!
-  const spriteCtx = SPRITE_WORK_CANVAS.getContext('2d', { willReadFrequently: true })!
 
   const resultSprites: Sprite[] = []
   for (let idx = 0; idx < frames.length; idx++) {
     const f = frames[idx]!
-    const region = regionsRef[idx]!
     const imageData = spritesheetCtx.getImageData(f.x, f.y, f.w, f.h)
-    // adapt canvas and draw sprite, then get its ImageData
-    SPRITE_WORK_CANVAS.width = region.w
-    SPRITE_WORK_CANVAS.height = region.h
-    spriteCtx.clearRect(0, 0, region.w, region.h)
-    spriteCtx.putImageData(imageData, 0, 0)
-    // Create blob and push all data to result array as a Sprite
-    const spriteBlob = await SPRITE_WORK_CANVAS.convertToBlob({ type: 'image/png' })
     resultSprites.push({
       region: regionsRef[idx]!,
-      blob: spriteBlob,
-      blobURL: URL.createObjectURL(spriteBlob),
+      data: imageData
     })
   }
   return resultSprites

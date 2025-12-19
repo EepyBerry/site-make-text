@@ -19,3 +19,8 @@ export function updateFrameIndex(current: Ref<number>): void {
   current.value++
   if (current.value === 3) current.value = 0
 }
+export function updateRawFrameIndex(index: number): number {
+  index++
+  if (index === 3) index = 0
+  return index
+}

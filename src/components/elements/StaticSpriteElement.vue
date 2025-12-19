@@ -28,6 +28,7 @@ function setBackgroundSize() {
   spriteImageRef.value!.style.backgroundSize = `${relativeBackgroundSize[0]}px ${relativeBackgroundSize[1]}px`
 }
 function setBackgroundPosition() {
+  if (!spriteFrameRegions.value || !spriteFrameRegions.value[spriteFrameIndex.value]) return;
   const relativeBackgroundPosition = computeSpritesheetBackgroundPosition(
     spriteFrameRegions.value[spriteFrameIndex.value]!.x,
     spriteFrameRegions.value[spriteFrameIndex.value]!.y,

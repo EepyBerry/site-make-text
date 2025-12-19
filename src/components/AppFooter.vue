@@ -4,7 +4,7 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
 </script>
 
 <template>
-  <footer id="app-footer">
+  <footer id="smtx-footer">
     <div>
       <p>a smol web-toy by EepyBerry :3</p>
       <p>not affiliated with <a href="https://hempuli.com/baba/" target="_blank" rel="noreferrer noopener">Baba Is You</a> or its creators</p>
@@ -21,11 +21,11 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
 </template>
 
 <style lang="scss">
-#app-footer {
+#smtx-footer {
   z-index: 5;
   padding: 1rem;
   background: transparent;
-  
+
   display: flex;
   align-items: center;
   justify-content: space-between;

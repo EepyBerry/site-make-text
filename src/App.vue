@@ -16,7 +16,7 @@ import { initSpritesheetCanvas } from './core/spritesheet-cutter';
 // main tick loop to synchronize every sprite
 onMounted(() => {
   initSpritesheetCanvas()
-  setInterval(EventBus.sendTickEvent, 1000/3.0)
+  setInterval(EventBus.sendTickEvent, 250)
 })
 </script>
 

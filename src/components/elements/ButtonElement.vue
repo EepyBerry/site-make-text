@@ -53,16 +53,16 @@ button.lgv {
 
   &:hover {
     cursor: pointer;
-    background: var(--smt-button-hover);
+    background: var(--smtx-button-hover);
   }
   &:active {
     cursor: pointer;
-    background: var(--smt-button-active);
+    background: var(--smtx-button-active);
   }
   &:disabled {
     cursor: not-allowed;
-    background: var(--smt-button-disabled);
-    color: var(--smt-text-disabled);
+    background: var(--smtx-button-disabled);
+    color: var(--smtx-text-disabled);
   }
 
   iconify-icon,

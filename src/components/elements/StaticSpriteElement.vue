@@ -6,13 +6,18 @@ import { EventBus } from '@/core/event-bus';
 import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
 import { computeSpritesheetBackgroundPosition, computeSpritesheetBackgroundSize, updateFrameIndex } from '@/core/utils/spritesheet-utils';
 import type { SpritesheetRegion } from '@/types';
-import { ref, useTemplateRef, watch, type Ref } from 'vue';
+import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 
 const spriteImageRef = useTemplateRef("spriteImageRef")
 const spriteFrameRegions: Ref<SpritesheetRegion[]> = ref([])
 const spriteFrameIndex: Ref<number> = ref(0)
 
 const $props = withDefaults(defineProps<{ sprite: string, width?: string }>(), { width: '2rem' })
+onMounted(() => {
+  if (!EventBus.tickEvent.value) return
+  setBackgroundSize()
+  setBackgroundPosition()
+})
 watch(EventBus.spritesheetInitEvent, () => {
   setBackgroundSize()
   setBackgroundPosition()

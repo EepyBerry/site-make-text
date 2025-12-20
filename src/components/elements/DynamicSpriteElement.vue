@@ -7,10 +7,11 @@ import { EventBus } from '@/core/event-bus';
 import type { AnimatedSprite } from '@/core/models/animated-sprite.model';
 import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
 import { updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
-import { ref, useTemplateRef, watch, type Ref } from 'vue';
+import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import { WordType, type DynamicSpriteProps } from '@/types';
 
 const spriteCanvas = useTemplateRef("spriteCanvas")!
+const emptySprite: Ref<AnimatedSprite|null> = ref(null)
 const blockSprite: Ref<AnimatedSprite|null> = ref(null)
 const letterSprites: Ref<AnimatedSprite[]> = ref([])
 const spriteFrameIndex: Ref<number> = ref(0)
@@ -23,11 +24,19 @@ const $props = withDefaults(defineProps<DynamicSpriteProps>(), {
   type: WordType.NOUN,
 })
 
+onMounted(() => {
+  if (!EventBus.spritesheetInitEvent.value) return
+  loadEmptySprite()
+  loadBlockSprite()
+  reloadLetterSprites()
+  updateCanvas()
+})
 watch($props, () => {
    reloadLetterSprites()
    updateCanvas()
 })
 watch(EventBus.spritesheetInitEvent, () => {
+  loadEmptySprite()
   loadBlockSprite()
   reloadLetterSprites()
   updateCanvas()
@@ -37,9 +46,14 @@ watch(EventBus.tickEvent, () => {
   updateCanvas()
 })
 
+function loadEmptySprite() {
+  const emptyAnimSprite = getAnimatedSprite('icon-empty')
+  if (!emptyAnimSprite) throw new Error("Cannot find sprite for icon-empty")
+  emptySprite.value = emptyAnimSprite
+}
 function loadBlockSprite() {
   const blockAnimSprite = getAnimatedSprite('block')
-  if (!blockAnimSprite) throw new Error("Cannot find sprite for block")
+  if (!blockAnimSprite) throw new Error("Cannot find sprite for icon-block")
   blockSprite.value = blockAnimSprite
 }
 function reloadLetterSprites() {
@@ -65,7 +79,11 @@ function updateCanvas() {
   if (!ctx) return
   clearCanvas(ctx)
 
-  if (!letterSprites.value || letterSprites.value.length === 0) return
+  if (!letterSprites.value || letterSprites.value.length === 0) {
+    drawEmpty(ctx)
+    return
+  }
+
   switch (letterSprites.value.length) {
     case 1: drawLetter(ctx); break;
     case 2: drawLettersAsDuo(ctx); break;
@@ -163,6 +181,10 @@ function drawLettersAsOcto(ctx: CanvasRenderingContext2D) {
   ctx.putImageData(letterSprites.value[5]!.frames[spriteFrameIndex.value]!.data, 6, 12)
   ctx.putImageData(letterSprites.value[6]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 12, 12)
   ctx.putImageData(letterSprites.value[7]!.frames[spriteFrameIndex.value]!.data, 18, 12)
+}
+
+function drawEmpty(ctx: CanvasRenderingContext2D) {
+  ctx.putImageData(emptySprite.value!.frames[spriteFrameIndex.value]!.data, 0, 0)
 }
 
 /**

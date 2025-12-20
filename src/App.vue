@@ -1,7 +1,7 @@
 <template>
   <AppHeader />
   <main>
-
+    <CanvasGrid />
   </main>
   <AppFooter />
 </template>
@@ -10,8 +10,9 @@
 import { onMounted } from 'vue';
 import AppHeader from './components/AppHeader.vue';
 import AppFooter from './components/AppFooter.vue';
+import CanvasGrid from './components/SectionSprites.vue';
 import { EventBus } from './core/event-bus';
-import { initSpritesheetCanvas } from './core/spritesheet-cutter';
+import { initSpritesheetCanvas } from './core/helpers/spritesheet.helper';
 
 // main tick loop to synchronize every sprite
 onMounted(() => {

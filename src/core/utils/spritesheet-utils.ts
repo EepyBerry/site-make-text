@@ -1,5 +1,5 @@
 import type { Ref } from "vue"
-import { SPRITESHEET_WIDTH, REM_SIZE, SPRITESHEET_HEIGHT, SPRITESHEET_CELL_SIZE } from "./globals"
+import { SPRITESHEET_WIDTH, REM_SIZE, SPRITESHEET_HEIGHT, SPRITESHEET_CELL_SIZE } from "@/core/globals"
 
 export function computeSpritesheetBackgroundSize(elWidth: string): number[] {
   const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE

@@ -1,6 +1,6 @@
 <template>
   <header id="smtx-header">
-    <DynamicSprite width="5rem" word="site" color="#8e44c7" :show-block="false" :more-letters-on-top="false" />
+    <DynamicSprite width="5rem" word="site" color="#8e44c7" type="noun" :more-letters-on-top="false" />
     <hr>
     <DynamicSprite width="5rem" word="make" :more-letters-on-top="false" />
     <hr>

@@ -3,8 +3,8 @@
 </template>
 <script setup lang="ts">
 import { EventBus } from '@/core/event-bus';
-import { getAnimatedSprite } from '@/core/spritesheet-cutter';
-import { computeSpritesheetBackgroundPosition, computeSpritesheetBackgroundSize, updateFrameIndex } from '@/core/spritesheet-utils';
+import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
+import { computeSpritesheetBackgroundPosition, computeSpritesheetBackgroundSize, updateFrameIndex } from '@/core/utils/spritesheet-utils';
 import type { SpritesheetRegion } from '@/types';
 import { ref, useTemplateRef, watch, type Ref } from 'vue';
 

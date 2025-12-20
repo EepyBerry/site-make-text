@@ -1,10 +1,10 @@
 import type { Sprite, SpritesheetRegion } from '@/types'
 import appSpritesheetJson from '@/assets/spritesheet/app-spritesheet.json'
 import appSpritesheet from '@/assets/spritesheet/app-spritesheet.png'
-import { EventBus } from './event-bus'
+import { EventBus } from '../event-bus'
 import { ref, type Ref } from 'vue'
-import { AnimatedSprite } from './models/animated-sprite.model'
-import { SPRITESHEET_HEIGHT, SPRITESHEET_WIDTH } from './globals'
+import { AnimatedSprite } from '../models/animated-sprite.model'
+import { SPRITESHEET_HEIGHT, SPRITESHEET_WIDTH } from '../globals'
 
 const SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT)
 const SPRITESHEET_ANIMSPRITES: Record<string, SpritesheetRegion[]> = appSpritesheetJson

@@ -1,26 +1,26 @@
 <template>
-  <canvas ref="spriteCanvas" width="24" height="24"></canvas>
+  <canvas ref="spriteCanvas" class="sprite animated" width="24" height="24"></canvas>
 </template>
 
 <script setup lang="ts">
 import { EventBus } from '@/core/event-bus';
 import type { AnimatedSprite } from '@/core/models/animated-sprite.model';
-import { getAnimatedSprite } from '@/core/spritesheet-cutter';
-import { updateFrameIndex, updateRawFrameIndex } from '@/core/spritesheet-utils';
+import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
+import { updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
 import { ref, useTemplateRef, watch, type Ref } from 'vue';
+import { WordType, type DynamicSpriteProps } from '@/types';
 
 const spriteCanvas = useTemplateRef("spriteCanvas")!
 const blockSprite: Ref<AnimatedSprite|null> = ref(null)
 const letterSprites: Ref<AnimatedSprite[]> = ref([])
 const spriteFrameIndex: Ref<number> = ref(0)
 
-type DynamicSpriteProps = { width?: string, word?: string, color?: string, moreLettersOnTop?: boolean, showBlock?: boolean }
 const $props = withDefaults(defineProps<DynamicSpriteProps>(), {
   width: '2rem',
   word: 'TEXT',
   color: '#ffffff',
   moreLettersOnTop: true,
-  showBlock: false,
+  type: WordType.NOUN,
 })
 
 watch($props, () => {
@@ -78,7 +78,7 @@ function updateCanvas() {
   }
   applyColor(ctx)
 
-  if ($props.showBlock) {
+  if ($props.type === WordType.PROPERTY) {
     drawBlock(ctx)
   }
 }

@@ -9,3 +9,6 @@ export interface SpritesheetRegion {
   w: number
   h: number
 }
+
+export enum WordType { NOUN = "noun", PROPERTY = "property" }
+export type DynamicSpriteProps = { width?: string, word?: string, color?: string, moreLettersOnTop?: boolean, type?: WordType|string }

@@ -6,7 +6,6 @@
     <div ref="spriteGrid" id="sprite-grid">
       <button type="button" v-for="word, idx of words" :key="idx" @click="selectWord(idx)">
         <DynamicSprite
-          :key="word.word"
           :word="word.word"
           :color="word.color"
           :more-letters-on-top="word.moreLettersOnTop"
@@ -20,7 +19,7 @@
         <StaticSprite width="5rem" sprite="icon-plus" />
       </button>
     </div>
-    <button id="button-make-gifs" type="button" @click="makeGifs()">
+    <button v-show="false" id="button-make-gifs" type="button" @click="makeGifs()">
       <StaticSprite width="5rem" sprite="icon-plus" />
     </button>
   </section>
@@ -68,20 +67,6 @@ function makeGifs() {
   display: flex;
   align-items: center;
 
-  button {
-    position: relative;
-    background: none;
-    border: none;
-    &:hover {
-      cursor: pointer;
-      .sprite:not(.caret) {
-        transform: scale(1.05);
-      }
-    }
-    &:active .sprite:not(.caret) {
-      transform: scale(0.9);
-    }
-  }
   button#button-make-gifs {
     position: absolute;
     bottom: 0;
@@ -93,11 +78,26 @@ function makeGifs() {
     display: grid;
     grid-template-columns: repeat(v-bind(wordCount), min-content);
     grid-template-rows: 1fr;
+
+    button {
+      position: relative;
+      background: none;
+      border: none;
+      &:hover {
+        cursor: pointer;
+        .sprite:not(.caret) {
+          transform: scale(1.05);
+        }
+      }
+      &:active .sprite:not(.caret) {
+        transform: scale(0.9);
+      }
+    }
   }
 
   .sprite.caret {
     position: absolute;
-    bottom: -100%;
+    top: -100%;
   }
 }
 #sprite-properties-panel {

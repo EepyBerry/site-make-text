@@ -68,7 +68,7 @@ function reloadLetterSprites() {
 
     // get each letter's AnimatedSprite
     const letterAnimSprite = getAnimatedSprite(`letter-${letter.toLowerCase()}${useSmallLetters ? '-small' : ''}`)
-    if (!letterAnimSprite) throw new Error("Cannot find sprite for letter: "+letter)
+    if (!letterAnimSprite) continue;
     letterSprites.value.push(letterAnimSprite!)
   }
   console.log(letterSprites.value.map(v => v.key))

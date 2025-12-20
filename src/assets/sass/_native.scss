@@ -1,8 +1,11 @@
 input {
-  padding: 0.5rem;
+  padding: 0.25rem;
 
-  border: 1px solid var(--smtx-primary);
+  border: 2px solid var(--smtx-primary);
   background: #000;
   color: var(--smtx-text);
   text-align: center;
+}
+button {
+  border: none;
 }

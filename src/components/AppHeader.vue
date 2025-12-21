@@ -8,10 +8,6 @@
   </header>
 </template>
 
-<script setup lang="ts">
-import DynamicSprite from './elements/DynamicSpriteElement.vue';
-</script>
-
 <style lang="scss">
 #smtx-header {
   z-index: 5;

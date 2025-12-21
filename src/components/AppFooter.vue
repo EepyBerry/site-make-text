@@ -25,6 +25,7 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
   z-index: 5;
   padding: 1rem;
   background: transparent;
+  border-top: 4px dashed white;
 
   display: flex;
   align-items: center;

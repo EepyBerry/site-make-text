@@ -13,6 +13,7 @@ import { WordType, type DynamicSpriteProps } from '@/types';
 const spriteCanvas = useTemplateRef("spriteCanvas")!
 const emptySprite: Ref<AnimatedSprite|null> = ref(null)
 const blockSprite: Ref<AnimatedSprite|null> = ref(null)
+const crossSprite: Ref<AnimatedSprite|null> = ref(null)
 const letterSprites: Ref<AnimatedSprite[]> = ref([])
 const spriteFrameIndex: Ref<number> = ref(0)
 
@@ -20,14 +21,16 @@ const $props = withDefaults(defineProps<DynamicSpriteProps>(), {
   width: '2rem',
   word: 'TEXT',
   color: '#ffffff',
-  moreLettersOnTop: true,
   type: WordType.NOUN,
+  moreLettersOnTop: true,
+  crossedOut: false
 })
 
 onMounted(() => {
   if (!EventBus.spritesheetInitEvent.value) return
   loadEmptySprite()
   loadBlockSprite()
+  loadCrossSprite()
   reloadLetterSprites()
   updateCanvas()
 })
@@ -38,6 +41,7 @@ watch($props, () => {
 watch(EventBus.spritesheetInitEvent, () => {
   loadEmptySprite()
   loadBlockSprite()
+  loadCrossSprite()
   reloadLetterSprites()
   updateCanvas()
 })
@@ -47,7 +51,7 @@ watch(EventBus.tickEvent, () => {
 })
 
 function loadEmptySprite() {
-  const emptyAnimSprite = getAnimatedSprite('icon-empty')
+  const emptyAnimSprite = getAnimatedSprite('empty')
   if (!emptyAnimSprite) throw new Error("Cannot find sprite for icon-empty")
   emptySprite.value = emptyAnimSprite
 }
@@ -55,6 +59,11 @@ function loadBlockSprite() {
   const blockAnimSprite = getAnimatedSprite('block')
   if (!blockAnimSprite) throw new Error("Cannot find sprite for icon-block")
   blockSprite.value = blockAnimSprite
+}
+function loadCrossSprite() {
+  const crossAnimSprite = getAnimatedSprite('cross')
+  if (!crossAnimSprite) throw new Error("Cannot find sprite for icon-empty")
+  crossSprite.value = crossAnimSprite
 }
 function reloadLetterSprites() {
   letterSprites.value.splice(0)
@@ -64,10 +73,15 @@ function reloadLetterSprites() {
     // check if we must use small letters; special case for 5-letter words
     const useSmallLetters: boolean = $props.word.length === 5
       ? ($props.moreLettersOnTop ? i <= 2 : i >= 2)
-      : [3, 6].includes($props.word.length)
+      : [3, 6, 7].includes($props.word.length)
+
+    // check if we must use tiny letters; special case for 7-letter words
+    const useTinyLetters: boolean = $props.word.length === 7
+      ? ($props.moreLettersOnTop ? i <= 3 : i >= 3)
+      : [7, 8].includes($props.word.length)
 
     // get each letter's AnimatedSprite
-    const letterAnimSprite = getAnimatedSprite(`letter-${letter.toLowerCase()}${useSmallLetters ? '-small' : ''}`)
+    const letterAnimSprite = getAnimatedSprite(`letter-${letter.toLowerCase()}${useTinyLetters ? '-tiny' : useSmallLetters ? '-small' : ''}`)
     if (!letterAnimSprite) continue;
     letterSprites.value.push(letterAnimSprite!)
   }
@@ -91,13 +105,18 @@ function updateCanvas() {
     case 4: drawLettersAsQuad(ctx); break;
     case 5: drawLettersAsQuint(ctx); break;
     case 6: drawLettersAsHexa(ctx); break;
-    case 6: drawLettersAsHepta(ctx); break;
-    case 6: drawLettersAsOcto(ctx); break;
+    case 7: drawLettersAsHepta(ctx); break;
+    case 8: drawLettersAsOcto(ctx); break;
   }
   applyColor(ctx)
 
   if ($props.type === WordType.PROPERTY) {
     drawBlock(ctx)
+  }
+
+
+  if ($props.crossedOut) {
+    drawCross(ctx)
   }
 }
 
@@ -192,18 +211,36 @@ function drawEmpty(ctx: CanvasRenderingContext2D) {
  * @param ctx
  */
 function drawBlock(ctx: CanvasRenderingContext2D) {
-  const letterImgData = ctx.getImageData(0, 0, 24, 24)
+  const wordImgData = ctx.getImageData(0, 0, 24, 24)
 
   ctx.putImageData(blockSprite.value!.frames[spriteFrameIndex.value]!.data, 0, 0)
   ctx.fillStyle = $props.color
   ctx.fillRect(0, 0, 24, 24)
 
   const blockImageData = ctx.getImageData(0, 0, 24, 24)
-  for (let i = 0; i < letterImgData.data.length; i += 4) {
-    blockImageData.data[i+3] = (letterImgData.data[i+3]! > 0 ? 0 : blockImageData.data[i+3]!)
+  for (let i = 0; i < wordImgData.data.length; i += 4) {
+    blockImageData.data[i+3] = (wordImgData.data[i+3]! > 0 ? 0 : blockImageData.data[i+3]!)
   }
   ctx.putImageData(blockImageData, 0, 0)
 }
+
+/**
+ * Overrides the drawing by overlaying the cross sprite on the rest
+ * @param ctx
+ */
+function drawCross(ctx: CanvasRenderingContext2D) {
+  const wordImgData = ctx.getImageData(0, 0, 24, 24)
+
+  const crossFrameData = crossSprite.value!.frames[spriteFrameIndex.value]!.data
+  for (let i = 0; i < crossFrameData.data.length; i += 4) {
+    wordImgData.data[i+0] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+0]! : wordImgData.data[i+0]!)
+    wordImgData.data[i+1] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+1]! : wordImgData.data[i+1]!)
+    wordImgData.data[i+2] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+2]! : wordImgData.data[i+2]!)
+    wordImgData.data[i+3] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+3]! : wordImgData.data[i+3]!)
+  }
+  ctx.putImageData(wordImgData, 0, 0)
+}
+
 </script>
 
 <style scoped lang="scss">

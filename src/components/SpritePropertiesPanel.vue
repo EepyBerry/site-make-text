@@ -22,13 +22,35 @@
 
     <StaticSprite width="2.5rem" sprite="icon-morelettersontop" />
     <RadioElement>
-      <RadioOptionElement v-model="spriteProps!.moreLettersOnTop" pid="prop-type" id="noun" :value="false">
+      <RadioOptionElement v-model="spriteProps!.moreLettersOnTop" pid="prop-type" id="moreontop" :value="false">
         <DynamicSprite word="off" type="noun" width="2rem" />
       </RadioOptionElement>
-      <RadioOptionElement v-model="spriteProps!.moreLettersOnTop" pid="prop-type" id="property" :value="true">
+      <RadioOptionElement v-model="spriteProps!.moreLettersOnTop" pid="prop-type" id="lessontop" :value="true">
         <DynamicSprite word="on" type="noun" width="2rem" />
       </RadioOptionElement>
     </RadioElement>
+
+    <StaticSprite width="2.5rem" sprite="icon-crossedout" />
+    <RadioElement>
+      <RadioOptionElement v-model="spriteProps!.crossedOut" pid="prop-type" id="notcrossedout" :value="false">
+        <DynamicSprite word="off" type="noun" width="2rem" />
+      </RadioOptionElement>
+      <RadioOptionElement v-model="spriteProps!.crossedOut" pid="prop-type" id="crossedout" :value="true">
+        <DynamicSprite word="on" type="noun" width="2rem" />
+      </RadioOptionElement>
+    </RadioElement>
+  </section>
+  <section id="section-sprite-color">
+    <ColorPicker
+      :color="spriteProps!.color"
+      alpha-channel="hide"
+      default-format="hex"
+      :visible-formats="['hex']"
+      @color-change="setColor"
+      draggable="false"
+    >
+      <template v-slot:hue-range-input-label><span></span></template>
+    </ColorPicker>
   </section>
 </template>
 
@@ -37,17 +59,21 @@ import { WordType, type DynamicSpriteProps } from '@/types';
 import { computed } from 'vue';
 import RadioElement from './elements/RadioElement.vue';
 import RadioOptionElement from './elements/RadioOptionElement.vue';
+import { ColorPicker } from 'vue-accessible-color-picker';
 
 const spriteProps = defineModel<DynamicSpriteProps>()
 const spriteColor = computed(() => spriteProps.value?.color)
+
+function setColor(data: { colors: object, cssColor: string }) {
+  spriteProps.value!.color = data.cssColor
+}
+
 </script>
 
 <style lang="scss">
 #section-sprite-props {
   padding: 1rem 1rem 1rem 0.5rem;
-
   border-bottom: 4px dashed white;
-  border-right: 4px dashed white;
 
   display: grid;
   grid-template-columns: 3rem 1fr;
@@ -55,7 +81,7 @@ const spriteColor = computed(() => spriteProps.value?.color)
   gap: 1rem 0;
 
   input {
-    width: 10rem;
+    width: 100%;
     font-size: 1.25rem;
     font-weight: 600;
     border-radius: 2px;
@@ -66,5 +92,9 @@ const spriteColor = computed(() => spriteProps.value?.color)
     background: v-bind(spriteColor);
     border-radius: 2px;
   }
+}
+#section-sprite-color {
+  padding: 1rem 1rem 1rem;
+  border-bottom: 4px dashed white;
 }
 </style>

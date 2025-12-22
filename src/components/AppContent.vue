@@ -113,6 +113,9 @@ function addWord() {
     moreLettersOnTop: true,
     crossedOut: false,
   });
+  if (selectedWord.value < 0) {
+    setTimeout(() => selectWord(words.value.length-1), 0);
+  }
   setTimeout(
     () => sectionRef.value!.scrollTo({ left: sectionRef.value!.clientWidth, behavior: 'smooth' }),
     50,

@@ -9,16 +9,19 @@ input {
 }
 button {
   border: none;
+  background: none;
+  font-family: inherit;
 }
 
 a {
   color: var(--smtx-link);
   text-decoration: none;
   font-weight: 650;
+  font-family: inherit;
 }
-a:visited {
+a:not(:has(div)):visited {
   color: var(--smtx-link-visited);
 }
-a:hover {
-  filter: brightness(1.25);
+a:not(:has(div)):hover {
+  filter: brightness(1.5);
 }

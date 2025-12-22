@@ -88,7 +88,6 @@ function addWord() {
 }
 function selectWord(idx: number) {
   selectedWord.value = idx;
-  console.log('selected word ' + idx);
 }
 function deleteWord(idx: number) {
   words.value.splice(idx, 1);

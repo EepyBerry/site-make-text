@@ -55,10 +55,18 @@ defineExpose({ convertToBlob });
 // ----------------------------------------------------------------------------
 // exposed functions
 
-function convertToBlob(format: 'gif' | 'webp' = 'gif'): Blob | undefined {
-  const blobCanvas: OffscreenCanvas = new OffscreenCanvas(24, 24);
-  const ctx = blobCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
-  if (!ctx) throw new Error('Cannot make gif from canvas: context was not properly initialized');
+function convertToBlob(format: 'gif' | 'webp' = 'gif', scale: number = 2): Blob | undefined {
+  const scaledImageSize: number = 24*scale
+
+  const rawCanvas: OffscreenCanvas = new OffscreenCanvas(24, 24);
+  const scaleCanvas: OffscreenCanvas = new OffscreenCanvas(scaledImageSize, scaledImageSize);
+  const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
+  const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
+  if (!rawCtx || !scaleCtx) throw new Error('Cannot make gif from canvas: context was not properly initialized');
+
+  // prepare scaled-up canvas
+  _clearCanvas(scaleCtx);
+  scaleCtx.scale(scale, scale);
 
   // skip empty words
   if (!letterSprites.value || letterSprites.value.length === 0) {
@@ -68,43 +76,49 @@ function convertToBlob(format: 'gif' | 'webp' = 'gif'): Blob | undefined {
   // iterate on frames and draw them one by one on canvas first, and then as a gif frame
   const gifEncoder = new GIFEncoder();
   for (let i = 0; i < 3; i++) {
-    _clearCanvas(ctx);
+    _clearCanvas(rawCtx);
     switch (letterSprites.value.length) {
       case 1:
-        _drawLetter(ctx, i);
+        _drawLetter(rawCtx, i);
         break;
       case 2:
-        _drawLettersAsDuo(ctx, i);
+        _drawLettersAsDuo(rawCtx, i);
         break;
       case 3:
-        _drawLettersAsTrio(ctx, i);
+        _drawLettersAsTrio(rawCtx, i);
         break;
       case 4:
-        _drawLettersAsQuad(ctx, i);
+        _drawLettersAsQuad(rawCtx, i);
         break;
       case 5:
-        _drawLettersAsQuint(ctx, i);
+        _drawLettersAsQuint(rawCtx, i);
         break;
       case 6:
-        _drawLettersAsHexa(ctx, i);
+        _drawLettersAsHexa(rawCtx, i);
         break;
       case 7:
-        _drawLettersAsHepta(ctx, i);
+        _drawLettersAsHepta(rawCtx, i);
         break;
       case 8:
-        _drawLettersAsOcto(ctx, i);
+        _drawLettersAsOcto(rawCtx, i);
         break;
     }
-    _applyColor(ctx);
+    _applyColor(rawCtx);
+    if ($props.type === WordType.PROPERTY) _drawBlock(rawCtx, i);
+    if ($props.crossedOut) _drawCross(rawCtx, i);
 
-    if ($props.type === WordType.PROPERTY) _drawBlock(ctx, i);
-    if ($props.crossedOut) _drawCross(ctx, i);
+    // Scale raw data on scaleCanvas
+    _clearCanvas(scaleCtx);
+    scaleCtx.globalCompositeOperation = "source-over";
+    scaleCtx.imageSmoothingEnabled = false
+    scaleCtx.imageSmoothingQuality = "high"
+    scaleCtx.drawImage(rawCanvas, 0, 0);
 
     // convert to GIF frame
-    const frame = ctx.getImageData(0, 0, 24, 24);
+    const frame = scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize);
     const framePalette = quantize(frame.data, 4, { format: 'rgba4444', oneBitAlpha: true });
     const frameIndex = applyPalette(frame.data, framePalette, 'rgba4444');
-    gifEncoder.writeFrame(frameIndex, 24, 24, {
+    gifEncoder.writeFrame(frameIndex, scaledImageSize, scaledImageSize, {
       first: i === 0,
       transparent: true,
       transparentIndex: framePalette.findIndex((p: number[]) => p[3] === 0),
@@ -162,7 +176,6 @@ function _reloadLetterSprites() {
     if (!letterAnimSprite) continue;
     letterSprites.value.push(letterAnimSprite!);
   }
-  console.log(letterSprites.value.map((v) => v.key));
 }
 
 function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {

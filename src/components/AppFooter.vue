@@ -16,12 +16,12 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
     </div>
     <ul id="footer-links">
       <li>
-        <a href="https://eepyberry.me" target="_blank">
+        <a class="image-link" href="https://eepyberry.me" target="_blank">
           <StaticSprite sprite="icon-eepyberry" width="3rem" />
         </a>
       </li>
       <li>
-        <a href="https://github.com/EepyBerry/site-make-text" target="_blank">
+        <a class="image-link" href="https://github.com/EepyBerry/site-make-text" target="_blank">
           <StaticSprite sprite="icon-github" width="3rem" />
         </a>
       </li>
@@ -47,7 +47,16 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 1rem;
+
+
+    a:hover .sprite {
+      cursor: pointer;
+      transform: scale(1.075);
+    }
+    a:active .sprite {
+      transform: scale(0.9);
+    }
   }
 }
 </style>

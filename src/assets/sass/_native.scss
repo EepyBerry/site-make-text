@@ -1,5 +1,6 @@
 input {
   padding: 0.25rem;
+  font-family: inherit;
 
   border: 2px solid var(--smtx-primary);
   background: #000;
@@ -8,4 +9,16 @@ input {
 }
 button {
   border: none;
+}
+
+a {
+  color: var(--smtx-link);
+  text-decoration: none;
+  font-weight: 650;
+}
+a:visited {
+  color: var(--smtx-link-visited);
+}
+a:hover {
+  filter: brightness(1.25);
 }

@@ -14,7 +14,7 @@ import { initSpritesheetCanvas } from './core/helpers/spritesheet.helper';
 
 // main tick loop to synchronize every sprite
 onMounted(() => {
-  initSpritesheetCanvas()
-  setInterval(EventBus.sendTickEvent, 225)
-})
+  initSpritesheetCanvas();
+  setInterval(EventBus.sendTickEvent, 225);
+});
 </script>

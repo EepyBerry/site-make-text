@@ -1,26 +1,35 @@
-import type { Ref } from "vue"
-import { SPRITESHEET_WIDTH, REM_SIZE, SPRITESHEET_HEIGHT, SPRITESHEET_CELL_SIZE } from "@/core/globals"
+import type { Ref } from 'vue';
+import {
+  SPRITESHEET_WIDTH,
+  REM_SIZE,
+  SPRITESHEET_HEIGHT,
+  SPRITESHEET_CELL_SIZE,
+} from '@/core/globals';
 
 export function computeSpritesheetBackgroundSize(elWidth: string): number[] {
-  const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE
-  const backgroundSizeX = (SPRITESHEET_WIDTH * elWidthAsNumber) / SPRITESHEET_CELL_SIZE
-  const backgroundSizeY = (SPRITESHEET_HEIGHT * elWidthAsNumber) / SPRITESHEET_CELL_SIZE
-  return [backgroundSizeX, backgroundSizeY]
+  const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
+  const backgroundSizeX = (SPRITESHEET_WIDTH * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  const backgroundSizeY = (SPRITESHEET_HEIGHT * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  return [backgroundSizeX, backgroundSizeY];
 }
 
-export function computeSpritesheetBackgroundPosition(frameX: number, frameY: number, elWidth: string): number[] {
-  const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE
-  const backgroundPositionX = (frameX * elWidthAsNumber) / SPRITESHEET_CELL_SIZE
-  const backgroundPositionY = (frameY * elWidthAsNumber) / SPRITESHEET_CELL_SIZE
-  return [backgroundPositionX, backgroundPositionY]
+export function computeSpritesheetBackgroundPosition(
+  frameX: number,
+  frameY: number,
+  elWidth: string,
+): number[] {
+  const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
+  const backgroundPositionX = (frameX * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  const backgroundPositionY = (frameY * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  return [backgroundPositionX, backgroundPositionY];
 }
 
 export function updateFrameIndex(current: Ref<number>): void {
-  current.value++
-  if (current.value === 3) current.value = 0
+  current.value++;
+  if (current.value === 3) current.value = 0;
 }
 export function updateRawFrameIndex(index: number): number {
-  index++
-  if (index === 3) index = 0
-  return index
+  index++;
+  if (index === 3) index = 0;
+  return index;
 }

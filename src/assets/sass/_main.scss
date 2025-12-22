@@ -23,19 +23,8 @@ body {
   color: var(--smtx-text);
 
   font-family:
-    Poppins,
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+    JetBrains Mono,
+    monospace;
   line-height: 1.5;
 
   image-rendering: pixelated;
@@ -59,23 +48,12 @@ body:has(dialog[open]) {
   -webkit-overflow-scrolling: none;
 }
 
-ul,ol {
+ul,
+ol {
   list-style-type: none;
   padding: 0;
 }
 
 hr {
   border: 1px solid var(--lg-accent);
-}
-
-.a11y--visually-hidden {
-  position: absolute;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  border: 0;
-  white-space: nowrap;
 }

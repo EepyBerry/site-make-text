@@ -5,20 +5,31 @@
     </aside>
     <section ref="sectionRef" id="section-sprites">
       <div id="sprite-grid">
-        <div class="sprite-column" v-for="word, idx of words" :key="idx">
+        <div class="sprite-column" v-for="(word, idx) of words" :key="idx">
           <button type="button" @click="selectWord(idx)">
             <DynamicSprite
+              ref="dynamicSpriteRefs"
               :word="word.word"
               :color="word.color"
               :type="word.type"
               :more-letters-on-top="word.moreLettersOnTop"
               :crossed-out="word.crossedOut"
               width="5rem"
-              :class="{ empty: word.word!.length === 0}"
+              :class="{ empty: word.word!.length === 0 }"
             />
-            <StaticSprite v-if="selectedWord === idx" class="caret" width="5rem" sprite="icon-caret" />
+            <StaticSprite
+              v-if="selectedWord === idx"
+              class="caret"
+              width="5rem"
+              sprite="icon-caret"
+            />
           </button>
-          <button v-if="selectedWord === idx" id="button-delete-word" type="button" @click="deleteWord(idx)">
+          <button
+            v-if="selectedWord === idx"
+            id="button-delete-word"
+            type="button"
+            @click="deleteWord(idx)"
+          >
             <StaticSprite width="5rem" sprite="icon-trash" />
           </button>
         </div>
@@ -26,7 +37,7 @@
           <StaticSprite width="5rem" sprite="icon-plus" />
         </button>
       </div>
-      <button v-show="false" id="button-make-gifs" type="button" @click="makeGifs()">
+      <button id="button-make-gifs" type="button" @click="makeGifs()">
         <StaticSprite width="5rem" sprite="icon-plus" />
       </button>
     </section>
@@ -34,35 +45,64 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type Ref, ref, useTemplateRef } from 'vue';
-import { WordType, type DynamicSpriteProps } from '@/types';
+import { computed, type Ref, ref, type TemplateRef, useTemplateRef } from 'vue';
+import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps } from '@/types';
 import SpritePropertiesPanel from './SpritePropertiesPanel.vue';
+import { saveAs } from 'file-saver';
 
-const sectionRef = useTemplateRef("sectionRef")
+const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
+const dynamicSpriteRefs: TemplateRef<DynamicSpriteExposes[]> = useTemplateRef('dynamicSpriteRefs');
 
 const words: Ref<DynamicSpriteProps[]> = ref([
-  { word: 'plus', color: '#0ea4ad', moreLettersOnTop: true, type: WordType.NOUN, crossedOut: false },
+  {
+    word: 'plus',
+    color: '#0ea4ad',
+    moreLettersOnTop: true,
+    type: WordType.NOUN,
+    crossedOut: false,
+  },
   { word: 'is', color: '#ffffff', moreLettersOnTop: true, type: WordType.NOUN, crossedOut: false },
-  { word: 'add', color: '#0ea4ad', moreLettersOnTop: true, type: WordType.PROPERTY, crossedOut: false },
-])
-const wordCount = computed(() => words.value.length + 1)
-const selectedWord: Ref<number> = ref(-1)
+  {
+    word: 'add',
+    color: '#0ea4ad',
+    moreLettersOnTop: true,
+    type: WordType.PROPERTY,
+    crossedOut: false,
+  },
+]);
+const wordCount = computed(() => words.value.length + 1);
+const selectedWord: Ref<number> = ref(-1);
 
 function addWord() {
-  words.value.push({ word: '', color: '#ffffff', type: WordType.NOUN, moreLettersOnTop: true, crossedOut: false })
-  setTimeout(() => sectionRef.value!.scrollTo({ left: sectionRef.value!.clientWidth, behavior: 'smooth' }), 50)
+  words.value.push({
+    word: '',
+    color: '#ffffff',
+    type: WordType.NOUN,
+    moreLettersOnTop: true,
+    crossedOut: false,
+  });
+  setTimeout(
+    () => sectionRef.value!.scrollTo({ left: sectionRef.value!.clientWidth, behavior: 'smooth' }),
+    50,
+  );
 }
 function selectWord(idx: number) {
-  selectedWord.value = idx
-  console.log('selected word '+idx)
+  selectedWord.value = idx;
+  console.log('selected word ' + idx);
 }
 function deleteWord(idx: number) {
-  words.value.splice(idx, 1)
-  selectedWord.value = -1
+  words.value.splice(idx, 1);
+  selectedWord.value = -1;
 }
 
 function makeGifs() {
-  // TODO implement this
+  const gifBlobs: Blob[] = [];
+  dynamicSpriteRefs.value!.forEach((ref) => {
+    const maybeBlob: Blob | undefined = ref.convertToBlob();
+    if (!maybeBlob) return;
+    gifBlobs.push(maybeBlob);
+  });
+  gifBlobs.forEach((b, i) => saveAs(b, `word-${i}.gif`));
 }
 </script>
 

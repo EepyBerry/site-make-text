@@ -7,12 +7,19 @@
 div.vacp-color-picker {
   padding: 0;
   grid-gap: 0.5rem 0;
+  font-family: inherit;
 
-  div.vacp-actions { display: none }
-  span.vacp-color-input-label-text { display: none;}
+  div.vacp-actions {
+    display: none;
+  }
+  span.vacp-color-input-label-text {
+    display: none;
+  }
   input.vacp-color-input {
     padding: 0.25rem;
 
+    font-size: 1rem;
+    border-radius: 2px;
     border: 2px solid var(--smtx-primary);
     background: #000;
     color: var(--smtx-text);

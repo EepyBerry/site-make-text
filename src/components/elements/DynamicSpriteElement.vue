@@ -9,13 +9,14 @@ import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
 import { updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import { WordType, type DynamicSpriteProps } from '@/types';
+import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 
-const spriteCanvas = useTemplateRef("spriteCanvas")!
-const emptySprite: Ref<AnimatedSprite|null> = ref(null)
-const blockSprite: Ref<AnimatedSprite|null> = ref(null)
-const crossSprite: Ref<AnimatedSprite|null> = ref(null)
-const letterSprites: Ref<AnimatedSprite[]> = ref([])
-const spriteFrameIndex: Ref<number> = ref(0)
+const spriteCanvas = useTemplateRef('spriteCanvas')!;
+const emptySprite: Ref<AnimatedSprite | null> = ref(null);
+const blockSprite: Ref<AnimatedSprite | null> = ref(null);
+const crossSprite: Ref<AnimatedSprite | null> = ref(null);
+const letterSprites: Ref<AnimatedSprite[]> = ref([]);
+const spriteFrameIndex: Ref<number> = ref(0);
 
 const $props = withDefaults(defineProps<DynamicSpriteProps>(), {
   width: '2rem',
@@ -23,224 +24,352 @@ const $props = withDefaults(defineProps<DynamicSpriteProps>(), {
   color: '#ffffff',
   type: WordType.NOUN,
   moreLettersOnTop: true,
-  crossedOut: false
-})
+  crossedOut: false,
+});
 
 onMounted(() => {
-  if (!EventBus.spritesheetInitEvent.value) return
-  loadEmptySprite()
-  loadBlockSprite()
-  loadCrossSprite()
-  reloadLetterSprites()
-  updateCanvas()
-})
+  if (!EventBus.spritesheetInitEvent.value) return;
+  _loadEmptySprite();
+  _loadBlockSprite();
+  _loadCrossSprite();
+  _reloadLetterSprites();
+  _updateCanvas(spriteCanvas.value!);
+});
 watch($props, () => {
-   reloadLetterSprites()
-   updateCanvas()
-})
+  _reloadLetterSprites();
+  _updateCanvas(spriteCanvas.value!);
+});
 watch(EventBus.spritesheetInitEvent, () => {
-  loadEmptySprite()
-  loadBlockSprite()
-  loadCrossSprite()
-  reloadLetterSprites()
-  updateCanvas()
-})
+  _loadEmptySprite();
+  _loadBlockSprite();
+  _loadCrossSprite();
+  _reloadLetterSprites();
+  _updateCanvas(spriteCanvas.value!);
+});
 watch(EventBus.tickEvent, () => {
-  updateFrameIndex(spriteFrameIndex)
-  updateCanvas()
-})
+  updateFrameIndex(spriteFrameIndex);
+  _updateCanvas(spriteCanvas.value!);
+});
+defineExpose({ convertToBlob });
 
-function loadEmptySprite() {
-  const emptyAnimSprite = getAnimatedSprite('empty')
-  if (!emptyAnimSprite) throw new Error("Cannot find sprite for icon-empty")
-  emptySprite.value = emptyAnimSprite
+// ----------------------------------------------------------------------------
+// exposed functions
+
+function convertToBlob(format: 'gif' | 'webp' = 'gif'): Blob | undefined {
+  const blobCanvas: OffscreenCanvas = new OffscreenCanvas(24, 24);
+  const ctx = blobCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
+  if (!ctx) throw new Error('Cannot make gif from canvas: context was not properly initialized');
+
+  // skip empty words
+  if (!letterSprites.value || letterSprites.value.length === 0) {
+    return undefined;
+  }
+
+  // iterate on frames and draw them one by one on canvas first, and then as a gif frame
+  const gifEncoder = new GIFEncoder();
+  for (let i = 0; i < 3; i++) {
+    _clearCanvas(ctx);
+    switch (letterSprites.value.length) {
+      case 1:
+        _drawLetter(ctx, i);
+        break;
+      case 2:
+        _drawLettersAsDuo(ctx, i);
+        break;
+      case 3:
+        _drawLettersAsTrio(ctx, i);
+        break;
+      case 4:
+        _drawLettersAsQuad(ctx, i);
+        break;
+      case 5:
+        _drawLettersAsQuint(ctx, i);
+        break;
+      case 6:
+        _drawLettersAsHexa(ctx, i);
+        break;
+      case 7:
+        _drawLettersAsHepta(ctx, i);
+        break;
+      case 8:
+        _drawLettersAsOcto(ctx, i);
+        break;
+    }
+    _applyColor(ctx);
+
+    if ($props.type === WordType.PROPERTY) _drawBlock(ctx, i);
+    if ($props.crossedOut) _drawCross(ctx, i);
+
+    // convert to GIF frame
+    const frame = ctx.getImageData(0, 0, 24, 24);
+    const framePalette = quantize(frame.data, 4, { format: 'rgba4444', oneBitAlpha: true });
+    const frameIndex = applyPalette(frame.data, framePalette, 'rgba4444');
+    gifEncoder.writeFrame(frameIndex, 24, 24, {
+      first: i === 0,
+      transparent: true,
+      transparentIndex: framePalette.findIndex((p: number[]) => p[3] === 0),
+      delay: 225,
+      palette: framePalette,
+    });
+  }
+  gifEncoder.finish();
+  return new Blob([gifEncoder.bytesView().buffer], { type: `image/${format}` });
 }
-function loadBlockSprite() {
-  const blockAnimSprite = getAnimatedSprite('block')
-  if (!blockAnimSprite) throw new Error("Cannot find sprite for icon-block")
-  blockSprite.value = blockAnimSprite
+
+// ----------------------------------------------------------------------------
+// internal functions
+
+function _loadEmptySprite() {
+  const emptyAnimSprite = getAnimatedSprite('empty');
+  if (!emptyAnimSprite) throw new Error('Cannot find sprite for icon-empty');
+  emptySprite.value = emptyAnimSprite;
 }
-function loadCrossSprite() {
-  const crossAnimSprite = getAnimatedSprite('cross')
-  if (!crossAnimSprite) throw new Error("Cannot find sprite for icon-empty")
-  crossSprite.value = crossAnimSprite
+function _loadBlockSprite() {
+  const blockAnimSprite = getAnimatedSprite('block');
+  if (!blockAnimSprite) throw new Error('Cannot find sprite for icon-block');
+  blockSprite.value = blockAnimSprite;
 }
-function reloadLetterSprites() {
-  letterSprites.value.splice(0)
+function _loadCrossSprite() {
+  const crossAnimSprite = getAnimatedSprite('cross');
+  if (!crossAnimSprite) throw new Error('Cannot find sprite for icon-empty');
+  crossSprite.value = crossAnimSprite;
+}
+function _reloadLetterSprites() {
+  letterSprites.value.splice(0);
   for (let i = 0; i < $props.word.length; i++) {
-    const letter = $props.word.charAt(i)
+    const letter = $props.word.charAt(i);
 
     // check if we must use small letters; special case for 5-letter words
-    const useSmallLetters: boolean = $props.word.length === 5
-      ? ($props.moreLettersOnTop ? i <= 2 : i >= 2)
-      : [3, 6, 7].includes($props.word.length)
+    const useSmallLetters: boolean =
+      $props.word.length === 5
+        ? $props.moreLettersOnTop
+          ? i <= 2
+          : i >= 2
+        : [3, 6, 7].includes($props.word.length);
 
     // check if we must use tiny letters; special case for 7-letter words
-    const useTinyLetters: boolean = $props.word.length === 7
-      ? ($props.moreLettersOnTop ? i <= 3 : i >= 3)
-      : [7, 8].includes($props.word.length)
+    const useTinyLetters: boolean =
+      $props.word.length === 7
+        ? $props.moreLettersOnTop
+          ? i <= 3
+          : i >= 3
+        : [7, 8].includes($props.word.length);
 
     // get each letter's AnimatedSprite
-    const letterAnimSprite = getAnimatedSprite(`letter-${letter.toLowerCase()}${useTinyLetters ? '-tiny' : useSmallLetters ? '-small' : ''}`)
+    const letterAnimSprite = getAnimatedSprite(
+      `letter-${letter.toLowerCase()}${useTinyLetters ? '-tiny' : useSmallLetters ? '-small' : ''}`,
+    );
     if (!letterAnimSprite) continue;
-    letterSprites.value.push(letterAnimSprite!)
+    letterSprites.value.push(letterAnimSprite!);
   }
-  console.log(letterSprites.value.map(v => v.key))
+  console.log(letterSprites.value.map((v) => v.key));
 }
 
-function updateCanvas() {
-  const ctx = spriteCanvas.value?.getContext('2d', { willReadFrequently: true })
-  if (!ctx) return
-  clearCanvas(ctx)
+function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })! as
+    | CanvasRenderingContext2D
+    | OffscreenCanvasRenderingContext2D;
+  if (!ctx) return;
+  _clearCanvas(ctx);
 
   if (!letterSprites.value || letterSprites.value.length === 0) {
-    drawEmpty(ctx)
-    return
+    _drawEmpty(ctx, spriteFrameIndex.value);
+    return;
   }
 
   switch (letterSprites.value.length) {
-    case 1: drawLetter(ctx); break;
-    case 2: drawLettersAsDuo(ctx); break;
-    case 3: drawLettersAsTrio(ctx); break;
-    case 4: drawLettersAsQuad(ctx); break;
-    case 5: drawLettersAsQuint(ctx); break;
-    case 6: drawLettersAsHexa(ctx); break;
-    case 7: drawLettersAsHepta(ctx); break;
-    case 8: drawLettersAsOcto(ctx); break;
+    case 1:
+      _drawLetter(ctx, spriteFrameIndex.value);
+      break;
+    case 2:
+      _drawLettersAsDuo(ctx, spriteFrameIndex.value);
+      break;
+    case 3:
+      _drawLettersAsTrio(ctx, spriteFrameIndex.value);
+      break;
+    case 4:
+      _drawLettersAsQuad(ctx, spriteFrameIndex.value);
+      break;
+    case 5:
+      _drawLettersAsQuint(ctx, spriteFrameIndex.value);
+      break;
+    case 6:
+      _drawLettersAsHexa(ctx, spriteFrameIndex.value);
+      break;
+    case 7:
+      _drawLettersAsHepta(ctx, spriteFrameIndex.value);
+      break;
+    case 8:
+      _drawLettersAsOcto(ctx, spriteFrameIndex.value);
+      break;
   }
-  applyColor(ctx)
+  _applyColor(ctx);
 
   if ($props.type === WordType.PROPERTY) {
-    drawBlock(ctx)
+    _drawBlock(ctx, spriteFrameIndex.value);
   }
-
-
   if ($props.crossedOut) {
-    drawCross(ctx)
+    _drawCross(ctx, spriteFrameIndex.value);
   }
 }
 
-function clearCanvas(ctx: CanvasRenderingContext2D) {
-  ctx.clearRect(0, 0, 24, 24)
-  ctx.globalCompositeOperation = "source-in"
+function _clearCanvas(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
+  ctx.clearRect(0, 0, 24, 24);
+  ctx.globalCompositeOperation = 'source-in';
 }
-function applyColor(ctx: CanvasRenderingContext2D) {
-  ctx.fillStyle = $props.color
-  ctx.fillRect(0, 0, 24, 24)
-  ctx.fillStyle = "#ffffff"
+function _applyColor(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
+  ctx.fillStyle = $props.color;
+  ctx.fillRect(0, 0, 24, 24);
+  ctx.fillStyle = '#ffffff';
 }
 
-function drawLetter(ctx: CanvasRenderingContext2D) {
-  ctx.putImageData(letterSprites.value[0]!.frames[spriteFrameIndex.value]!.data, 6, 6)
+function _drawLetter(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  ctx.putImageData(letterSprites.value[0]!.frames[frameIndex]!.data, 6, 6);
 }
-function drawLettersAsDuo(ctx: CanvasRenderingContext2D) {
-  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 1, 6)
-  ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 11, 6)
+function _drawLettersAsDuo(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 1, 6);
+  ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 11, 6);
 }
-function drawLettersAsTrio(ctx: CanvasRenderingContext2D) {
-  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 0, 6)
-  ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 8, 6)
-  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 16, 6)
+function _drawLettersAsTrio(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 0, 6);
+  ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 8, 6);
+  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 16, 6);
 }
-function drawLettersAsQuad(ctx: CanvasRenderingContext2D) {
-  if (letterSprites.value.length !== 4) return
-  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 1, 0)
-  ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 11, 0)
-  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 1, 12)
-  ctx.putImageData(letterSprites.value[3]!.frames[spriteFrameIndex.value]!.data, 11, 12)
+function _drawLettersAsQuad(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  if (letterSprites.value.length !== 4) return;
+  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 1, 0);
+  ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 11, 0);
+  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 1, 12);
+  ctx.putImageData(letterSprites.value[3]!.frames[frameIndex]!.data, 11, 12);
 }
-function drawLettersAsQuint(ctx: CanvasRenderingContext2D) {
+function _drawLettersAsQuint(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
   if ($props.moreLettersOnTop) {
-    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 0, 0)
-    ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 8, 0)
-    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 16, 0)
-    ctx.putImageData(letterSprites.value[3]!.frames[spriteFrameIndex.value]!.data, 1, 12)
-    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 11, 12)
+    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 0, 0);
+    ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 8, 0);
+    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 16, 0);
+    ctx.putImageData(letterSprites.value[3]!.frames[frameIndex]!.data, 1, 12);
+    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(frameIndex)]!.data, 11, 12);
   } else {
-    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 1, 0)
-    ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 11, 0)
-    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 0, 12)
-    ctx.putImageData(letterSprites.value[3]!.frames[spriteFrameIndex.value]!.data, 8, 12)
-    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 16, 12)
+    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 1, 0);
+    ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 11, 0);
+    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 0, 12);
+    ctx.putImageData(letterSprites.value[3]!.frames[frameIndex]!.data, 8, 12);
+    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(frameIndex)]!.data, 16, 12);
   }
 }
-function drawLettersAsHexa(ctx: CanvasRenderingContext2D) {
-  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 0, 0)
-  ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 8, 0)
-  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 16, 0)
-  ctx.putImageData(letterSprites.value[3]!.frames[spriteFrameIndex.value]!.data, 0, 12)
-  ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 8, 12)
-  ctx.putImageData(letterSprites.value[5]!.frames[spriteFrameIndex.value]!.data, 16, 12)
+function _drawLettersAsHexa(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 0, 0);
+  ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 8, 0);
+  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 16, 0);
+  ctx.putImageData(letterSprites.value[3]!.frames[frameIndex]!.data, 0, 12);
+  ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(frameIndex)]!.data, 8, 12);
+  ctx.putImageData(letterSprites.value[5]!.frames[frameIndex]!.data, 16, 12);
 }
-function drawLettersAsHepta(ctx: CanvasRenderingContext2D) {
+function _drawLettersAsHepta(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
   if ($props.moreLettersOnTop) {
-    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 0, 0)
-    ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 6, 0)
-    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 12, 0)
-    ctx.putImageData(letterSprites.value[3]!.frames[spriteFrameIndex.value]!.data, 18, 0)
-    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 1, 12)
-    ctx.putImageData(letterSprites.value[5]!.frames[spriteFrameIndex.value]!.data, 8, 12)
-    ctx.putImageData(letterSprites.value[6]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 15, 12)
+    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 0, 0);
+    ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 6, 0);
+    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 12, 0);
+    ctx.putImageData(letterSprites.value[3]!.frames[frameIndex]!.data, 18, 0);
+    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(frameIndex)]!.data, 1, 12);
+    ctx.putImageData(letterSprites.value[5]!.frames[frameIndex]!.data, 8, 12);
+    ctx.putImageData(letterSprites.value[6]!.frames[updateRawFrameIndex(frameIndex)]!.data, 15, 12);
   } else {
-    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 1, 0)
-    ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 8, 0)
-    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 15, 0)
-    ctx.putImageData(letterSprites.value[3]!.frames[spriteFrameIndex.value]!.data, 0, 12)
-    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 6, 12)
-    ctx.putImageData(letterSprites.value[5]!.frames[spriteFrameIndex.value]!.data, 12, 12)
-    ctx.putImageData(letterSprites.value[6]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 18, 12)
+    ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 1, 0);
+    ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 8, 0);
+    ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 15, 0);
+    ctx.putImageData(letterSprites.value[3]!.frames[frameIndex]!.data, 0, 12);
+    ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(frameIndex)]!.data, 6, 12);
+    ctx.putImageData(letterSprites.value[5]!.frames[frameIndex]!.data, 12, 12);
+    ctx.putImageData(letterSprites.value[6]!.frames[updateRawFrameIndex(frameIndex)]!.data, 18, 12);
   }
 }
-function drawLettersAsOcto(ctx: CanvasRenderingContext2D) {
-  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 0, 0)
-  ctx.putImageData(letterSprites.value[1]!.frames[spriteFrameIndex.value]!.data, 6, 0)
-  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 12, 0)
-  ctx.putImageData(letterSprites.value[3]!.frames[spriteFrameIndex.value]!.data, 18, 0)
-  ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 0, 12)
-  ctx.putImageData(letterSprites.value[5]!.frames[spriteFrameIndex.value]!.data, 6, 12)
-  ctx.putImageData(letterSprites.value[6]!.frames[updateRawFrameIndex(spriteFrameIndex.value)]!.data, 12, 12)
-  ctx.putImageData(letterSprites.value[7]!.frames[spriteFrameIndex.value]!.data, 18, 12)
+function _drawLettersAsOcto(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  ctx.putImageData(letterSprites.value[0]!.frames[updateRawFrameIndex(frameIndex)]!.data, 0, 0);
+  ctx.putImageData(letterSprites.value[1]!.frames[frameIndex]!.data, 6, 0);
+  ctx.putImageData(letterSprites.value[2]!.frames[updateRawFrameIndex(frameIndex)]!.data, 12, 0);
+  ctx.putImageData(letterSprites.value[3]!.frames[frameIndex]!.data, 18, 0);
+  ctx.putImageData(letterSprites.value[4]!.frames[updateRawFrameIndex(frameIndex)]!.data, 0, 12);
+  ctx.putImageData(letterSprites.value[5]!.frames[frameIndex]!.data, 6, 12);
+  ctx.putImageData(letterSprites.value[6]!.frames[updateRawFrameIndex(frameIndex)]!.data, 12, 12);
+  ctx.putImageData(letterSprites.value[7]!.frames[frameIndex]!.data, 18, 12);
 }
 
-function drawEmpty(ctx: CanvasRenderingContext2D) {
-  ctx.putImageData(emptySprite.value!.frames[spriteFrameIndex.value]!.data, 0, 0)
+function _drawEmpty(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  ctx.putImageData(emptySprite.value!.frames[frameIndex]!.data, 0, 0);
 }
 
 /**
  * Overrides the drawing by using current image data as a clip mask on the block sprite
  * @param ctx
  */
-function drawBlock(ctx: CanvasRenderingContext2D) {
-  const wordImgData = ctx.getImageData(0, 0, 24, 24)
+function _drawBlock(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  const wordImgData = ctx.getImageData(0, 0, 24, 24);
 
-  ctx.putImageData(blockSprite.value!.frames[spriteFrameIndex.value]!.data, 0, 0)
-  ctx.fillStyle = $props.color
-  ctx.fillRect(0, 0, 24, 24)
+  ctx.putImageData(blockSprite.value!.frames[frameIndex]!.data, 0, 0);
+  ctx.fillStyle = $props.color;
+  ctx.fillRect(0, 0, 24, 24);
 
-  const blockImageData = ctx.getImageData(0, 0, 24, 24)
+  const blockImageData = ctx.getImageData(0, 0, 24, 24);
   for (let i = 0; i < wordImgData.data.length; i += 4) {
-    blockImageData.data[i+3] = (wordImgData.data[i+3]! > 0 ? 0 : blockImageData.data[i+3]!)
+    blockImageData.data[i + 3] = wordImgData.data[i + 3]! > 0 ? 0 : blockImageData.data[i + 3]!;
   }
-  ctx.putImageData(blockImageData, 0, 0)
+  ctx.putImageData(blockImageData, 0, 0);
 }
 
 /**
  * Overrides the drawing by overlaying the cross sprite on the rest
  * @param ctx
  */
-function drawCross(ctx: CanvasRenderingContext2D) {
-  const wordImgData = ctx.getImageData(0, 0, 24, 24)
+function _drawCross(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  frameIndex: number,
+) {
+  const wordImgData = ctx.getImageData(0, 0, 24, 24);
 
-  const crossFrameData = crossSprite.value!.frames[spriteFrameIndex.value]!.data
+  const crossFrameData = crossSprite.value!.frames[frameIndex]!.data;
   for (let i = 0; i < crossFrameData.data.length; i += 4) {
-    wordImgData.data[i+0] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+0]! : wordImgData.data[i+0]!)
-    wordImgData.data[i+1] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+1]! : wordImgData.data[i+1]!)
-    wordImgData.data[i+2] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+2]! : wordImgData.data[i+2]!)
-    wordImgData.data[i+3] = (crossFrameData.data[i+3]! > 0 ? crossFrameData.data[i+3]! : wordImgData.data[i+3]!)
+    wordImgData.data[i + 0] =
+      crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 0]! : wordImgData.data[i + 0]!;
+    wordImgData.data[i + 1] =
+      crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 1]! : wordImgData.data[i + 1]!;
+    wordImgData.data[i + 2] =
+      crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 2]! : wordImgData.data[i + 2]!;
+    wordImgData.data[i + 3] =
+      crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 3]! : wordImgData.data[i + 3]!;
   }
-  ctx.putImageData(wordImgData, 0, 0)
+  ctx.putImageData(wordImgData, 0, 0);
 }
-
 </script>
 
 <style scoped lang="scss">

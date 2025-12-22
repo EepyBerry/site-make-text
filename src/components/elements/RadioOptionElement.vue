@@ -42,7 +42,7 @@ function select() {
   padding: 0 0.75rem;
   background: var(--smtx-panel);
   border: none;
-    color: var(--smtx-text);
+  color: var(--smtx-text);
   font-weight: 600;
   cursor: pointer;
 
@@ -61,5 +61,4 @@ function select() {
 input[type='radio'] {
   display: none;
 }
-
 </style>

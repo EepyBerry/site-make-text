@@ -8,9 +8,16 @@ input {
   text-align: center;
 }
 button {
+  position: relative;
   border: none;
   background: none;
   font-family: inherit;
+
+  &:hover { cursor: pointer; }
+  &:active { cursor: pointer; }
+  &:disabled { pointer-events: none; transform: none; }
+  &.animated:hover > * { transform: scale(1.05); }
+  &.animated:active > * { transform: scale(0.90); }
 }
 
 a {

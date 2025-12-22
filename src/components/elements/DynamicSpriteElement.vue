@@ -64,9 +64,14 @@ function convertToBlob(format: 'gif' | 'webp' = 'gif', scale: number = 2): Blob 
   const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
   if (!rawCtx || !scaleCtx) throw new Error('Cannot make gif from canvas: context was not properly initialized');
 
+  // prepare raw canvas
+  rawCtx.globalCompositeOperation = 'source-in';
+
   // prepare scaled-up canvas
   _clearCanvas(scaleCtx);
   scaleCtx.scale(scale, scale);
+  scaleCtx.globalCompositeOperation = "source-over";
+  scaleCtx.imageSmoothingEnabled = false;
 
   // skip empty words
   if (!letterSprites.value || letterSprites.value.length === 0) {
@@ -109,9 +114,6 @@ function convertToBlob(format: 'gif' | 'webp' = 'gif', scale: number = 2): Blob 
 
     // Scale raw data on scaleCanvas
     _clearCanvas(scaleCtx);
-    scaleCtx.globalCompositeOperation = "source-over";
-    scaleCtx.imageSmoothingEnabled = false
-    scaleCtx.imageSmoothingQuality = "high"
     scaleCtx.drawImage(rawCanvas, 0, 0);
 
     // convert to GIF frame
@@ -184,6 +186,7 @@ function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
     | OffscreenCanvasRenderingContext2D;
   if (!ctx) return;
   _clearCanvas(ctx);
+  ctx.globalCompositeOperation = 'source-in';
 
   if (!letterSprites.value || letterSprites.value.length === 0) {
     _drawEmpty(ctx, spriteFrameIndex.value);
@@ -228,7 +231,6 @@ function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
 
 function _clearCanvas(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
   ctx.clearRect(0, 0, 24, 24);
-  ctx.globalCompositeOperation = 'source-in';
 }
 function _applyColor(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
   ctx.fillStyle = $props.color;

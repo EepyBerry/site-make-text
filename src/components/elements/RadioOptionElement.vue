@@ -40,17 +40,21 @@ function select() {
   flex: 1;
   height: 100%;
   padding: 0 0.75rem;
-  background: var(--smtx-panel);
+  background: var(--smtx-button);
   border: none;
   color: var(--smtx-text);
   font-weight: 600;
   cursor: pointer;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   &:hover {
     background: var(--smtx-primary);
   }
   &:active {
-    background: var(--smtx-panel);
+    background: var(--smtx-button);
   }
   &.selected {
     background: var(--smtx-accent);

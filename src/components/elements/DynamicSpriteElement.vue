@@ -9,7 +9,6 @@ import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
 import { updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import { WordType, type DynamicSpriteProps } from '@/types';
-import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 
 const spriteCanvas = useTemplateRef('spriteCanvas')!;
 const emptySprite: Ref<AnimatedSprite | null> = ref(null);
@@ -50,12 +49,12 @@ watch(EventBus.tickEvent, () => {
   updateFrameIndex(spriteFrameIndex);
   _updateCanvas(spriteCanvas.value!);
 });
-defineExpose({ convertToBlob });
+defineExpose({ extractFrames });
 
 // ----------------------------------------------------------------------------
 // exposed functions
 
-function convertToBlob(format: 'gif' | 'webp' = 'gif', scale: number = 2): Blob | undefined {
+function extractFrames(scale: number = 2): ImageData[] {
   const scaledImageSize: number = 24*scale
 
   const rawCanvas: OffscreenCanvas = new OffscreenCanvas(24, 24);
@@ -75,11 +74,11 @@ function convertToBlob(format: 'gif' | 'webp' = 'gif', scale: number = 2): Blob 
 
   // skip empty words
   if (!letterSprites.value || letterSprites.value.length === 0) {
-    return undefined;
+    return [];
   }
 
   // iterate on frames and draw them one by one on canvas first, and then as a gif frame
-  const gifEncoder = new GIFEncoder();
+  const frames: ImageData[] = []
   for (let i = 0; i < 3; i++) {
     _clearCanvas(rawCtx);
     switch (letterSprites.value.length) {
@@ -115,21 +114,9 @@ function convertToBlob(format: 'gif' | 'webp' = 'gif', scale: number = 2): Blob 
     // Scale raw data on scaleCanvas
     _clearCanvas(scaleCtx);
     scaleCtx.drawImage(rawCanvas, 0, 0);
-
-    // convert to GIF frame
-    const frame = scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize);
-    const framePalette = quantize(frame.data, 4, { format: 'rgba4444', oneBitAlpha: true });
-    const frameIndex = applyPalette(frame.data, framePalette, 'rgba4444');
-    gifEncoder.writeFrame(frameIndex, scaledImageSize, scaledImageSize, {
-      first: i === 0,
-      transparent: true,
-      transparentIndex: framePalette.findIndex((p: number[]) => p[3] === 0),
-      delay: 225,
-      palette: framePalette,
-    });
+    frames.push(scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize));
   }
-  gifEncoder.finish();
-  return new Blob([gifEncoder.bytesView().buffer], { type: `image/${format}` });
+  return frames;
 }
 
 // ----------------------------------------------------------------------------

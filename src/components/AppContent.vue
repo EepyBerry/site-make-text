@@ -67,10 +67,10 @@
       <!-- special actions -->
       <div id="global-actions-bar" :class="{ disabled: compactMode && compactModePropertiesToggle }">
         <div id="global-actions-panel">
-          <button type="button" :disabled="compactMode && compactModePropertiesToggle" @click="makeGifs('gif')" aria-label="Export words as .gif">
+          <button type="button" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('gif')" aria-label="Export words as .gif">
             <StaticSprite width="4rem" sprite="icon-format-gif" />
           </button>
-          <button type="button" :disabled="compactMode && compactModePropertiesToggle" @click="makeGifs('webp')" aria-label="Export words as .webp">
+          <button type="button" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('webp')" aria-label="Export words as .webp">
             <StaticSprite width="4rem" sprite="icon-format-webp" />
           </button>
           <div id="action-download-container">
@@ -86,9 +86,13 @@
 import { computed, onBeforeMount, onMounted, type Ref, ref, type TemplateRef, useTemplateRef } from 'vue';
 import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps } from '@/types';
 import SpritePropertiesPanel from './SpritePropertiesPanel.vue';
-import { saveAs } from 'file-saver';
 import { autoUpdate, limitShift, offset, shift, useFloating } from '@floating-ui/vue';
 import { EventBus } from '@/core/event-bus';
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
+import GIFImageDataEncoder from '@/core/encoders/gif.encoder';
+import WebPImageDataEncoder from '@/core/encoders/webp.encoder';
+import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
@@ -187,7 +191,7 @@ function moveSelectedWord(direction: 'left'|'right') {
   selectedWordElementRef.value = wordElementRefs.value!.find(r => r.id === `button-word-${moveIndex.toString()}`)!
   wordActionsElementRef.value!.focus()
   update()
-  canDeleteSelectedWord.value.timeout = setTimeout(() => canDeleteSelectedWord.value.v = true, 500)
+  canDeleteSelectedWord.value.timeout = window.setTimeout(() => canDeleteSelectedWord.value.v = true, 500)
 }
 
 function deleteWord(idx: number) {
@@ -196,14 +200,34 @@ function deleteWord(idx: number) {
   wordActionsElementRef.value!.style.display = 'none'
 }
 
-function makeGifs(format: 'gif'|'webp') {
-  const gifBlobs: Blob[] = [];
-  wordSpriteRefs.value!.forEach((ref) => {
-    const maybeBlob: Blob | undefined = ref.convertToBlob(format);
-    if (!maybeBlob) return;
-    gifBlobs.push(maybeBlob);
-  });
-  gifBlobs.forEach((b, i) => saveAs(b, `word-${i}.gif`));
+async function exportWords(format: 'gif'|'webp') {
+  const outputScale = 2
+  const wordBlobs: Blob[] = [];
+  for (let i = 0; i < wordSpriteRefs.value!.length; i++) {
+    // get frame data
+    const wordSprite = wordSpriteRefs.value![i]!
+    const frames: ImageData[] = wordSprite.extractFrames(outputScale);
+    if (!frames || frames.length === 0) return;
+
+    // encode to target format (.gif or .webp)
+    if (format === 'gif') {
+      const encoder = new GIFImageDataEncoder()
+      const wb = new Blob([encoder.encode(frames, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/gif' })
+      wordBlobs.push(wb);
+    } else if (format === 'webp') {
+      const encoder = new WebPImageDataEncoder()
+      const wb = new Blob([await encoder.encodeAsync(frames, outputScale * SPRITESHEET_CELL_SIZE)])
+      wordBlobs.push(wb);
+    }
+  }
+
+  // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
+  // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
+  // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
+  const jsZip = new JSZip();
+  wordBlobs.forEach((wb,i) => jsZip.file(`word-${i}.${format}`, wb))
+  const zipFile = await jsZip.generateAsync({ type: 'blob' });
+  FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
 }
 
 </script>

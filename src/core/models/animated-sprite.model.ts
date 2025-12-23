@@ -22,9 +22,6 @@ export class AnimatedSprite {
     this._frames = frames;
   }
 
-  public get urls(): string[] {
-    return this._frames.map((f) => f.blobURL);
-  }
   public get regions(): SpritesheetRegion[] {
     return this._frames.map((f) => f.region);
   }

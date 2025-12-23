@@ -32,4 +32,15 @@
     border: 2px solid var(--smtx-primary);
   }
 }
+
+@media screen and (max-width: 767px) {
+  #smtx-header {
+    padding: 0.5rem;
+
+    .sprite {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+}
 </style>

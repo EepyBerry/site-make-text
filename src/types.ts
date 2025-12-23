@@ -23,5 +23,5 @@ export type DynamicSpriteProps = {
   crossedOut?: boolean;
 };
 export type DynamicSpriteExposes = {
-  convertToBlob: () => Blob | undefined;
+  convertToBlob: (format?: 'gif' | 'webp', scale?: number) => Blob | undefined;
 };

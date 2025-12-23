@@ -59,4 +59,16 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
     }
   }
 }
+
+@media screen and (max-width: 767px) {
+  #smtx-footer {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    gap: 0.5rem;
+
+    #footer-links {
+      gap: 0.5rem;
+    }
+  }
+}
 </style>

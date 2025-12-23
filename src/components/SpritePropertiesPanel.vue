@@ -16,6 +16,7 @@
         pid="prop-type"
         id="noun"
         :value="WordType.NOUN"
+        internal-aria-label="Set word as a noun"
       >
         <DynamicSprite word="noun" type="noun" width="2.125rem" />
       </RadioOptionElement>
@@ -24,6 +25,7 @@
         pid="prop-type"
         id="property"
         :value="WordType.PROPERTY"
+        internal-aria-label="Set word as a property (adds background)"
       >
         <DynamicSprite word="prop" type="property" width="2.125rem" />
       </RadioOptionElement>
@@ -36,6 +38,7 @@
         pid="prop-type"
         id="moreontop"
         :value="false"
+        internal-aria-label="Show less letters on top of a word"
       >
         <DynamicSprite word="off" type="noun" width="2.25rem" />
       </RadioOptionElement>
@@ -44,6 +47,7 @@
         pid="prop-type"
         id="lessontop"
         :value="true"
+        internal-aria-label="Show more letters on top of a word"
       >
         <DynamicSprite word="on" type="noun" width="2.25rem" />
       </RadioOptionElement>
@@ -56,6 +60,7 @@
         pid="prop-type"
         id="notcrossedout"
         :value="false"
+        internal-aria-label="Do not cross out word"
       >
         <DynamicSprite word="off" type="noun" width="2.25rem" />
       </RadioOptionElement>
@@ -64,6 +69,7 @@
         pid="prop-type"
         id="crossedout"
         :value="true"
+        internal-aria-label="Cross out word"
       >
         <DynamicSprite word="on" type="noun" width="2.25rem" />
       </RadioOptionElement>

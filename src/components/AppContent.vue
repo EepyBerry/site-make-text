@@ -11,8 +11,8 @@
         <p>select a word to see its properties</p>
       </div>
     </aside>
-    <section ref="sectionRef" id="section-words">
-      <div id="section-words-scrollzone">
+    <section id="section-words">
+      <div ref="sectionRef" id="section-words-scrollzone">
         <!-- main content -->
         <div id="word-grid">
           <button

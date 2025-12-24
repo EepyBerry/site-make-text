@@ -1,5 +1,5 @@
 <div align="center">
-  todo logo
+  <img src="https://github.com/user-attachments/assets/bb5e6c0a-50c2-47a8-8fde-34eb01a59ce8">
 </div>
 
 # SITE MAKE TEXT - Hand-drawn Word Maker 💬

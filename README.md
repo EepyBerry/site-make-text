@@ -1,48 +1,48 @@
-# site-make-text
+<div align="center">
+  todo logo
+</div>
 
-This template should help get you started developing with Vue 3 in Vite.
+# SITE MAKE TEXT - Hand-drawn Word Maker 💬
 
-## Recommended IDE Setup
+<p>
+  <img src="https://img.shields.io/badge/VueJS-3.5-%2342B883?logo=vuedotjs&labelColor=%2335495E&logoColor=white">
+  <img src="https://img.shields.io/badge/Vite-7.2-%23BD34FE?logo=vite&labelColor=%2335495E&logoColor=white">
+</p>
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+A simple word maker in the style of [Baba Is You](https://hempuli.com/baba/)! <br>
+Includes options to make `NOUN`s, `PROPERTY`s, cross them out, colour them and more!
 
-## Recommended Browser Setup
+**💬✨ [Check out the app here!](https://site-make-text.eepyberry.me) ✨💬**
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Run locally
 
-## Type Support for `.vue` Imports in TS
+Clone the repository then use the following commands:
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Install dependencies: `npm install`
+- Run the application locally: `npm run dev` / `npm run dev-host`
 
-## Customize configuration
+The app runs on port 5173 by default; `dev-host` exposes the application to the local network.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Build project
 
-## Project Setup
+Building is done with the following command:
 
-```sh
-npm install
-```
+- `npm run build`
 
-### Compile and Hot-Reload for Development
+Vite copies the output to the `dist` folder, creating it first if need be.
 
-```sh
-npm run dev
-```
+## ✨ Credits
 
-### Type-Check, Compile and Minify for Production
+Huge thanks to the awesome people below:
+<ul>
+  <li><a href="https://hempuli.com">Arvi "Hempuli" Teikari</a> and the entire team behind Baba Is You!</li>
+  <li>The people behind <a href="https://github.com/ApeironTsuka/node-webpmux">node-webpmux</a> and <a href="https://github.com/mattdesl/gifenc">gifenc</a>, without whom my exporting efforts would be MUCH harder!</li>
+</ul>
 
-```sh
-npm run build
-```
+## 📓 Licensing
 
-### Lint with [ESLint](https://eslint.org/)
+The main spritesheet used by this application is released to the public domain under the Creative Commons Zero 1.0 Universal license ([CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)).
+Please consult the spritesheet [license file](src/assets/spritesheet/LICENCE) for full information.
 
-```sh
-npm run lint
-```
+The rest of the assets and source code from this project are provided under the "I'm So Tired" Software License 1.0 - No-Resale version.<br>
+Please consult the main [license file](LICENSE) for full information.

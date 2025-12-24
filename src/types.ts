@@ -23,5 +23,5 @@ export type DynamicSpriteProps = {
   crossedOut?: boolean;
 };
 export type DynamicSpriteExposes = {
-  extractFrames: (scale?: number) => ImageData[]
+  extractFrames: (scale?: number) => ImageData[];
 };

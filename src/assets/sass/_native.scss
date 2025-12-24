@@ -1,0 +1,61 @@
+input {
+  padding: 0.25rem;
+  font-family: inherit;
+
+  border: 2px solid var(--smtx-primary);
+  background: #000;
+  color: var(--smtx-text);
+  text-align: center;
+}
+button {
+  position: relative;
+  border: none;
+  background: none;
+  font-family: inherit;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    cursor: pointer;
+  }
+  &:active {
+    cursor: pointer;
+  }
+  &:disabled {
+    pointer-events: none;
+    transform: none;
+  }
+  &.animated:hover > * {
+    transform: scale(1.05);
+  }
+  &.animated:active > * {
+    transform: scale(0.9);
+  }
+
+  &.primary {
+    padding: 4px;
+    background: var(--smtx-button);
+    border-radius: 4px;
+    &:hover {
+      background: var(--smtx-button-hover);
+    }
+    &:active {
+      background: var(--smtx-button-active);
+    }
+  }
+}
+
+a {
+  color: var(--smtx-link);
+  text-decoration: none;
+  font-weight: 650;
+  font-family: inherit;
+}
+a:not(:has(div)):visited {
+  color: var(--smtx-link-visited);
+}
+a:not(:has(div)):hover {
+  filter: brightness(1.5);
+}

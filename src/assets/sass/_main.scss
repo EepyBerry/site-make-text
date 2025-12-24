@@ -1,0 +1,59 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  background: transparent;
+  scroll-behavior: smooth;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+body {
+  flex: 1;
+  min-height: 100%;
+
+  border-radius: 2px;
+  background: var(--smtx-background);
+  color: var(--smtx-text);
+
+  font-family:
+    JetBrains Mono,
+    monospace;
+  line-height: 1.5;
+
+  image-rendering: pixelated;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  display: flex;
+  flex-direction: column;
+
+  #app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+body:has(dialog[open]) {
+  touch-action: none;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
+}
+
+ul,
+ol {
+  list-style-type: none;
+  padding: 0;
+}
+
+hr {
+  border: 1px solid var(--lg-accent);
+}

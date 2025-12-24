@@ -1,0 +1,21 @@
+:root {
+  --smtx-text: #fff;
+  --smtx-text-hint: #515151;
+  --smtx-text-disabled: #c5c5c5;
+
+  --smtx-background: #0a090c;
+  --smtx-panel: #1c1822;
+  --smtx-primary: #5e3b4f;
+  --smtx-accent: #912c67;
+
+  --smtx-radio: #3a1c27;
+
+  --smtx-button: var(--smtx-accent);
+  --smtx-button-hover: #682a4e;
+  --smtx-button-active: #3a1c27;
+
+  --smtx-link: #bb3c86;
+  --smtx-link-visited: #792d58;
+
+  --smtx-word-empty: #555;
+}

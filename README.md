@@ -36,7 +36,7 @@ Vite copies the output to the `dist` folder, creating it first if need be.
 Huge thanks to the awesome people below:
 <ul>
   <li><a href="https://hempuli.com">Arvi "Hempuli" Teikari</a> and the entire team behind Baba Is You!</li>
-  <li>The people behind <a href="https://github.com/ApeironTsuka/node-webpmux">node-webpmux</a> and <a href="https://github.com/mattdesl/gifenc">gifenc</a>, without whom my exporting efforts would be MUCH harder!</li>
+  <li>The people behind <a href="https://github.com/ApeironTsuka/node-webpmux" target="_blank">node-webpmux</a> and <a href="https://github.com/mattdesl/gifenc" target="_blank">gifenc</a>, without whom my exporting efforts would be MUCH harder!</li>
 </ul>
 
 ## 📓 Licensing

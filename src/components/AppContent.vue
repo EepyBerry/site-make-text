@@ -216,7 +216,7 @@ async function exportWords(format: 'gif'|'webp') {
       wordBlobs.push(wb);
     } else if (format === 'webp') {
       const encoder = new WebPImageDataEncoder()
-      const wb = new Blob([await encoder.encodeAsync(frames, outputScale * SPRITESHEET_CELL_SIZE)])
+      const wb = new Blob([await encoder.encodeAsync(frames, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/webp' })
       wordBlobs.push(wb);
     }
   }

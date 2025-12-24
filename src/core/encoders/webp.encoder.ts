@@ -1,28 +1,48 @@
-import WebXMux, { type Frame } from "webpxmux";
-import type { ImageDataEncoder } from "./encoder";
-import { FRAME_DURATION_MS } from "../globals";
+import type { ImageDataEncoder } from './encoder';
+import { FRAME_DURATION_MS } from '../globals';
+import * as WebP from 'node-webpmux';
 
 export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffer> {
-  private webpxmux = WebXMux("/wasm/webpxmux.wasm");
-  private runtimeReady: boolean = false
+  private isInternalLibraryReady: boolean = false;
 
   public async encodeAsync(frames: ImageData[], imageSize: number): Promise<ArrayBuffer> {
-    if (!this.runtimeReady) {
-      await this.webpxmux.waitRuntime()
+    if (!this.isInternalLibraryReady) {
+      await WebP.Image.initLib();
+      this.isInternalLibraryReady = true;
     }
+    const webp = await WebP.Image.getEmptyImage(true);
+    webp.convertToAnim();
 
-    const xmuxFrames: Frame[] = frames.map(f => ({
-      duration: FRAME_DURATION_MS,
-      isKeyframe: false,
-      rgba: new Uint32Array(f.data.buffer)
-    } as Frame));
-    return (await this.webpxmux.encodeFrames({
-      frameCount: 3,
+    for (let i = 0; i < frames.length; i++) {
+      const frameData = frames[i]!.data;
+      // bufferize image data (using Buffer polyfill)
+      const amfPixels: Buffer = Buffer.alloc(imageSize * imageSize * 4);
+      amfPixels.set(frameData);
+
+      // create WebP image from buffer
+      const amfImg = await WebP.Image.getEmptyImage(false);
+      await amfImg.setImageData(amfPixels, {
+        width: imageSize,
+        height: imageSize,
+        lossless: 9,
+        exact: true,
+        bgColor: [0, 0, 0, 0],
+      });
+
+      // create new AMF frame from image
+      const amfFrame = await WebP.Image.generateFrame({
+        buffer: await amfImg.save(null, { bgColor: [0, 0, 0, 0] }),
+        x: 0,
+        y: 0,
+        blend: false,
+      });
+      webp.frames.push(amfFrame);
+    }
+    return await webp.save(null, {
       width: imageSize,
       height: imageSize,
-      loopCount: 0,
-      bgColor: 0, //0x00000000 as 0xRRGGBBAA
-      frames: xmuxFrames
-    })).buffer as ArrayBuffer
+      bgColor: [0, 0, 0, 0],
+      delay: FRAME_DURATION_MS,
+    });
   }
 }

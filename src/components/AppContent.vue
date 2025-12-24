@@ -321,7 +321,7 @@ async function exportWords(format: 'gif' | 'webp') {
   isExporting.value = true;
   setTimeout(async () => {
     try {
-      const outputScale = 2; // Change this to increase scale
+      const outputScale = 3; // Change this to increase scale
       const wordBlobs: Blob[] = [];
 
       // init encoders

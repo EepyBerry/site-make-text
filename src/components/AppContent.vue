@@ -2,8 +2,8 @@
   <main>
     <aside id="word-properties-sidebar" aria-label="Selected word properties" :class="{ collapsed: !compactModePropertiesToggle}">
       <button id="button-toggle-sidebar" type="button" class="animated" @click="compactModePropertiesToggle = !compactModePropertiesToggle">
-        <StaticSprite v-show="!compactModePropertiesToggle" width="2.5rem" sprite="icon-right" />
-        <StaticSprite v-show="compactModePropertiesToggle" width="2.5rem" sprite="icon-left" />
+        <StaticSprite v-if="compactModePropertiesToggle" width="2.5rem" sprite="icon-left" />
+        <StaticSprite v-else width="2.5rem" sprite="icon-right" />
       </button>
       <SpritePropertiesPanel v-if="selectedWord >= 0" v-model="words[selectedWord]" />
       <div v-else id="word-properties-hint">
@@ -12,6 +12,9 @@
       </div>
     </aside>
     <section id="section-words">
+      <button id="button-reset" type="button" class="animated" @click="resetWords()">
+        <StaticSprite width="2.5rem" sprite="icon-reset" />
+      </button>
       <div ref="sectionRef" id="section-words-scrollzone">
         <!-- main content -->
         <div id="word-grid">
@@ -44,7 +47,7 @@
             />
           </button>
           <button type="button" id="button-add-word" class="animated" @click="addWord()" aria-label="Add word">
-            <StaticSprite width="5rem" sprite="icon-plus" />
+            <StaticSprite width="4rem" sprite="icon-plus" />
           </button>
         </div>
 
@@ -65,12 +68,12 @@
       </div>
 
       <!-- special actions -->
-      <div id="global-actions-bar" :class="{ disabled: compactMode && compactModePropertiesToggle }">
+      <div id="global-actions-bar" v-if="words.length > 0" :class="{ disabled: compactMode && compactModePropertiesToggle }">
         <div id="global-actions-panel">
-          <button type="button" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('gif')" aria-label="Export words as .gif">
+          <button type="button" class="primary" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('gif')" aria-label="Export words as .gif">
             <StaticSprite width="4rem" sprite="icon-format-gif" />
           </button>
-          <button type="button" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('webp')" aria-label="Export words as .webp">
+          <button type="button" class="primary" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('webp')" aria-label="Export words as .webp">
             <StaticSprite width="4rem" sprite="icon-format-webp" />
           </button>
           <div id="action-download-container">
@@ -140,14 +143,26 @@ const canDeleteSelectedWord: Ref<{ timeout: number|undefined, v: boolean }> = re
 // lifecycle
 
 const checkCompactMode = () => compactMode.value = window.innerWidth <= 1023
+const checkPointerTarget = (evt: Event) => {
+  if ((evt.target as HTMLElement).id === "section-words-scrollzone") {
+    selectedWord.value = -1
+    selectedWordElementRef.value = null
+    wordActionsElementRef.value!.style.display = 'none'
+  }
+}
 onMounted(() => {
+  sectionRef.value!.addEventListener('pointerdown', checkPointerTarget)
   EventBus.registerWindowEventListener('resize', checkCompactMode)
   EventBus.registerWindowEventListener('deviceorientation', checkCompactMode)
 })
 onBeforeMount(() => {
+  sectionRef.value?.removeEventListener('pointerdown', checkPointerTarget)
   EventBus.deregisterWindowEventListener('resize', checkCompactMode)
   EventBus.deregisterWindowEventListener('deviceorientation', checkCompactMode)
 })
+
+// ----------------------------------------------------------------------------
+// component functions
 
 function addWord() {
   words.value.push({
@@ -165,9 +180,6 @@ function addWord() {
     50,
   );
 }
-
-// ----------------------------------------------------------------------------
-// component functions
 
 function selectWord(idx: number) {
   selectedWord.value = idx;
@@ -200,6 +212,12 @@ function deleteWord(idx: number) {
   wordActionsElementRef.value!.style.display = 'none'
 }
 
+function resetWords() {
+  words.value.splice(0);
+  selectedWord.value = -1;
+  wordActionsElementRef.value!.style.display = 'none'
+}
+
 async function exportWords(format: 'gif'|'webp') {
   const outputScale = 2
   const wordBlobs: Blob[] = [];
@@ -212,11 +230,11 @@ async function exportWords(format: 'gif'|'webp') {
     // encode to target format (.gif or .webp)
     if (format === 'gif') {
       const encoder = new GIFImageDataEncoder()
-      const wb = new Blob([encoder.encode(frames, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/gif' })
+      const wb = new Blob([encoder.encode(frames, outputScale * SPRITESHEET_CELL_SIZE, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/gif' })
       wordBlobs.push(wb);
     } else if (format === 'webp') {
       const encoder = new WebPImageDataEncoder()
-      const wb = new Blob([await encoder.encodeAsync(frames, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/webp' })
+      const wb = new Blob([await encoder.encodeAsync(frames, outputScale * SPRITESHEET_CELL_SIZE, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/webp' })
       wordBlobs.push(wb);
     }
   }
@@ -251,6 +269,22 @@ main {
   display: flex;
   align-items: center;
 
+  #button-reset {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: var(--smtx-panel);
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+  #button-add-word {
+    background: var(--smtx-panel);
+    margin: 0 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+
+
   #section-words-scrollzone {
     flex: 1;
     width: 100%;
@@ -266,6 +300,7 @@ main {
     display: grid;
     grid-template-columns: repeat(v-bind(wordCount), min-content);
     grid-template-rows: 1fr;
+    gap: 0 4px;
   }
 
   .sprite.caret {
@@ -341,17 +376,13 @@ div#global-actions-bar {
     background: var(--smtx-panel);
     padding: 0.25rem;
 
-    button {
-      padding: 4px;
-      background: var(--smtx-button);
-      &:hover { background: var(--smtx-button-hover);}
-      &:active { background: var(--smtx-button-active);}
-    }
     button:first-of-type {
+      border-radius: unset;
       border-top-left-radius: 4px;
       border-bottom-left-radius: 4px;
     }
     button:last-of-type {
+      border-radius: unset;
       border-top-right-radius: 4px;
       border-bottom-right-radius: 4px;
     }
@@ -366,6 +397,12 @@ div#global-actions-bar {
 @media screen and (max-width: 1023px) {
   main {
     grid-template-columns: 1fr;
+  }
+  #section-words {
+    #button-reset {
+      left: unset;
+      right: 0.5rem;
+    }
   }
   #word-properties-sidebar {
     z-index: 10;

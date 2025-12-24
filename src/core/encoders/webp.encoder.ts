@@ -5,7 +5,11 @@ import * as WebP from 'node-webpmux';
 export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffer> {
   private isInternalLibraryReady: boolean = false;
 
-  public async encodeAsync(frames: ImageData[], imageSize: number): Promise<ArrayBuffer> {
+  public async encodeAsync(
+    frames: ImageData[],
+    width: number,
+    height: number,
+  ): Promise<ArrayBuffer> {
     if (!this.isInternalLibraryReady) {
       await WebP.Image.initLib();
       this.isInternalLibraryReady = true;
@@ -13,7 +17,7 @@ export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffe
     const webp = await WebP.Image.getEmptyImage(true);
     webp.convertToAnim();
 
-    const amfPixels: Buffer = Buffer.alloc(imageSize * imageSize * 4);
+    const amfPixels: Buffer = Buffer.alloc(width * height * 4);
     for (let i = 0; i < frames.length; i++) {
       // bufferize image data (using Buffer polyfill)
       const frameData = frames[i]!.data;
@@ -22,11 +26,10 @@ export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffe
       // create WebP image from buffer
       const amfImg = await WebP.Image.getEmptyImage(false);
       await amfImg.setImageData(amfPixels, {
-        width: imageSize,
-        height: imageSize,
+        width,
+        height,
         lossless: 9,
         exact: true,
-        bgColor: [0, 0, 0, 0],
       });
 
       // create new AMF frame from image
@@ -39,8 +42,8 @@ export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffe
       webp.frames.push(amfFrame);
     }
     return await webp.save(null, {
-      width: imageSize,
-      height: imageSize,
+      width,
+      height,
       bgColor: [0, 0, 0, 0],
       delay: FRAME_DURATION_MS,
     });

@@ -13,10 +13,10 @@ export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffe
     const webp = await WebP.Image.getEmptyImage(true);
     webp.convertToAnim();
 
+    const amfPixels: Buffer = Buffer.alloc(imageSize * imageSize * 4);
     for (let i = 0; i < frames.length; i++) {
-      const frameData = frames[i]!.data;
       // bufferize image data (using Buffer polyfill)
-      const amfPixels: Buffer = Buffer.alloc(imageSize * imageSize * 4);
+      const frameData = frames[i]!.data;
       amfPixels.set(frameData);
 
       // create WebP image from buffer

@@ -19,6 +19,6 @@ export default class GIFImageDataEncoder implements ImageDataEncoder<ArrayBuffer
       });
     }
     gifEncoder.finish();
-    return gifEncoder.bytesView().buffer
+    return gifEncoder.bytesView().buffer;
   }
 }

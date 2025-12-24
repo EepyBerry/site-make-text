@@ -7,8 +7,18 @@
     </div>
 
     <!-- properties section -->
-    <aside id="word-properties-sidebar" aria-label="Selected word properties" :class="{ collapsed: !compactModePropertiesToggle}">
-      <button id="button-toggle-sidebar" type="button" class="animated" @click="compactModePropertiesToggle = !compactModePropertiesToggle">
+    <aside
+      id="word-properties-sidebar"
+      aria-label="Selected word properties"
+      :class="{ collapsed: !compactModePropertiesToggle }"
+    >
+      <button
+        id="button-toggle-sidebar"
+        type="button"
+        class="animated"
+        @click="compactModePropertiesToggle = !compactModePropertiesToggle"
+        aria-label="Toggle word properties panel"
+      >
         <StaticSprite v-if="compactModePropertiesToggle" width="2.5rem" sprite="icon-left" />
         <StaticSprite v-else width="2.5rem" sprite="icon-right" />
       </button>
@@ -22,7 +32,13 @@
     <!-- main section -->
     <section id="section-words">
       <!-- reset button -->
-      <button id="button-reset" type="button" class="animated" @click="resetWords()">
+      <button
+        id="button-reset"
+        type="button"
+        class="animated"
+        @click="resetWords()"
+        aria-label="Remove all words (reset)"
+      >
         <StaticSprite width="2.5rem" sprite="icon-reset" />
       </button>
 
@@ -33,11 +49,11 @@
             v-for="(word, idx) of words"
             :key="idx"
             ref="wordElementRefs"
-            :id="'button-word-'+idx"
+            :id="'button-word-' + idx"
             type="button"
             class="animated"
             @click="selectWord(idx)"
-            :aria-label="'word: '+word.word"
+            :aria-label="'word: ' + word.word"
           >
             <DynamicSprite
               ref="wordSpriteRefs"
@@ -57,21 +73,52 @@
               :class="{ disabled: compactMode && compactModePropertiesToggle }"
             />
           </button>
-          <button type="button" id="button-add-word" class="animated" @click="addWord()" aria-label="Add word">
+          <button
+            type="button"
+            id="button-add-word"
+            class="animated"
+            @click="addWord()"
+            aria-label="Add word"
+          >
             <StaticSprite width="4rem" sprite="icon-plus" />
           </button>
         </div>
 
         <!-- floating element -->
-        <div ref="wordActionsElementRef" id="word-actions-panel" :class="{ disabled: compactMode && compactModePropertiesToggle }" :style="floatingStyles">
+        <div
+          ref="wordActionsElementRef"
+          id="word-actions-panel"
+          :class="{ disabled: compactMode && compactModePropertiesToggle }"
+          :style="floatingStyles"
+        >
           <div class="actions-container">
-            <button type="button" class="animated" :disabled="selectedWord === 0 || (compactMode && compactModePropertiesToggle)" @click="moveSelectedWord('left')" aria-label="Move selected word left (if possible)">
+            <button
+              type="button"
+              class="animated"
+              :disabled="selectedWord === 0 || (compactMode && compactModePropertiesToggle)"
+              @click="moveSelectedWord('left')"
+              aria-label="Move selected word left (if possible)"
+            >
               <StaticSprite width="4rem" sprite="icon-left" />
             </button>
-            <button type="button" class="animated" :disabled="!canDeleteSelectedWord.v || (compactMode && compactModePropertiesToggle)" @click="deleteWord(selectedWord)" aria-label="Delete selected word">
+            <button
+              type="button"
+              class="animated"
+              :disabled="!canDeleteSelectedWord.v || (compactMode && compactModePropertiesToggle)"
+              @click="deleteWord(selectedWord)"
+              aria-label="Delete selected word"
+            >
               <StaticSprite width="4rem" sprite="icon-trash" />
             </button>
-            <button type="button" class="animated" :disabled="selectedWord === wordCount-2 || (compactMode && compactModePropertiesToggle)" @click="moveSelectedWord('right')" aria-label="Move selected word right (if possible)">
+            <button
+              type="button"
+              class="animated"
+              :disabled="
+                selectedWord === wordCount - 2 || (compactMode && compactModePropertiesToggle)
+              "
+              @click="moveSelectedWord('right')"
+              aria-label="Move selected word right (if possible)"
+            >
               <StaticSprite width="4rem" sprite="icon-right" />
             </button>
           </div>
@@ -79,12 +126,28 @@
       </div>
 
       <!-- special actions -->
-      <div id="global-actions-bar" v-if="words.length > 0" :class="{ disabled: compactMode && compactModePropertiesToggle }">
+      <div
+        id="global-actions-bar"
+        v-if="words.length > 0"
+        :class="{ disabled: compactMode && compactModePropertiesToggle }"
+      >
         <div id="global-actions-panel">
-          <button type="button" class="primary" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('gif')" aria-label="Export words as .gif">
+          <button
+            type="button"
+            class="primary"
+            :disabled="compactMode && compactModePropertiesToggle"
+            @click="exportWords('gif')"
+            aria-label="Export words as .gif"
+          >
             <StaticSprite width="4rem" sprite="icon-format-gif" />
           </button>
-          <button type="button" class="primary" :disabled="compactMode && compactModePropertiesToggle" @click="exportWords('webp')" aria-label="Export words as .webp">
+          <button
+            type="button"
+            class="primary"
+            :disabled="compactMode && compactModePropertiesToggle"
+            @click="exportWords('webp')"
+            aria-label="Export words as .webp"
+          >
             <StaticSprite width="4rem" sprite="icon-format-webp" />
           </button>
           <div id="action-download-container">
@@ -97,7 +160,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted, type Ref, ref, type TemplateRef, useTemplateRef } from 'vue';
+import {
+  computed,
+  onBeforeMount,
+  onMounted,
+  type Ref,
+  ref,
+  type TemplateRef,
+  useTemplateRef,
+} from 'vue';
 import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps } from '@/types';
 import SpritePropertiesPanel from './SpritePropertiesPanel.vue';
 import { autoUpdate, limitShift, offset, shift, useFloating } from '@floating-ui/vue';
@@ -111,23 +182,28 @@ import { combineCanvasData } from '@/core/helpers/canvas.helper';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
-const wordElementRefs: TemplateRef<HTMLElement[]> = useTemplateRef("wordElementRefs");
+const wordElementRefs: TemplateRef<HTMLElement[]> = useTemplateRef('wordElementRefs');
 const wordSpriteRefs: TemplateRef<DynamicSpriteExposes[]> = useTemplateRef('wordSpriteRefs');
-const selectedWordElementRef: Ref<HTMLElement|null> = ref(null);
+const selectedWordElementRef: Ref<HTMLElement | null> = ref(null);
 const isExporting: Ref<boolean> = ref(false);
 
 // floating-ui refs
-const wordActionsElementRef: TemplateRef<HTMLElement> = useTemplateRef("wordActionsElementRef");
+const wordActionsElementRef: TemplateRef<HTMLElement> = useTemplateRef('wordActionsElementRef');
 const { floatingStyles, update } = useFloating(selectedWordElementRef, wordActionsElementRef, {
   placement: 'top',
-  middleware: [offset(26), shift({ limiter: limitShift({
-    offset: ({rects}) => rects.reference.width
-  }) })],
-  whileElementsMounted: autoUpdate
-})
+  middleware: [
+    offset(26),
+    shift({
+      limiter: limitShift({
+        offset: ({ rects }) => rects.reference.width,
+      }),
+    }),
+  ],
+  whileElementsMounted: autoUpdate,
+});
 
 // compact mode refs
-const compactMode: Ref<boolean> = ref(false)
+const compactMode: Ref<boolean> = ref(false);
 const compactModePropertiesToggle: Ref<boolean> = ref(false);
 
 // word data & refs
@@ -150,29 +226,32 @@ const words: Ref<DynamicSpriteProps[]> = ref([
 ]);
 const wordCount = computed(() => words.value.length + 1);
 const selectedWord: Ref<number> = ref(-1);
-const canDeleteSelectedWord: Ref<{ timeout: number|undefined, v: boolean }> = ref({ timeout: undefined, v: true });
+const canDeleteSelectedWord: Ref<{ timeout: number | undefined; v: boolean }> = ref({
+  timeout: undefined,
+  v: true,
+});
 
 // ----------------------------------------------------------------------------
 // lifecycle
 
-const checkCompactMode = () => compactMode.value = window.innerWidth <= 1023
+const checkCompactMode = () => (compactMode.value = window.innerWidth <= 1023);
 const checkPointerTarget = (evt: Event) => {
-  if ((evt.target as HTMLElement).id === "section-words-scrollzone") {
-    selectedWord.value = -1
-    selectedWordElementRef.value = null
-    wordActionsElementRef.value!.style.display = 'none'
+  if ((evt.target as HTMLElement).id === 'section-words-scrollzone') {
+    selectedWord.value = -1;
+    selectedWordElementRef.value = null;
+    wordActionsElementRef.value!.style.display = 'none';
   }
-}
+};
 onMounted(() => {
-  sectionRef.value!.addEventListener('pointerdown', checkPointerTarget)
-  EventBus.registerWindowEventListener('resize', checkCompactMode)
-  EventBus.registerWindowEventListener('deviceorientation', checkCompactMode)
-})
+  sectionRef.value!.addEventListener('pointerdown', checkPointerTarget);
+  EventBus.registerWindowEventListener('resize', checkCompactMode);
+  EventBus.registerWindowEventListener('deviceorientation', checkCompactMode);
+});
 onBeforeMount(() => {
-  sectionRef.value?.removeEventListener('pointerdown', checkPointerTarget)
-  EventBus.deregisterWindowEventListener('resize', checkCompactMode)
-  EventBus.deregisterWindowEventListener('deviceorientation', checkCompactMode)
-})
+  sectionRef.value?.removeEventListener('pointerdown', checkPointerTarget);
+  EventBus.deregisterWindowEventListener('resize', checkCompactMode);
+  EventBus.deregisterWindowEventListener('deviceorientation', checkCompactMode);
+});
 
 // ----------------------------------------------------------------------------
 // component functions
@@ -186,7 +265,7 @@ function addWord() {
     crossedOut: false,
   });
   if (selectedWord.value < 0) {
-    setTimeout(() => selectWord(words.value.length-1), 0);
+    setTimeout(() => selectWord(words.value.length - 1), 0);
   }
   setTimeout(
     () => sectionRef.value!.scrollTo({ left: sectionRef.value!.clientWidth, behavior: 'smooth' }),
@@ -196,103 +275,138 @@ function addWord() {
 
 function selectWord(idx: number) {
   selectedWord.value = idx;
-  selectedWordElementRef.value = wordElementRefs.value!.find(r => r.id === `button-word-${idx.toString()}`)!
-  wordActionsElementRef.value!.style.display = 'block'
-  wordActionsElementRef.value!.focus()
-  update()
+  selectedWordElementRef.value = wordElementRefs.value!.find(
+    (r) => r.id === `button-word-${idx.toString()}`,
+  )!;
+  wordActionsElementRef.value!.style.display = 'block';
+  wordActionsElementRef.value!.focus();
+  update();
 }
 
-function moveSelectedWord(direction: 'left'|'right') {
-  if (direction === 'left' && selectedWord.value === 0) return
-  if (direction === 'right' && selectedWord.value === words.value!.length-1) return
-  clearTimeout(canDeleteSelectedWord.value.timeout)
-  canDeleteSelectedWord.value.v = false
+function moveSelectedWord(direction: 'left' | 'right') {
+  if (direction === 'left' && selectedWord.value === 0) return;
+  if (direction === 'right' && selectedWord.value === words.value!.length - 1) return;
+  clearTimeout(canDeleteSelectedWord.value.timeout);
+  canDeleteSelectedWord.value.v = false;
 
   const element = words.value[selectedWord.value]!;
-  const moveIndex = direction === 'left' ? selectedWord.value-1 : selectedWord.value+1
+  const moveIndex = direction === 'left' ? selectedWord.value - 1 : selectedWord.value + 1;
   words.value!.splice(selectedWord.value, 1);
   words.value!.splice(moveIndex, 0, element);
-  selectedWord.value = moveIndex
-  selectedWordElementRef.value = wordElementRefs.value!.find(r => r.id === `button-word-${moveIndex.toString()}`)!
-  wordActionsElementRef.value!.focus()
-  update()
-  canDeleteSelectedWord.value.timeout = window.setTimeout(() => canDeleteSelectedWord.value.v = true, 500)
+  selectedWord.value = moveIndex;
+  selectedWordElementRef.value = wordElementRefs.value!.find(
+    (r) => r.id === `button-word-${moveIndex.toString()}`,
+  )!;
+  wordActionsElementRef.value!.focus();
+  update();
+  canDeleteSelectedWord.value.timeout = window.setTimeout(
+    () => (canDeleteSelectedWord.value.v = true),
+    500,
+  );
 }
 
 function deleteWord(idx: number) {
   words.value.splice(idx, 1);
   selectedWord.value = -1;
-  wordActionsElementRef.value!.style.display = 'none'
+  wordActionsElementRef.value!.style.display = 'none';
 }
 
 function resetWords() {
   words.value.splice(0);
   selectedWord.value = -1;
-  wordActionsElementRef.value!.style.display = 'none'
+  wordActionsElementRef.value!.style.display = 'none';
 }
 
-async function exportWords(format: 'gif'|'webp') {
+async function exportWords(format: 'gif' | 'webp') {
   isExporting.value = true;
   setTimeout(async () => {
     try {
-    const outputScale = 2; // Change this to increase scale
-    const wordBlobs: Blob[] = [];
+      const outputScale = 2; // Change this to increase scale
+      const wordBlobs: Blob[] = [];
 
-    // init encoders
-    const gifEncoder = new GIFImageDataEncoder()
-    const webpEncoder = new WebPImageDataEncoder()
+      // init encoders
+      const gifEncoder = new GIFImageDataEncoder();
+      const webpEncoder = new WebPImageDataEncoder();
 
-    // PHASE 1: extract frame data
-    const rawFrames: ImageData[][] = [];
-    for (let i = 0; i < wordSpriteRefs.value!.length; i++) {
-      // get frame data
-      const wordSprite = wordSpriteRefs.value![i]!;
-      const frames: ImageData[] = wordSprite.extractFrames(outputScale);
-      if (!frames || frames.length === 0) continue;
-      rawFrames.push(frames);
-    }
-
-    // PHASE 2: encode words to target format (with additional combined version)
-    const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE
-    for (let r = 0; r < rawFrames.length; r++) {
-      if (format === 'gif') {
-        wordBlobs.push(new Blob([gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], { type: 'image/gif' }));
-      } else if (format === 'webp') {
-        wordBlobs.push(new Blob([await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], { type: 'image/webp' }));
+      // PHASE 1: extract frame data
+      const rawFrames: ImageData[][] = [];
+      for (let i = 0; i < wordSpriteRefs.value!.length; i++) {
+        // get frame data
+        const wordSprite = wordSpriteRefs.value![i]!;
+        const frames: ImageData[] = wordSprite.extractFrames(outputScale);
+        if (!frames || frames.length === 0) continue;
+        rawFrames.push(frames);
       }
-    }
 
-    // PHASE 3 (optional): combine words into one set of frames and encode to target format
-    let combinedBlob: Blob | undefined
-    if (words.value.length > 1) {
-      const combinedOutputWidth = words.value.length * scaledOutputSize
-      const combinedOutputHeight = scaledOutputSize
-      const combinedFrames: ImageData[] = []
-      for (let c = 0; c < 3; c++) {
-        combinedFrames.push(combineCanvasData(rawFrames.map(r => r[c]!), words.value.length * scaledOutputSize, scaledOutputSize, scaledOutputSize))
+      // PHASE 2: encode words to target format (with additional combined version)
+      const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE;
+      for (let r = 0; r < rawFrames.length; r++) {
+        if (format === 'gif') {
+          wordBlobs.push(
+            new Blob([gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], {
+              type: 'image/gif',
+            }),
+          );
+        } else if (format === 'webp') {
+          wordBlobs.push(
+            new Blob(
+              [await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)],
+              { type: 'image/webp' },
+            ),
+          );
+        }
       }
-      if (format === 'gif') {
-        combinedBlob = new Blob([gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)], { type: 'image/gif' });
-      } else if (format === 'webp') {
-        combinedBlob = new Blob([await webpEncoder.encodeAsync(combinedFrames, combinedOutputWidth, combinedOutputHeight)], { type: 'image/webp' });
-      }
-    }
 
-    // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
-    // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
-    // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
-    const jsZip = new JSZip();
-    wordBlobs.forEach((wb,i) => jsZip.file(`word-${i}.${format}`, wb))
-    if (combinedBlob) {
-      jsZip.file(`word-combined.${format}`, combinedBlob)
+      // PHASE 3 (optional): combine words into one set of frames and encode to target format
+      let combinedBlob: Blob | undefined;
+      if (words.value.length > 1) {
+        const combinedOutputWidth = words.value.length * scaledOutputSize;
+        const combinedOutputHeight = scaledOutputSize;
+        const combinedFrames: ImageData[] = [];
+        for (let c = 0; c < 3; c++) {
+          combinedFrames.push(
+            combineCanvasData(
+              rawFrames.map((r) => r[c]!),
+              words.value.length * scaledOutputSize,
+              scaledOutputSize,
+              scaledOutputSize,
+            ),
+          );
+        }
+        if (format === 'gif') {
+          combinedBlob = new Blob(
+            [gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)],
+            { type: 'image/gif' },
+          );
+        } else if (format === 'webp') {
+          combinedBlob = new Blob(
+            [
+              await webpEncoder.encodeAsync(
+                combinedFrames,
+                combinedOutputWidth,
+                combinedOutputHeight,
+              ),
+            ],
+            { type: 'image/webp' },
+          );
+        }
+      }
+
+      // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
+      // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
+      // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
+      const jsZip = new JSZip();
+      wordBlobs.forEach((wb, i) => jsZip.file(`word-${i}.${format}`, wb));
+      if (combinedBlob) {
+        jsZip.file(`word-combined.${format}`, combinedBlob);
+      }
+      const zipFile = await jsZip.generateAsync({ type: 'blob' });
+      FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
+    } finally {
+      isExporting.value = false;
     }
-    const zipFile = await jsZip.generateAsync({ type: 'blob' });
-    FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
-  } finally {
-    isExporting.value = false;
-  }}, 500)
+  }, 500);
 }
-
 </script>
 
 <style lang="scss">
@@ -355,7 +469,6 @@ main {
     align-self: center;
   }
 
-
   #section-words-scrollzone {
     flex: 1;
     width: 100%;
@@ -394,8 +507,12 @@ div#word-actions-panel {
     button:disabled {
       filter: brightness(0.25);
     }
-    button.animated:hover > * { transform: scale(1.10); }
-    button.animated:active > * { transform: scale(0.90); }
+    button.animated:hover > * {
+      transform: scale(1.1);
+    }
+    button.animated:active > * {
+      transform: scale(0.9);
+    }
   }
 }
 
@@ -462,7 +579,7 @@ div#global-actions-bar {
 
 .disabled {
   pointer-events: none;
-  filter: brightness(0.625)
+  filter: brightness(0.625);
 }
 
 @media screen and (max-width: 1023px) {
@@ -496,7 +613,9 @@ div#global-actions-bar {
     }
     #button-toggle-sidebar {
       display: block;
-      .sprite { transform: rotate(90deg);}
+      .sprite {
+        transform: rotate(90deg);
+      }
     }
     #word-properties-hint:nth-child(2) {
       padding-top: 0;
@@ -505,8 +624,12 @@ div#global-actions-bar {
   #word-properties-sidebar.collapsed {
     width: fit-content;
     max-width: 14rem;
-    #word-properties-hint { display: none; }
-    section { display: none;}
+    #word-properties-hint {
+      display: none;
+    }
+    section {
+      display: none;
+    }
   }
   div#global-actions-bar {
     align-items: flex-start;

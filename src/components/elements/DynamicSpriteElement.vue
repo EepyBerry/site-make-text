@@ -55,13 +55,14 @@ defineExpose({ extractFrames });
 // exposed functions
 
 function extractFrames(scale: number = 2): ImageData[] {
-  const scaledImageSize: number = 24*scale
+  const scaledImageSize: number = 24 * scale;
 
   const rawCanvas: OffscreenCanvas = new OffscreenCanvas(24, 24);
   const scaleCanvas: OffscreenCanvas = new OffscreenCanvas(scaledImageSize, scaledImageSize);
   const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
   const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
-  if (!rawCtx || !scaleCtx) throw new Error('Cannot extract frames: context was not properly initialized');
+  if (!rawCtx || !scaleCtx)
+    throw new Error('Cannot extract frames: context was not properly initialized');
 
   // prepare raw canvas
   rawCtx.globalCompositeOperation = 'source-in';
@@ -69,7 +70,7 @@ function extractFrames(scale: number = 2): ImageData[] {
   // prepare scaled-up canvas
   _clearCanvas(scaleCtx);
   scaleCtx.scale(scale, scale);
-  scaleCtx.globalCompositeOperation = "source-over";
+  scaleCtx.globalCompositeOperation = 'source-over';
   scaleCtx.imageSmoothingEnabled = false;
 
   // skip empty words
@@ -78,7 +79,7 @@ function extractFrames(scale: number = 2): ImageData[] {
   }
 
   // iterate on frames and draw them one by one on canvas first, and then as a gif frame
-  const frames: ImageData[] = []
+  const frames: ImageData[] = [];
   for (let i = 0; i < 3; i++) {
     _clearCanvas(rawCtx);
     switch (letterSprites.value.length) {

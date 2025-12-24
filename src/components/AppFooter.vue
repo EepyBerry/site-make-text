@@ -49,7 +49,6 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
     justify-content: center;
     gap: 1rem;
 
-
     a:hover .sprite {
       cursor: pointer;
       transform: scale(1.075);

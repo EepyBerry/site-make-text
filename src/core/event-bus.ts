@@ -10,7 +10,11 @@ export class EventBus {
   public static spritesheetInitEvent: Ref<boolean> = ref(false);
   public static tickEvent: Ref<number> = ref(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static windowEventRegistry: Map<keyof WindowEventMap, any> = new Map<keyof WindowEventMap, any>();
+  private static windowEventRegistry: Map<keyof WindowEventMap, any> = new Map<
+    keyof WindowEventMap,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >();
 
   // sent once when spritesheet data is initialized
   public static sendSpritesheetInitEvent() {

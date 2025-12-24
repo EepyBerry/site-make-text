@@ -17,18 +17,33 @@ button {
   display: flex;
   align-items: center;
 
-  &:hover { cursor: pointer; }
-  &:active { cursor: pointer; }
-  &:disabled { pointer-events: none; transform: none; }
-  &.animated:hover > * { transform: scale(1.05); }
-  &.animated:active > * { transform: scale(0.90); }
+  &:hover {
+    cursor: pointer;
+  }
+  &:active {
+    cursor: pointer;
+  }
+  &:disabled {
+    pointer-events: none;
+    transform: none;
+  }
+  &.animated:hover > * {
+    transform: scale(1.05);
+  }
+  &.animated:active > * {
+    transform: scale(0.9);
+  }
 
   &.primary {
     padding: 4px;
     background: var(--smtx-button);
     border-radius: 4px;
-    &:hover { background: var(--smtx-button-hover);}
-    &:active { background: var(--smtx-button-active);}
+    &:hover {
+      background: var(--smtx-button-hover);
+    }
+    &:active {
+      background: var(--smtx-button-active);
+    }
   }
 }
 

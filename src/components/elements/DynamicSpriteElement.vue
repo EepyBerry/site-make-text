@@ -61,7 +61,7 @@ function extractFrames(scale: number = 2): ImageData[] {
   const scaleCanvas: OffscreenCanvas = new OffscreenCanvas(scaledImageSize, scaledImageSize);
   const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
   const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
-  if (!rawCtx || !scaleCtx) throw new Error('Cannot make gif from canvas: context was not properly initialized');
+  if (!rawCtx || !scaleCtx) throw new Error('Cannot extract frames: context was not properly initialized');
 
   // prepare raw canvas
   rawCtx.globalCompositeOperation = 'source-in';

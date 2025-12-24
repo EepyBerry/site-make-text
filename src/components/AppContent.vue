@@ -1,5 +1,12 @@
 <template>
   <main>
+    <!-- export "loader" -->
+    <div id="export-loader" :class="{ visible: isExporting }">
+      <StaticSprite width="10rem" sprite="icon-wait" />
+      <p>&lt;exporting...&gt;</p>
+    </div>
+
+    <!-- properties section -->
     <aside id="word-properties-sidebar" aria-label="Selected word properties" :class="{ collapsed: !compactModePropertiesToggle}">
       <button id="button-toggle-sidebar" type="button" class="animated" @click="compactModePropertiesToggle = !compactModePropertiesToggle">
         <StaticSprite v-if="compactModePropertiesToggle" width="2.5rem" sprite="icon-left" />
@@ -11,10 +18,14 @@
         <p>select a word to see its properties</p>
       </div>
     </aside>
+
+    <!-- main section -->
     <section id="section-words">
+      <!-- reset button -->
       <button id="button-reset" type="button" class="animated" @click="resetWords()">
         <StaticSprite width="2.5rem" sprite="icon-reset" />
       </button>
+
       <div ref="sectionRef" id="section-words-scrollzone">
         <!-- main content -->
         <div id="word-grid">
@@ -96,12 +107,14 @@ import FileSaver from 'file-saver';
 import GIFImageDataEncoder from '@/core/encoders/gif.encoder';
 import WebPImageDataEncoder from '@/core/encoders/webp.encoder';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
+import { combineCanvasData } from '@/core/helpers/canvas.helper';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
 const wordElementRefs: TemplateRef<HTMLElement[]> = useTemplateRef("wordElementRefs");
 const wordSpriteRefs: TemplateRef<DynamicSpriteExposes[]> = useTemplateRef('wordSpriteRefs');
 const selectedWordElementRef: Ref<HTMLElement|null> = ref(null);
+const isExporting: Ref<boolean> = ref(false);
 
 // floating-ui refs
 const wordActionsElementRef: TemplateRef<HTMLElement> = useTemplateRef("wordActionsElementRef");
@@ -219,33 +232,65 @@ function resetWords() {
 }
 
 async function exportWords(format: 'gif'|'webp') {
-  const outputScale = 2
-  const wordBlobs: Blob[] = [];
-  for (let i = 0; i < wordSpriteRefs.value!.length; i++) {
-    // get frame data
-    const wordSprite = wordSpriteRefs.value![i]!
-    const frames: ImageData[] = wordSprite.extractFrames(outputScale);
-    if (!frames || frames.length === 0) return;
+  isExporting.value = true;
+  setTimeout(async () => {
+    try {
+    const outputScale = 2; // Change this to increase scale
+    const wordBlobs: Blob[] = [];
 
-    // encode to target format (.gif or .webp)
-    if (format === 'gif') {
-      const encoder = new GIFImageDataEncoder()
-      const wb = new Blob([encoder.encode(frames, outputScale * SPRITESHEET_CELL_SIZE, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/gif' })
-      wordBlobs.push(wb);
-    } else if (format === 'webp') {
-      const encoder = new WebPImageDataEncoder()
-      const wb = new Blob([await encoder.encodeAsync(frames, outputScale * SPRITESHEET_CELL_SIZE, outputScale * SPRITESHEET_CELL_SIZE)], { type: 'image/webp' })
-      wordBlobs.push(wb);
+    // init encoders
+    const gifEncoder = new GIFImageDataEncoder()
+    const webpEncoder = new WebPImageDataEncoder()
+
+    // PHASE 1: extract frame data
+    const rawFrames: ImageData[][] = [];
+    for (let i = 0; i < wordSpriteRefs.value!.length; i++) {
+      // get frame data
+      const wordSprite = wordSpriteRefs.value![i]!;
+      const frames: ImageData[] = wordSprite.extractFrames(outputScale);
+      if (!frames || frames.length === 0) continue;
+      rawFrames.push(frames);
     }
-  }
 
-  // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
-  // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
-  // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
-  const jsZip = new JSZip();
-  wordBlobs.forEach((wb,i) => jsZip.file(`word-${i}.${format}`, wb))
-  const zipFile = await jsZip.generateAsync({ type: 'blob' });
-  FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
+    // PHASE 2: encode words to target format (with additional combined version)
+    const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE
+    for (let r = 0; r < rawFrames.length; r++) {
+      if (format === 'gif') {
+        wordBlobs.push(new Blob([gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], { type: 'image/gif' }));
+      } else if (format === 'webp') {
+        wordBlobs.push(new Blob([await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], { type: 'image/webp' }));
+      }
+    }
+
+    // PHASE 3 (optional): combine words into one set of frames and encode to target format
+    let combinedBlob: Blob | undefined
+    if (words.value.length > 1) {
+      const combinedOutputWidth = words.value.length * scaledOutputSize
+      const combinedOutputHeight = scaledOutputSize
+      const combinedFrames: ImageData[] = []
+      for (let c = 0; c < 3; c++) {
+        combinedFrames.push(combineCanvasData(rawFrames.map(r => r[c]!), words.value.length * scaledOutputSize, scaledOutputSize, scaledOutputSize))
+      }
+      if (format === 'gif') {
+        combinedBlob = new Blob([gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)], { type: 'image/gif' });
+      } else if (format === 'webp') {
+        combinedBlob = new Blob([await webpEncoder.encodeAsync(combinedFrames, combinedOutputWidth, combinedOutputHeight)], { type: 'image/webp' });
+      }
+    }
+
+    // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
+    // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
+    // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
+    const jsZip = new JSZip();
+    wordBlobs.forEach((wb,i) => jsZip.file(`word-${i}.${format}`, wb))
+    if (combinedBlob) {
+      jsZip.file(`word-combined.${format}`, combinedBlob)
+    }
+    const zipFile = await jsZip.generateAsync({ type: 'blob' });
+    FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
+  } finally {
+    isExporting.value = false;
+  }}, 500)
 }
 
 </script>
@@ -260,6 +305,31 @@ main {
   flex-direction: column;
   overflow: hidden;
   background: transparent;
+
+  #export-loader {
+    display: none;
+    transition: opacity 0.25s ease;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+
+    z-index: 20;
+    position: absolute;
+    inset: 0;
+    background: #000c;
+
+    font-size: 1.25rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &.visible {
+      display: flex;
+      opacity: 1;
+    }
+  }
 }
 
 #section-words {
@@ -268,7 +338,6 @@ main {
   overflow: hidden;
   display: flex;
   align-items: center;
-
   #button-reset {
     position: absolute;
     top: 0.5rem;
@@ -279,9 +348,11 @@ main {
   }
   #button-add-word {
     background: var(--smtx-panel);
+    padding: 0.25rem;
     margin: 0 1rem;
-    padding: 0.5rem;
+    height: fit-content;
     border-radius: 8px;
+    align-self: center;
   }
 
 

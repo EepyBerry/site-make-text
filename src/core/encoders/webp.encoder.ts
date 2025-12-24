@@ -11,8 +11,10 @@ export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffe
     height: number,
   ): Promise<ArrayBuffer> {
     if (!this.isInternalLibraryReady) {
+      console.log('<SiteMakeText> Initializing webpmux.wasm...');
       await WebP.Image.initLib();
       this.isInternalLibraryReady = true;
+      console.log('<SiteMakeText> WebP encoder ready!');
     }
     const webp = await WebP.Image.getEmptyImage(true);
     webp.convertToAnim();

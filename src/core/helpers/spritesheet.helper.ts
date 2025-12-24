@@ -29,6 +29,9 @@ export function getAnimatedSprite(key: string): AnimatedSprite | undefined {
   return SMTX_ANIMATED_SPRITES.value.find((as) => as.key === key);
 }
 
+// ----------------------------------------------------------------------------
+// internal functions
+
 async function cutSpritesheet(): Promise<void> {
   for (const region of Object.entries(SPRITESHEET_ANIMSPRITES)) {
     const sprites: Sprite[] = await cutSpritesheetRegion(region[0], region[1]);

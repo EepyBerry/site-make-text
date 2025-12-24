@@ -141,7 +141,9 @@ function _loadCrossSprite() {
 function _reloadLetterSprites() {
   letterSprites.value.splice(0);
   for (let i = 0; i < $props.word.length; i++) {
-    const letter = $props.word.charAt(i);
+    // get letter; replace invalid letters by '?'
+    let letter = $props.word.charAt(i);
+    if (!/^[A-Za-z\?\!]+$/.test(letter)) letter = '?';
 
     // check if we must use small letters; special case for 5-letter words
     const useSmallLetters: boolean =

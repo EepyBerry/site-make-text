@@ -18,11 +18,12 @@
         class="animated"
         @click="compactModePropertiesToggle = !compactModePropertiesToggle"
         aria-label="Toggle word properties panel"
+        title="Toggle word properties panel"
       >
-        <StaticSprite v-if="compactModePropertiesToggle" width="2.5rem" sprite="icon-left" />
-        <StaticSprite v-else width="2.5rem" sprite="icon-right" />
+        <StaticSprite v-if="compactModePropertiesToggle" width="2.5rem" sprite="icon-properties-opened" />
+        <StaticSprite v-else width="2.5rem" sprite="icon-properties-closed" />
       </button>
-      <SpritePropertiesPanel v-if="selectedWord >= 0" v-model="words[selectedWord]" />
+      <WordPropertiesPanel v-if="selectedWord >= 0" v-model="words[selectedWord]" />
       <div v-else id="word-properties-hint">
         <StaticSprite width="4rem" sprite="icon-word-hint" />
         <p>select a word to see its properties</p>
@@ -38,6 +39,7 @@
         class="animated"
         @click="resetWords()"
         aria-label="Remove all words (reset)"
+        title="Remove all words (reset)"
       >
         <StaticSprite width="2.5rem" sprite="icon-reset" />
       </button>
@@ -54,6 +56,7 @@
             class="animated"
             @click="selectWord(idx)"
             :aria-label="'word: ' + word.word"
+            title="Edit word"
           >
             <DynamicSprite
               ref="wordSpriteRefs"
@@ -78,7 +81,8 @@
             id="button-add-word"
             class="animated"
             @click="addWord()"
-            aria-label="Add word"
+            aria-label="Add new word"
+            title="Add new word"
           >
             <StaticSprite width="4rem" sprite="icon-plus" />
           </button>
@@ -98,6 +102,7 @@
               :disabled="selectedWord === 0 || (compactMode && compactModePropertiesToggle)"
               @click="moveSelectedWord('left')"
               aria-label="Move selected word left (if possible)"
+              title="Move right"
             >
               <StaticSprite width="4rem" sprite="icon-left" />
             </button>
@@ -107,6 +112,7 @@
               :disabled="!canDeleteSelectedWord.v || (compactMode && compactModePropertiesToggle)"
               @click="deleteWord(selectedWord)"
               aria-label="Delete selected word"
+              title="Delete selected word"
             >
               <StaticSprite width="4rem" sprite="icon-trash" />
             </button>
@@ -118,6 +124,7 @@
               "
               @click="moveSelectedWord('right')"
               aria-label="Move selected word right (if possible)"
+              title="Move right"
             >
               <StaticSprite width="4rem" sprite="icon-right" />
             </button>
@@ -138,6 +145,7 @@
             :disabled="compactMode && compactModePropertiesToggle"
             @click="exportWords('gif')"
             aria-label="Export words as .gif"
+            title="Export word(s) as .gif"
           >
             <StaticSprite width="4rem" sprite="icon-format-gif" />
           </button>
@@ -147,6 +155,7 @@
             :disabled="compactMode && compactModePropertiesToggle"
             @click="exportWords('webp')"
             aria-label="Export words as .webp"
+            title="Export word(s) as .webp"
           >
             <StaticSprite width="4rem" sprite="icon-format-webp" />
           </button>
@@ -170,7 +179,7 @@ import {
   useTemplateRef,
 } from 'vue';
 import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps } from '@/types';
-import SpritePropertiesPanel from './SpritePropertiesPanel.vue';
+import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
 import { autoUpdate, limitShift, offset, shift, useFloating } from '@floating-ui/vue';
 import { EventBus } from '@/core/event-bus';
 import JSZip from 'jszip';
@@ -240,6 +249,7 @@ const checkPointerTarget = (evt: Event) => {
     selectedWord.value = -1;
     selectedWordElementRef.value = null;
     wordActionsElementRef.value!.style.display = 'none';
+    compactModePropertiesToggle.value = false;
   }
 };
 onMounted(() => {
@@ -613,9 +623,6 @@ div#global-actions-bar {
     }
     #button-toggle-sidebar {
       display: block;
-      .sprite {
-        transform: rotate(90deg);
-      }
     }
     #word-properties-hint:nth-child(2) {
       padding-top: 0;

@@ -14,6 +14,7 @@
     :class="{ selected: value === optionModel }"
     @click="select()"
     :aria-label="internalAriaLabel"
+    :title="internalTitle"
   >
     <slot></slot>
   </button>
@@ -28,6 +29,7 @@ defineProps<{
   id: string;
   value: string | number | boolean | object;
   internalAriaLabel?: string;
+  internalTitle?: string
 }>();
 const optionModel = defineModel<string | number | boolean | WordType>();
 const htmlRadio = useTemplateRef('htmlRadio');

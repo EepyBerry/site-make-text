@@ -17,6 +17,7 @@
         id="noun"
         :value="WordType.NOUN"
         internal-aria-label="Set word as a noun"
+        internal-title="Set word as a noun"
       >
         <DynamicSprite word="noun" type="noun" width="2.125rem" />
       </RadioOptionElement>
@@ -26,6 +27,7 @@
         id="property"
         :value="WordType.PROPERTY"
         internal-aria-label="Set word as a property (adds background)"
+        internal-title="Set word as a property"
       >
         <DynamicSprite word="prop" type="property" width="2.125rem" />
       </RadioOptionElement>
@@ -39,6 +41,7 @@
         id="moreontop"
         :value="false"
         internal-aria-label="Show less letters on top of a word"
+        internal-title="Show less letters on top of a word"
       >
         <DynamicSprite word="off" type="noun" width="2.25rem" />
       </RadioOptionElement>
@@ -48,6 +51,7 @@
         id="lessontop"
         :value="true"
         internal-aria-label="Show more letters on top of a word"
+        internal-title="Show more letters on top of a word"
       >
         <DynamicSprite word="on" type="noun" width="2.25rem" />
       </RadioOptionElement>
@@ -61,6 +65,7 @@
         id="notcrossedout"
         :value="false"
         internal-aria-label="Do not cross out word"
+        internal-title="Do not cross out word"
       >
         <DynamicSprite word="off" type="noun" width="2.25rem" />
       </RadioOptionElement>
@@ -70,6 +75,7 @@
         id="crossedout"
         :value="true"
         internal-aria-label="Cross out word"
+        internal-title="Cross out word"
       >
         <DynamicSprite word="on" type="noun" width="2.25rem" />
       </RadioOptionElement>
@@ -95,8 +101,8 @@
 <script setup lang="ts">
 import { WordType, type DynamicSpriteProps } from '@/types';
 import { computed } from 'vue';
-import RadioElement from './elements/RadioElement.vue';
-import RadioOptionElement from './elements/RadioOptionElement.vue';
+import RadioElement from '@/components/elements/RadioElement.vue';
+import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
 import { ColorPicker } from 'vue-accessible-color-picker';
 
 const spriteProps = defineModel<DynamicSpriteProps>();

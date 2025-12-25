@@ -16,7 +16,7 @@
         id="button-toggle-sidebar"
         type="button"
         class="animated"
-        @click="compactModePropertiesToggle = !compactModePropertiesToggle"
+        @click="togglePropertiesPanel"
         aria-label="Toggle word properties panel"
         title="Toggle word properties panel"
       >
@@ -37,7 +37,7 @@
         id="button-reset"
         type="button"
         class="animated"
-        @click="resetWords()"
+        @click="resetWords"
         aria-label="Remove all words (reset)"
         title="Remove all words (reset)"
       >
@@ -132,37 +132,21 @@
         </div>
       </div>
 
-      <!-- special actions -->
-      <div
-        id="global-actions-bar"
-        v-if="words.length > 0"
-        :class="{ disabled: compactMode && compactModePropertiesToggle }"
-      >
-        <div id="global-actions-panel">
-          <button
-            type="button"
-            class="primary"
-            :disabled="compactMode && compactModePropertiesToggle"
-            @click="exportWords('gif')"
-            aria-label="Export words as .gif"
-            title="Export word(s) as .gif"
-          >
-            <StaticSprite width="4rem" sprite="icon-format-gif" />
-          </button>
-          <button
-            type="button"
-            class="primary"
-            :disabled="compactMode && compactModePropertiesToggle"
-            @click="exportWords('webp')"
-            aria-label="Export words as .webp"
-            title="Export word(s) as .webp"
-          >
-            <StaticSprite width="4rem" sprite="icon-format-webp" />
-          </button>
-          <div id="action-download-container">
-            <StaticSprite width="4rem" sprite="icon-download" />
-          </div>
-        </div>
+      <!-- export panel -->
+      <div id="export-settings-panel"
+      :class="{ collapsed: !exportSettingsToggle }">
+        <button
+          id="button-toggle-export-settings"
+          type="button"
+          class="animated"
+          @click="toggleExportSettingsPanel"
+          aria-label="Toggle word properties panel"
+          title="Toggle word properties panel"
+        >
+          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" sprite="icon-export-opened" />
+          <StaticSprite v-else width="2.5rem" sprite="icon-export-closed" />
+        </button>
+        <ExportSettingsPanel @export="exportWords" />
       </div>
     </section>
   </main>
@@ -178,7 +162,7 @@ import {
   type TemplateRef,
   useTemplateRef,
 } from 'vue';
-import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps } from '@/types';
+import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps, type ExportSettingsOptions } from '@/types';
 import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
 import { autoUpdate, limitShift, offset, shift, useFloating } from '@floating-ui/vue';
 import { EventBus } from '@/core/event-bus';
@@ -188,6 +172,8 @@ import GIFImageDataEncoder from '@/core/encoders/gif.encoder';
 import WebPImageDataEncoder from '@/core/encoders/webp.encoder';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
 import { combineCanvasData } from '@/core/helpers/canvas.helper';
+import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
+import { clamp } from '@/core/utils/math.utils';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
@@ -211,9 +197,10 @@ const { floatingStyles, update } = useFloating(selectedWordElementRef, wordActio
   whileElementsMounted: autoUpdate,
 });
 
-// compact mode refs
+// compact mode & toggle refs
 const compactMode: Ref<boolean> = ref(false);
 const compactModePropertiesToggle: Ref<boolean> = ref(false);
+const exportSettingsToggle: Ref<boolean> = ref(false);
 
 // word data & refs
 const words: Ref<DynamicSpriteProps[]> = ref([
@@ -250,6 +237,7 @@ const checkPointerTarget = (evt: Event) => {
     selectedWordElementRef.value = null;
     wordActionsElementRef.value!.style.display = 'none';
     compactModePropertiesToggle.value = false;
+    exportSettingsToggle.value = false;
   }
 };
 onMounted(() => {
@@ -265,6 +253,21 @@ onBeforeMount(() => {
 
 // ----------------------------------------------------------------------------
 // component functions
+
+function togglePropertiesPanel() {
+  if (compactMode.value) {
+    compactModePropertiesToggle.value = !compactModePropertiesToggle.value
+  }
+  if (compactModePropertiesToggle.value) {
+    exportSettingsToggle.value = false
+  }
+}
+function toggleExportSettingsPanel() {
+  exportSettingsToggle.value = !exportSettingsToggle.value
+  if (exportSettingsToggle.value) {
+    compactModePropertiesToggle.value = false
+  }
+}
 
 function addWord() {
   words.value.push({
@@ -327,11 +330,12 @@ function resetWords() {
   wordActionsElementRef.value!.style.display = 'none';
 }
 
-async function exportWords(format: 'gif' | 'webp') {
+async function exportWords(opts: ExportSettingsOptions) {
   isExporting.value = true;
   setTimeout(async () => {
     try {
-      const outputScale = 3; // Change this to increase scale
+      const outputScale = clamp(opts.scale, 1, 10);
+      const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE;
       const wordBlobs: Blob[] = [];
 
       // init encoders
@@ -348,70 +352,73 @@ async function exportWords(format: 'gif' | 'webp') {
         rawFrames.push(frames);
       }
 
-      // PHASE 2: encode words to target format (with additional combined version)
-      const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE;
-      for (let r = 0; r < rawFrames.length; r++) {
-        if (format === 'gif') {
-          wordBlobs.push(
-            new Blob([gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], {
-              type: 'image/gif',
-            }),
-          );
-        } else if (format === 'webp') {
-          wordBlobs.push(
-            new Blob(
-              [await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)],
-              { type: 'image/webp' },
-            ),
-          );
-        }
-      }
-
-      // PHASE 3 (optional): combine words into one set of frames and encode to target format
-      let combinedBlob: Blob | undefined;
-      if (words.value.length > 1) {
-        const combinedOutputWidth = words.value.length * scaledOutputSize;
-        const combinedOutputHeight = scaledOutputSize;
-        const combinedFrames: ImageData[] = [];
-        for (let c = 0; c < 3; c++) {
-          combinedFrames.push(
-            combineCanvasData(
-              rawFrames.map((r) => r[c]!),
-              words.value.length * scaledOutputSize,
-              scaledOutputSize,
-              scaledOutputSize,
-            ),
-          );
-        }
-        if (format === 'gif') {
-          combinedBlob = new Blob(
-            [gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)],
-            { type: 'image/gif' },
-          );
-        } else if (format === 'webp') {
-          combinedBlob = new Blob(
-            [
-              await webpEncoder.encodeAsync(
-                combinedFrames,
-                combinedOutputWidth,
-                combinedOutputHeight,
+      // PHASE 2 (optional): encode words to target format (with additional combined version)
+      if (!opts.combinedOnly) {
+        for (let r = 0; r < rawFrames.length; r++) {
+          if (opts.format === 'gif') {
+            wordBlobs.push(
+              new Blob([gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], {
+                type: 'image/gif',
+              }),
+            );
+          } else if (opts.format === 'webp') {
+            wordBlobs.push(
+              new Blob(
+                [await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)],
+                { type: 'image/webp' },
               ),
-            ],
-            { type: 'image/webp' },
-          );
+            );
+          }
         }
       }
 
-      // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
-      // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
-      // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
-      const jsZip = new JSZip();
-      wordBlobs.forEach((wb, i) => jsZip.file(`word-${i}.${format}`, wb));
-      if (combinedBlob) {
-        jsZip.file(`word-combined.${format}`, combinedBlob);
+      // PHASE 3: combine words into one set of frames and encode to target format
+      let combinedBlob: Blob | undefined;
+      const combinedOutputWidth = words.value.length * scaledOutputSize;
+      const combinedOutputHeight = scaledOutputSize;
+      const combinedFrames: ImageData[] = [];
+      for (let c = 0; c < 3; c++) {
+        combinedFrames.push(
+          combineCanvasData(
+            rawFrames.map((r) => r[c]!),
+            words.value.length * scaledOutputSize,
+            scaledOutputSize,
+            scaledOutputSize,
+          ),
+        );
       }
-      const zipFile = await jsZip.generateAsync({ type: 'blob' });
-      FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
+      if (opts.format === 'gif') {
+        combinedBlob = new Blob(
+          [gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)],
+          { type: 'image/gif' },
+        );
+      } else if (opts.format === 'webp') {
+        combinedBlob = new Blob(
+          [
+            await webpEncoder.encodeAsync(
+              combinedFrames,
+              combinedOutputWidth,
+              combinedOutputHeight,
+            ),
+          ],
+          { type: 'image/webp' },
+        );
+      }
+
+      if (opts.combinedOnly && combinedBlob) {
+        FileSaver.saveAs(combinedBlob!, `word-combined.${opts.format}`);
+      } else {
+        // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
+        // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
+        // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
+        const jsZip = new JSZip();
+        wordBlobs.forEach((wb, i) => jsZip.file(`word-${i}.${opts.format}`, wb));
+        if (combinedBlob) {
+          jsZip.file(`word-combined.${opts.format}`, combinedBlob);
+        }
+        const zipFile = await jsZip.generateAsync({ type: 'blob' });
+        FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
+        }
     } finally {
       isExporting.value = false;
     }
@@ -523,6 +530,31 @@ div#word-actions-panel {
     button.animated:active > * {
       transform: scale(0.9);
     }
+  }
+}
+
+#export-settings-panel {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+
+  padding: 0.5rem;
+  width: fit-content;
+  max-width: 14rem;
+
+  border-radius: 8px;
+  background: var(--smtx-panel);
+
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: center;
+  #button-toggle-export-settings {
+    align-self: flex-end;
+  }
+}
+#export-settings-panel.collapsed {
+  section {
+    display: none;
   }
 }
 

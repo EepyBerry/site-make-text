@@ -7,6 +7,8 @@
       type="text"
       maxlength="8"
       style="text-transform: uppercase"
+      aria-label="Word to write (A-Z?! characters only)"
+      title="Word to write (A-Z?! characters only)"
     />
 
     <StaticSprite width="2.5rem" sprite="icon-type" />

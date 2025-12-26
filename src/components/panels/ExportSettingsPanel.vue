@@ -12,30 +12,6 @@
       title="Exported image scale (1 = 24px*24px)"
     />
 
-    <StaticSprite width="2.5rem" sprite="icon-export-format" />
-    <RadioElement>
-      <RadioOptionElement
-        v-model="exportSettings.format"
-        pid="setting-format"
-        id="gif"
-        value="gif"
-        internal-aria-label="Set word as a noun"
-        internal-title="Export words as .gif"
-      >
-        <StaticSprite width="2.5rem" sprite="icon-format-gif" />
-      </RadioOptionElement>
-      <RadioOptionElement
-        v-model="exportSettings.format"
-        pid="setting-format"
-        id="webp"
-        value="webp"
-        internal-aria-label="Set word as a property (adds background)"
-        internal-title="Export words as .webp"
-      >
-        <StaticSprite width="2.5rem" sprite="icon-format-webp" />
-      </RadioOptionElement>
-    </RadioElement>
-
     <StaticSprite width="2.5rem" sprite="icon-export-type" />
     <RadioElement>
       <RadioOptionElement
@@ -57,6 +33,30 @@
         internal-title="Export combined image only"
       >
         <DynamicSprite word="combined" width="2.5rem" :more-letters-on-top="false" />
+      </RadioOptionElement>
+    </RadioElement>
+
+    <StaticSprite width="2.5rem" sprite="icon-export-format" />
+    <RadioElement>
+      <RadioOptionElement
+        v-model="exportSettings.format"
+        pid="setting-format"
+        id="gif"
+        value="gif"
+        internal-aria-label="Set word as a noun"
+        internal-title="Export words as .gif"
+      >
+        <StaticSprite width="2.5rem" sprite="icon-format-gif" />
+      </RadioOptionElement>
+      <RadioOptionElement
+        v-model="exportSettings.format"
+        pid="setting-format"
+        id="webp"
+        value="webp"
+        internal-aria-label="Set word as a property (adds background)"
+        internal-title="Export words as .webp"
+      >
+        <StaticSprite width="2.5rem" sprite="icon-format-webp" />
       </RadioOptionElement>
     </RadioElement>
 
@@ -84,7 +84,10 @@ defineEmits(['export'])
 <style lang="scss">
 #section-export-settings {
   width: 100%;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: var(--smtx-panel);
+  border-radius: 8px;
+  border-bottom-right-radius: 0;
 
   display: grid;
   grid-template-columns: 3rem 1fr;

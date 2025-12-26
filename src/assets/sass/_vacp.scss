@@ -9,6 +9,11 @@ div.vacp-color-picker {
   grid-gap: 0.5rem 0;
   font-family: inherit;
 
+  div.vacp-color-space {
+    aspect-ratio: unset;
+    height: 100%;
+    min-height: 128px;
+  }
   div.vacp-actions {
     display: none;
   }

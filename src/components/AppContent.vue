@@ -10,24 +10,21 @@
     <aside
       id="word-properties-sidebar"
       aria-label="Selected word properties"
-      :class="{ collapsed: !compactModePropertiesToggle }"
+      :class="{ collapsed: !wordPropertiesToggle }"
     >
       <button
         id="button-toggle-sidebar"
         type="button"
         class="animated"
+        :class="{ active: !!wordPropertiesToggle }"
         @click="togglePropertiesPanel"
         aria-label="Toggle word properties panel"
         title="Toggle word properties panel"
       >
-        <StaticSprite v-if="compactModePropertiesToggle" width="2.5rem" sprite="icon-properties-opened" />
+        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" sprite="icon-properties-opened" />
         <StaticSprite v-else width="2.5rem" sprite="icon-properties-closed" />
       </button>
-      <WordPropertiesPanel v-if="selectedWord >= 0" v-model="words[selectedWord]" />
-      <div v-else id="word-properties-hint">
-        <StaticSprite width="4rem" sprite="icon-word-hint" />
-        <p>select a word to see its properties</p>
-      </div>
+      <WordPropertiesPanel :show-hint="selectedWord < 0" v-model="words[selectedWord]" />
     </aside>
 
     <!-- main section -->
@@ -73,7 +70,7 @@
               class="caret"
               width="5rem"
               sprite="icon-caret"
-              :class="{ disabled: compactMode && compactModePropertiesToggle }"
+              :class="{ disabled: compactMode && wordPropertiesToggle }"
             />
           </button>
           <button
@@ -92,14 +89,14 @@
         <div
           ref="wordActionsElementRef"
           id="word-actions-panel"
-          :class="{ disabled: compactMode && compactModePropertiesToggle }"
+          :class="{ disabled: compactMode && wordPropertiesToggle }"
           :style="floatingStyles"
         >
           <div class="actions-container">
             <button
               type="button"
               class="animated"
-              :disabled="selectedWord === 0 || (compactMode && compactModePropertiesToggle)"
+              :disabled="selectedWord === 0 || (compactMode && wordPropertiesToggle)"
               @click="moveSelectedWord('left')"
               aria-label="Move selected word left (if possible)"
               title="Move right"
@@ -109,7 +106,7 @@
             <button
               type="button"
               class="animated"
-              :disabled="!canDeleteSelectedWord.v || (compactMode && compactModePropertiesToggle)"
+              :disabled="!canDeleteSelectedWord.v || (compactMode && wordPropertiesToggle)"
               @click="deleteWord(selectedWord)"
               aria-label="Delete selected word"
               title="Delete selected word"
@@ -120,7 +117,7 @@
               type="button"
               class="animated"
               :disabled="
-                selectedWord === wordCount - 2 || (compactMode && compactModePropertiesToggle)
+                selectedWord === wordCount - 2 || (compactMode && wordPropertiesToggle)
               "
               @click="moveSelectedWord('right')"
               aria-label="Move selected word right (if possible)"
@@ -139,6 +136,7 @@
           id="button-toggle-export-settings"
           type="button"
           class="animated"
+          :class="{ active: !!exportSettingsToggle }"
           @click="toggleExportSettingsPanel"
           aria-label="Toggle word properties panel"
           title="Toggle word properties panel"
@@ -199,7 +197,7 @@ const { floatingStyles, update } = useFloating(selectedWordElementRef, wordActio
 
 // compact mode & toggle refs
 const compactMode: Ref<boolean> = ref(false);
-const compactModePropertiesToggle: Ref<boolean> = ref(false);
+const wordPropertiesToggle: Ref<boolean> = ref(false);
 const exportSettingsToggle: Ref<boolean> = ref(false);
 
 // word data & refs
@@ -236,7 +234,7 @@ const checkPointerTarget = (evt: Event) => {
     selectedWord.value = -1;
     selectedWordElementRef.value = null;
     wordActionsElementRef.value!.style.display = 'none';
-    compactModePropertiesToggle.value = false;
+    wordPropertiesToggle.value = false;
     exportSettingsToggle.value = false;
   }
 };
@@ -256,16 +254,16 @@ onBeforeMount(() => {
 
 function togglePropertiesPanel() {
   if (compactMode.value) {
-    compactModePropertiesToggle.value = !compactModePropertiesToggle.value
+    wordPropertiesToggle.value = !wordPropertiesToggle.value
   }
-  if (compactModePropertiesToggle.value) {
+  if (wordPropertiesToggle.value) {
     exportSettingsToggle.value = false
   }
 }
 function toggleExportSettingsPanel() {
   exportSettingsToggle.value = !exportSettingsToggle.value
   if (exportSettingsToggle.value) {
-    compactModePropertiesToggle.value = false
+    wordPropertiesToggle.value = false
   }
 }
 
@@ -356,18 +354,11 @@ async function exportWords(opts: ExportSettingsOptions) {
       if (!opts.combinedOnly) {
         for (let r = 0; r < rawFrames.length; r++) {
           if (opts.format === 'gif') {
-            wordBlobs.push(
-              new Blob([gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], {
-                type: 'image/gif',
-              }),
-            );
+            const encoded = gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)
+            wordBlobs.push(new Blob([encoded], { type: 'image/gif' }));
           } else if (opts.format === 'webp') {
-            wordBlobs.push(
-              new Blob(
-                [await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)],
-                { type: 'image/webp' },
-              ),
-            );
+            const encoded = await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)
+            wordBlobs.push(new Blob([encoded], { type: 'image/webp' }));
           }
         }
       }
@@ -388,23 +379,14 @@ async function exportWords(opts: ExportSettingsOptions) {
         );
       }
       if (opts.format === 'gif') {
-        combinedBlob = new Blob(
-          [gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)],
-          { type: 'image/gif' },
-        );
+        const encoded = gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)
+        combinedBlob = new Blob([encoded], { type: 'image/gif' });
       } else if (opts.format === 'webp') {
-        combinedBlob = new Blob(
-          [
-            await webpEncoder.encodeAsync(
-              combinedFrames,
-              combinedOutputWidth,
-              combinedOutputHeight,
-            ),
-          ],
-          { type: 'image/webp' },
-        );
+        const encoded = await webpEncoder.encodeAsync(combinedFrames, combinedOutputWidth, combinedOutputHeight)
+        combinedBlob = new Blob([encoded], { type: 'image/webp' });
       }
 
+      // PHASE 4: export as .zip if multiple files (SEPARATE) or as a single file (COMBINED)
       if (opts.combinedOnly && combinedBlob) {
         FileSaver.saveAs(combinedBlob!, `word-combined.${opts.format}`);
       } else {
@@ -538,18 +520,24 @@ div#word-actions-panel {
   bottom: 0.5rem;
   right: 0.5rem;
 
-  padding: 0.5rem;
   width: fit-content;
   max-width: 14rem;
 
   border-radius: 8px;
-  background: var(--smtx-panel);
 
   display: flex;
   flex-direction: column-reverse;
   justify-content: center;
+
   #button-toggle-export-settings {
     align-self: flex-end;
+    padding: 0.5rem;
+    background: var(--smtx-panel);
+    border-radius: 8px;
+    &.active {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
   }
 }
 #export-settings-panel.collapsed {
@@ -566,55 +554,14 @@ div#word-actions-panel {
   flex-direction: column;
   align-items: center;
 
-  #word-properties-hint {
-    flex: 1;
-    width: 100%;
-    padding: 1rem;
-
-    color: var(--smtx-text-hint);
-    text-align: center;
-    line-height: 1.1;
-    font-weight: 600;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
   #button-toggle-sidebar {
     display: none;
-  }
-}
-
-div#global-actions-bar {
-  position: absolute;
-  inset: auto 0 1rem;
-  padding: 0.5rem;
-  display: flex;
-  pointer-events: none;
-
-  #global-actions-panel {
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin: 0 auto;
-    pointer-events: all;
-
-    border-radius: 8px;
+    padding: 0.5rem;
     background: var(--smtx-panel);
-    padding: 0.25rem;
-
-    button:first-of-type {
-      border-radius: unset;
-      border-top-left-radius: 4px;
-      border-bottom-left-radius: 4px;
-    }
-    button:last-of-type {
-      border-radius: unset;
-      border-top-right-radius: 4px;
-      border-bottom-right-radius: 4px;
+    border-radius: 8px;
+    &.active {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
     }
   }
 }
@@ -639,39 +586,21 @@ div#global-actions-bar {
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;
-    padding: 0.5rem;
-    overflow-y: auto;
+    overflow: hidden;
 
+    max-height: calc(100% - 1rem);
     align-items: flex-start;
-    gap: 1rem;
 
-    background: var(--smtx-panel);
-    border-radius: 8px;
     border: none;
 
-    & > * {
-      padding: 0;
-      border: none;
-    }
     #button-toggle-sidebar {
       display: block;
     }
-    #word-properties-hint:nth-child(2) {
-      padding-top: 0;
-    }
   }
   #word-properties-sidebar.collapsed {
-    width: fit-content;
-    max-width: 14rem;
-    #word-properties-hint {
+    & > * {
       display: none;
     }
-    section {
-      display: none;
-    }
-  }
-  div#global-actions-bar {
-    align-items: flex-start;
   }
 }
 </style>

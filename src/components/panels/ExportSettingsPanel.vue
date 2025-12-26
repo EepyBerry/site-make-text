@@ -60,7 +60,11 @@
       </RadioOptionElement>
     </RadioElement>
 
-    <button type="button" id="button-export" class="primary animated" @click="$emit('export', exportSettings)"
+    <button
+      type="button"
+      id="button-export"
+      class="primary animated"
+      @click="$emit('export', exportSettings)"
       aria-label="Export words"
       title="Export words"
     >
@@ -76,9 +80,13 @@ import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
 import type { ExportSettingsOptions } from '@/types';
 import { ref, type Ref } from 'vue';
 
-const exportSettings: Ref<ExportSettingsOptions> = ref({ scale: 3, format: 'webp', combinedOnly: false })
+const exportSettings: Ref<ExportSettingsOptions> = ref({
+  scale: 3,
+  format: 'webp',
+  combinedOnly: false,
+});
 
-defineEmits(['export'])
+defineEmits(['export']);
 </script>
 
 <style lang="scss">

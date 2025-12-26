@@ -172,9 +172,9 @@ function setColor(data: { colors: object; cssColor: string }) {
   border-bottom: 4px dashed white;
 }
 
-
 @media screen and (max-width: 1023px) {
-  #word-properties-hint, #word-properties-panel-scrollzone {
+  #word-properties-hint,
+  #word-properties-panel-scrollzone {
     background: var(--smtx-panel);
     border-radius: 8px;
     border-top-left-radius: 0;
@@ -182,10 +182,13 @@ function setColor(data: { colors: object; cssColor: string }) {
   #word-properties-panel-scrollzone {
     padding: 0.5rem;
   }
-  #section-sprite-props, #section-sprite-color {
+  #section-sprite-props,
+  #section-sprite-color {
     padding: 0;
     border: none;
   }
-  #section-sprite-color { padding-top: 1rem; }
+  #section-sprite-color {
+    padding-top: 1rem;
+  }
 }
 </style>

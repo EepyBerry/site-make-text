@@ -29,7 +29,7 @@ defineProps<{
   id: string;
   value: string | number | boolean | object;
   internalAriaLabel?: string;
-  internalTitle?: string
+  internalTitle?: string;
 }>();
 const optionModel = defineModel<string | number | boolean | WordType>();
 const htmlRadio = useTemplateRef('htmlRadio');

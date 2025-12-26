@@ -116,9 +116,7 @@
             <button
               type="button"
               class="animated"
-              :disabled="
-                selectedWord === wordCount - 2 || (compactMode && wordPropertiesToggle)
-              "
+              :disabled="selectedWord === wordCount - 2 || (compactMode && wordPropertiesToggle)"
               @click="moveSelectedWord('right')"
               aria-label="Move selected word right (if possible)"
               title="Move right"
@@ -130,8 +128,7 @@
       </div>
 
       <!-- export panel -->
-      <div id="export-settings-panel"
-      :class="{ collapsed: !exportSettingsToggle }">
+      <div id="export-settings-panel" :class="{ collapsed: !exportSettingsToggle }">
         <button
           id="button-toggle-export-settings"
           type="button"
@@ -160,7 +157,12 @@ import {
   type TemplateRef,
   useTemplateRef,
 } from 'vue';
-import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps, type ExportSettingsOptions } from '@/types';
+import {
+  WordType,
+  type DynamicSpriteExposes,
+  type DynamicSpriteProps,
+  type ExportSettingsOptions,
+} from '@/types';
 import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
 import { autoUpdate, limitShift, offset, shift, useFloating } from '@floating-ui/vue';
 import { EventBus } from '@/core/event-bus';
@@ -254,16 +256,16 @@ onBeforeMount(() => {
 
 function togglePropertiesPanel() {
   if (compactMode.value) {
-    wordPropertiesToggle.value = !wordPropertiesToggle.value
+    wordPropertiesToggle.value = !wordPropertiesToggle.value;
   }
   if (wordPropertiesToggle.value) {
-    exportSettingsToggle.value = false
+    exportSettingsToggle.value = false;
   }
 }
 function toggleExportSettingsPanel() {
-  exportSettingsToggle.value = !exportSettingsToggle.value
+  exportSettingsToggle.value = !exportSettingsToggle.value;
   if (exportSettingsToggle.value) {
-    wordPropertiesToggle.value = false
+    wordPropertiesToggle.value = false;
   }
 }
 
@@ -354,10 +356,14 @@ async function exportWords(opts: ExportSettingsOptions) {
       if (!opts.combinedOnly) {
         for (let r = 0; r < rawFrames.length; r++) {
           if (opts.format === 'gif') {
-            const encoded = gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)
+            const encoded = gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize);
             wordBlobs.push(new Blob([encoded], { type: 'image/gif' }));
           } else if (opts.format === 'webp') {
-            const encoded = await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)
+            const encoded = await webpEncoder.encodeAsync(
+              rawFrames[r]!,
+              scaledOutputSize,
+              scaledOutputSize,
+            );
             wordBlobs.push(new Blob([encoded], { type: 'image/webp' }));
           }
         }
@@ -379,10 +385,18 @@ async function exportWords(opts: ExportSettingsOptions) {
         );
       }
       if (opts.format === 'gif') {
-        const encoded = gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)
+        const encoded = gifEncoder.encode(
+          combinedFrames,
+          combinedOutputWidth,
+          combinedOutputHeight,
+        );
         combinedBlob = new Blob([encoded], { type: 'image/gif' });
       } else if (opts.format === 'webp') {
-        const encoded = await webpEncoder.encodeAsync(combinedFrames, combinedOutputWidth, combinedOutputHeight)
+        const encoded = await webpEncoder.encodeAsync(
+          combinedFrames,
+          combinedOutputWidth,
+          combinedOutputHeight,
+        );
         combinedBlob = new Blob([encoded], { type: 'image/webp' });
       }
 
@@ -400,7 +414,7 @@ async function exportWords(opts: ExportSettingsOptions) {
         }
         const zipFile = await jsZip.generateAsync({ type: 'blob' });
         FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
-        }
+      }
     } finally {
       isExporting.value = false;
     }

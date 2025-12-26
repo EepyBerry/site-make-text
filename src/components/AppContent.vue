@@ -10,23 +10,21 @@
     <aside
       id="word-properties-sidebar"
       aria-label="Selected word properties"
-      :class="{ collapsed: !compactModePropertiesToggle }"
+      :class="{ collapsed: !wordPropertiesToggle }"
     >
       <button
         id="button-toggle-sidebar"
         type="button"
         class="animated"
-        @click="compactModePropertiesToggle = !compactModePropertiesToggle"
+        :class="{ active: !!wordPropertiesToggle }"
+        @click="togglePropertiesPanel"
         aria-label="Toggle word properties panel"
+        title="Toggle word properties panel"
       >
-        <StaticSprite v-if="compactModePropertiesToggle" width="2.5rem" sprite="icon-left" />
-        <StaticSprite v-else width="2.5rem" sprite="icon-right" />
+        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" sprite="icon-properties-opened" />
+        <StaticSprite v-else width="2.5rem" sprite="icon-properties-closed" />
       </button>
-      <SpritePropertiesPanel v-if="selectedWord >= 0" v-model="words[selectedWord]" />
-      <div v-else id="word-properties-hint">
-        <StaticSprite width="4rem" sprite="icon-word-hint" />
-        <p>select a word to see its properties</p>
-      </div>
+      <WordPropertiesPanel :show-hint="selectedWord < 0" v-model="words[selectedWord]" />
     </aside>
 
     <!-- main section -->
@@ -36,8 +34,9 @@
         id="button-reset"
         type="button"
         class="animated"
-        @click="resetWords()"
+        @click="resetWords"
         aria-label="Remove all words (reset)"
+        title="Remove all words (reset)"
       >
         <StaticSprite width="2.5rem" sprite="icon-reset" />
       </button>
@@ -54,6 +53,7 @@
             class="animated"
             @click="selectWord(idx)"
             :aria-label="'word: ' + word.word"
+            title="Edit word"
           >
             <DynamicSprite
               ref="wordSpriteRefs"
@@ -70,7 +70,7 @@
               class="caret"
               width="5rem"
               sprite="icon-caret"
-              :class="{ disabled: compactMode && compactModePropertiesToggle }"
+              :class="{ disabled: compactMode && wordPropertiesToggle }"
             />
           </button>
           <button
@@ -78,7 +78,8 @@
             id="button-add-word"
             class="animated"
             @click="addWord()"
-            aria-label="Add word"
+            aria-label="Add new word"
+            title="Add new word"
           >
             <StaticSprite width="4rem" sprite="icon-plus" />
           </button>
@@ -88,36 +89,37 @@
         <div
           ref="wordActionsElementRef"
           id="word-actions-panel"
-          :class="{ disabled: compactMode && compactModePropertiesToggle }"
+          :class="{ disabled: compactMode && wordPropertiesToggle }"
           :style="floatingStyles"
         >
           <div class="actions-container">
             <button
               type="button"
               class="animated"
-              :disabled="selectedWord === 0 || (compactMode && compactModePropertiesToggle)"
+              :disabled="selectedWord === 0 || (compactMode && wordPropertiesToggle)"
               @click="moveSelectedWord('left')"
               aria-label="Move selected word left (if possible)"
+              title="Move right"
             >
               <StaticSprite width="4rem" sprite="icon-left" />
             </button>
             <button
               type="button"
               class="animated"
-              :disabled="!canDeleteSelectedWord.v || (compactMode && compactModePropertiesToggle)"
+              :disabled="!canDeleteSelectedWord.v || (compactMode && wordPropertiesToggle)"
               @click="deleteWord(selectedWord)"
               aria-label="Delete selected word"
+              title="Delete selected word"
             >
               <StaticSprite width="4rem" sprite="icon-trash" />
             </button>
             <button
               type="button"
               class="animated"
-              :disabled="
-                selectedWord === wordCount - 2 || (compactMode && compactModePropertiesToggle)
-              "
+              :disabled="selectedWord === wordCount - 2 || (compactMode && wordPropertiesToggle)"
               @click="moveSelectedWord('right')"
               aria-label="Move selected word right (if possible)"
+              title="Move right"
             >
               <StaticSprite width="4rem" sprite="icon-right" />
             </button>
@@ -125,35 +127,21 @@
         </div>
       </div>
 
-      <!-- special actions -->
-      <div
-        id="global-actions-bar"
-        v-if="words.length > 0"
-        :class="{ disabled: compactMode && compactModePropertiesToggle }"
-      >
-        <div id="global-actions-panel">
-          <button
-            type="button"
-            class="primary"
-            :disabled="compactMode && compactModePropertiesToggle"
-            @click="exportWords('gif')"
-            aria-label="Export words as .gif"
-          >
-            <StaticSprite width="4rem" sprite="icon-format-gif" />
-          </button>
-          <button
-            type="button"
-            class="primary"
-            :disabled="compactMode && compactModePropertiesToggle"
-            @click="exportWords('webp')"
-            aria-label="Export words as .webp"
-          >
-            <StaticSprite width="4rem" sprite="icon-format-webp" />
-          </button>
-          <div id="action-download-container">
-            <StaticSprite width="4rem" sprite="icon-download" />
-          </div>
-        </div>
+      <!-- export panel -->
+      <div id="export-settings-panel" :class="{ collapsed: !exportSettingsToggle }">
+        <button
+          id="button-toggle-export-settings"
+          type="button"
+          class="animated"
+          :class="{ active: !!exportSettingsToggle }"
+          @click="toggleExportSettingsPanel"
+          aria-label="Toggle word properties panel"
+          title="Toggle word properties panel"
+        >
+          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" sprite="icon-export-opened" />
+          <StaticSprite v-else width="2.5rem" sprite="icon-export-closed" />
+        </button>
+        <ExportSettingsPanel @export="exportWords" />
       </div>
     </section>
   </main>
@@ -169,8 +157,13 @@ import {
   type TemplateRef,
   useTemplateRef,
 } from 'vue';
-import { WordType, type DynamicSpriteExposes, type DynamicSpriteProps } from '@/types';
-import SpritePropertiesPanel from './SpritePropertiesPanel.vue';
+import {
+  WordType,
+  type DynamicSpriteExposes,
+  type DynamicSpriteProps,
+  type ExportSettingsOptions,
+} from '@/types';
+import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
 import { autoUpdate, limitShift, offset, shift, useFloating } from '@floating-ui/vue';
 import { EventBus } from '@/core/event-bus';
 import JSZip from 'jszip';
@@ -179,6 +172,8 @@ import GIFImageDataEncoder from '@/core/encoders/gif.encoder';
 import WebPImageDataEncoder from '@/core/encoders/webp.encoder';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
 import { combineCanvasData } from '@/core/helpers/canvas.helper';
+import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
+import { clamp } from '@/core/utils/math.utils';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
@@ -202,9 +197,10 @@ const { floatingStyles, update } = useFloating(selectedWordElementRef, wordActio
   whileElementsMounted: autoUpdate,
 });
 
-// compact mode refs
+// compact mode & toggle refs
 const compactMode: Ref<boolean> = ref(false);
-const compactModePropertiesToggle: Ref<boolean> = ref(false);
+const wordPropertiesToggle: Ref<boolean> = ref(false);
+const exportSettingsToggle: Ref<boolean> = ref(false);
 
 // word data & refs
 const words: Ref<DynamicSpriteProps[]> = ref([
@@ -240,6 +236,8 @@ const checkPointerTarget = (evt: Event) => {
     selectedWord.value = -1;
     selectedWordElementRef.value = null;
     wordActionsElementRef.value!.style.display = 'none';
+    wordPropertiesToggle.value = false;
+    exportSettingsToggle.value = false;
   }
 };
 onMounted(() => {
@@ -255,6 +253,21 @@ onBeforeMount(() => {
 
 // ----------------------------------------------------------------------------
 // component functions
+
+function togglePropertiesPanel() {
+  if (compactMode.value) {
+    wordPropertiesToggle.value = !wordPropertiesToggle.value;
+  }
+  if (wordPropertiesToggle.value) {
+    exportSettingsToggle.value = false;
+  }
+}
+function toggleExportSettingsPanel() {
+  exportSettingsToggle.value = !exportSettingsToggle.value;
+  if (exportSettingsToggle.value) {
+    wordPropertiesToggle.value = false;
+  }
+}
 
 function addWord() {
   words.value.push({
@@ -317,11 +330,12 @@ function resetWords() {
   wordActionsElementRef.value!.style.display = 'none';
 }
 
-async function exportWords(format: 'gif' | 'webp') {
+async function exportWords(opts: ExportSettingsOptions) {
   isExporting.value = true;
   setTimeout(async () => {
     try {
-      const outputScale = 2; // Change this to increase scale
+      const outputScale = clamp(opts.scale, 1, 10);
+      const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE;
       const wordBlobs: Blob[] = [];
 
       // init encoders
@@ -338,70 +352,69 @@ async function exportWords(format: 'gif' | 'webp') {
         rawFrames.push(frames);
       }
 
-      // PHASE 2: encode words to target format (with additional combined version)
-      const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE;
-      for (let r = 0; r < rawFrames.length; r++) {
-        if (format === 'gif') {
-          wordBlobs.push(
-            new Blob([gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize)], {
-              type: 'image/gif',
-            }),
-          );
-        } else if (format === 'webp') {
-          wordBlobs.push(
-            new Blob(
-              [await webpEncoder.encodeAsync(rawFrames[r]!, scaledOutputSize, scaledOutputSize)],
-              { type: 'image/webp' },
-            ),
-          );
+      // PHASE 2 (optional): encode words to target format (with additional combined version)
+      if (!opts.combinedOnly) {
+        for (let r = 0; r < rawFrames.length; r++) {
+          if (opts.format === 'gif') {
+            const encoded = gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize);
+            wordBlobs.push(new Blob([encoded], { type: 'image/gif' }));
+          } else if (opts.format === 'webp') {
+            const encoded = await webpEncoder.encodeAsync(
+              rawFrames[r]!,
+              scaledOutputSize,
+              scaledOutputSize,
+            );
+            wordBlobs.push(new Blob([encoded], { type: 'image/webp' }));
+          }
         }
       }
 
-      // PHASE 3 (optional): combine words into one set of frames and encode to target format
+      // PHASE 3: combine words into one set of frames and encode to target format
       let combinedBlob: Blob | undefined;
-      if (words.value.length > 1) {
-        const combinedOutputWidth = words.value.length * scaledOutputSize;
-        const combinedOutputHeight = scaledOutputSize;
-        const combinedFrames: ImageData[] = [];
-        for (let c = 0; c < 3; c++) {
-          combinedFrames.push(
-            combineCanvasData(
-              rawFrames.map((r) => r[c]!),
-              words.value.length * scaledOutputSize,
-              scaledOutputSize,
-              scaledOutputSize,
-            ),
-          );
-        }
-        if (format === 'gif') {
-          combinedBlob = new Blob(
-            [gifEncoder.encode(combinedFrames, combinedOutputWidth, combinedOutputHeight)],
-            { type: 'image/gif' },
-          );
-        } else if (format === 'webp') {
-          combinedBlob = new Blob(
-            [
-              await webpEncoder.encodeAsync(
-                combinedFrames,
-                combinedOutputWidth,
-                combinedOutputHeight,
-              ),
-            ],
-            { type: 'image/webp' },
-          );
-        }
+      const combinedOutputWidth = words.value.length * scaledOutputSize;
+      const combinedOutputHeight = scaledOutputSize;
+      const combinedFrames: ImageData[] = [];
+      for (let c = 0; c < 3; c++) {
+        combinedFrames.push(
+          combineCanvasData(
+            rawFrames.map((r) => r[c]!),
+            words.value.length * scaledOutputSize,
+            scaledOutputSize,
+            scaledOutputSize,
+          ),
+        );
+      }
+      if (opts.format === 'gif') {
+        const encoded = gifEncoder.encode(
+          combinedFrames,
+          combinedOutputWidth,
+          combinedOutputHeight,
+        );
+        combinedBlob = new Blob([encoded], { type: 'image/gif' });
+      } else if (opts.format === 'webp') {
+        const encoded = await webpEncoder.encodeAsync(
+          combinedFrames,
+          combinedOutputWidth,
+          combinedOutputHeight,
+        );
+        combinedBlob = new Blob([encoded], { type: 'image/webp' });
       }
 
-      // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
-      // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
-      // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
-      const jsZip = new JSZip();
-      wordBlobs.forEach((wb, i) => jsZip.file(`word-${i}.${format}`, wb));
-      if (combinedBlob) {
-        jsZip.file(`word-combined.${format}`, combinedBlob);
+      // PHASE 4: export as .zip if multiple files (SEPARATE) or as a single file (COMBINED)
+      if (opts.combinedOnly && combinedBlob) {
+        FileSaver.saveAs(combinedBlob!, `word-combined.${opts.format}`);
+      } else {
+        // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
+        // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
+        // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
+        const jsZip = new JSZip();
+        wordBlobs.forEach((wb, i) => jsZip.file(`word-${i}.${opts.format}`, wb));
+        if (combinedBlob) {
+          jsZip.file(`word-combined.${opts.format}`, combinedBlob);
+        }
+        const zipFile = await jsZip.generateAsync({ type: 'blob' });
+        FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
       }
-      const zipFile = await jsZip.generateAsync({ type: 'blob' });
-      FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
     } finally {
       isExporting.value = false;
     }
@@ -516,6 +529,37 @@ div#word-actions-panel {
   }
 }
 
+#export-settings-panel {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+
+  width: fit-content;
+  max-width: 14rem;
+
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: center;
+
+  #button-toggle-export-settings {
+    align-self: flex-end;
+    padding: 0.5rem;
+    background: var(--smtx-panel);
+    border-radius: 8px;
+    &.active {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+}
+#export-settings-panel.collapsed {
+  section {
+    display: none;
+  }
+}
+
 #word-properties-sidebar {
   width: 14rem;
   border-right: 4px dashed white;
@@ -524,55 +568,14 @@ div#word-actions-panel {
   flex-direction: column;
   align-items: center;
 
-  #word-properties-hint {
-    flex: 1;
-    width: 100%;
-    padding: 1rem;
-
-    color: var(--smtx-text-hint);
-    text-align: center;
-    line-height: 1.1;
-    font-weight: 600;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
   #button-toggle-sidebar {
     display: none;
-  }
-}
-
-div#global-actions-bar {
-  position: absolute;
-  inset: auto 0 1rem;
-  padding: 0.5rem;
-  display: flex;
-  pointer-events: none;
-
-  #global-actions-panel {
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin: 0 auto;
-    pointer-events: all;
-
-    border-radius: 8px;
+    padding: 0.5rem;
     background: var(--smtx-panel);
-    padding: 0.25rem;
-
-    button:first-of-type {
-      border-radius: unset;
-      border-top-left-radius: 4px;
-      border-bottom-left-radius: 4px;
-    }
-    button:last-of-type {
-      border-radius: unset;
-      border-top-right-radius: 4px;
-      border-bottom-right-radius: 4px;
+    border-radius: 8px;
+    &.active {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
     }
   }
 }
@@ -597,42 +600,21 @@ div#global-actions-bar {
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;
-    padding: 0.5rem;
-    overflow-y: auto;
+    overflow: hidden;
 
+    max-height: calc(100% - 1rem);
     align-items: flex-start;
-    gap: 1rem;
 
-    background: var(--smtx-panel);
-    border-radius: 8px;
     border: none;
 
-    & > * {
-      padding: 0;
-      border: none;
-    }
     #button-toggle-sidebar {
       display: block;
-      .sprite {
-        transform: rotate(90deg);
-      }
-    }
-    #word-properties-hint:nth-child(2) {
-      padding-top: 0;
     }
   }
   #word-properties-sidebar.collapsed {
-    width: fit-content;
-    max-width: 14rem;
-    #word-properties-hint {
+    & > * {
       display: none;
     }
-    section {
-      display: none;
-    }
-  }
-  div#global-actions-bar {
-    align-items: flex-start;
   }
 }
 </style>

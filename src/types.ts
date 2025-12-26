@@ -25,3 +25,8 @@ export type DynamicSpriteProps = {
 export type DynamicSpriteExposes = {
   extractFrames: (scale?: number) => ImageData[];
 };
+export type ExportSettingsOptions = {
+  scale: number;
+  format: 'gif' | 'webp';
+  combinedOnly: boolean;
+};

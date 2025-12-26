@@ -16,12 +16,22 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
     </div>
     <ul id="footer-links">
       <li>
-        <a class="image-link" href="https://eepyberry.me" target="_blank">
+        <a
+          class="image-link"
+          href="https://eepyberry.me"
+          target="_blank"
+          title="EepyBerry's website"
+        >
           <StaticSprite sprite="icon-eepyberry" width="3rem" />
         </a>
       </li>
       <li>
-        <a class="image-link" href="https://github.com/EepyBerry/site-make-text" target="_blank">
+        <a
+          class="image-link"
+          href="https://github.com/EepyBerry/site-make-text"
+          target="_blank"
+          title="GitHub project page"
+        >
           <StaticSprite sprite="icon-github" width="3rem" />
         </a>
       </li>

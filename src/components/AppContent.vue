@@ -17,7 +17,7 @@
         type="button"
         class="animated"
         :class="{ active: !!wordPropertiesToggle }"
-        @click="togglePropertiesPanel"
+        @click="togglePropertiesPanel()"
         aria-label="Toggle word properties panel"
         title="Toggle word properties panel"
       >
@@ -73,7 +73,7 @@
               :class="{ disabled: compactMode && wordPropertiesToggle }"
             />
           </button>
-          <button
+          <!-- <button
             type="button"
             id="button-add-word"
             class="animated"
@@ -82,7 +82,7 @@
             title="Add new word"
           >
             <StaticSprite width="4rem" sprite="icon-plus" />
-          </button>
+          </button> -->
         </div>
 
         <!-- floating element -->
@@ -244,6 +244,7 @@ onMounted(() => {
   sectionRef.value!.addEventListener('pointerdown', checkPointerTarget);
   EventBus.registerWindowEventListener('resize', checkCompactMode);
   EventBus.registerWindowEventListener('deviceorientation', checkCompactMode);
+  checkCompactMode()
 });
 onBeforeMount(() => {
   sectionRef.value?.removeEventListener('pointerdown', checkPointerTarget);
@@ -256,7 +257,7 @@ onBeforeMount(() => {
 
 function togglePropertiesPanel() {
   if (compactMode.value) {
-    wordPropertiesToggle.value = !wordPropertiesToggle.value;
+    wordPropertiesToggle.value  = !wordPropertiesToggle.value;
   }
   if (wordPropertiesToggle.value) {
     exportSettingsToggle.value = false;
@@ -269,7 +270,7 @@ function toggleExportSettingsPanel() {
   }
 }
 
-function addWord() {
+/* function addWord() {
   words.value.push({
     word: '',
     color: '#ffffff',
@@ -284,7 +285,7 @@ function addWord() {
     () => sectionRef.value!.scrollTo({ left: sectionRef.value!.clientWidth, behavior: 'smooth' }),
     50,
   );
-}
+} */
 
 function selectWord(idx: number) {
   selectedWord.value = idx;
@@ -424,14 +425,14 @@ async function exportWords(opts: ExportSettingsOptions) {
 
 <style lang="scss">
 main {
-  position: relative;
   flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+
   display: grid;
   grid-template-rows: 1fr;
   grid-template-columns: auto 1fr;
-  flex-direction: column;
-  overflow: hidden;
-  background: transparent;
 
   #export-loader {
     display: none;
@@ -460,11 +461,11 @@ main {
 }
 
 #section-words {
-  flex: 1;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
+
   #button-reset {
     position: absolute;
     top: 0.5rem;
@@ -486,18 +487,24 @@ main {
     flex: 1;
     width: 100%;
     height: 100%;
-    overflow-x: auto;
+    overflow: auto;
 
     display: flex;
     align-items: center;
   }
   #word-grid {
-    margin: 0 auto;
-    padding: 0 2rem;
+    margin: auto;
+    padding: 4rem;
+
     display: grid;
     grid-template-columns: repeat(v-bind(wordCount), min-content);
-    grid-template-rows: 1fr;
-    gap: 0 4px;
+    gap: -1px;
+
+    & > [id^='button-word'] {
+      padding: 4px;
+      border-right: 1px dashed var(--smtx-grid-border);
+      border-bottom: 1px dashed var(--smtx-grid-border);
+    }
   }
 
   .sprite.caret {
@@ -612,6 +619,7 @@ div#word-actions-panel {
     }
   }
   #word-properties-sidebar.collapsed {
+    width: fit-content;
     & > * {
       display: none;
     }

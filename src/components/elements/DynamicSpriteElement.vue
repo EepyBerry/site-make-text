@@ -381,5 +381,6 @@ function _drawCross(
 canvas {
   width: v-bind(width);
   height: v-bind(width);
+  pointer-events: none;
 }
 </style>

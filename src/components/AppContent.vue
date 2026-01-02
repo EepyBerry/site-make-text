@@ -24,7 +24,7 @@
         <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" sprite="icon-properties-opened" />
         <StaticSprite v-else width="2.5rem" sprite="icon-properties-closed" />
       </button>
-      <WordPropertiesPanel :show-hint="selectedWord < 0" v-model="words[selectedWord]" />
+      <WordPropertiesPanel :show-hint="!selectedWord" v-model="selectedWord" />
     </aside>
 
     <!-- main section -->
@@ -43,8 +43,17 @@
 
       <div ref="sectionRef" id="section-words-scrollzone">
         <!-- main content -->
-        <div id="word-grid">
-          <button
+         <WordGridElement
+          ref="wordGridRef"
+          id="word-grid"
+          v-model="words"
+          :width="wordGridDimensions.x"
+          :height="wordGridDimensions.y"
+          @select="handleGridSelect"
+          @delete="handleGridDelete"
+        />
+        <!-- <div id="word-grid">
+           <button
             v-for="(word, idx) of words"
             :key="idx"
             ref="wordElementRefs"
@@ -65,15 +74,8 @@
               width="5rem"
               :class="{ empty: word.word!.length === 0 }"
             />
-            <StaticSprite
-              v-if="selectedWord === idx"
-              class="caret"
-              width="5rem"
-              sprite="icon-caret"
-              :class="{ disabled: compactMode && wordPropertiesToggle }"
-            />
           </button>
-          <!-- <button
+          <button
             type="button"
             id="button-add-word"
             class="animated"
@@ -82,49 +84,10 @@
             title="Add new word"
           >
             <StaticSprite width="4rem" sprite="icon-plus" />
-          </button> -->
-        </div>
+          </button>
+        </div> -->
 
-        <!-- floating element -->
-        <div
-          ref="wordActionsElementRef"
-          id="word-actions-panel"
-          :class="{ disabled: compactMode && wordPropertiesToggle }"
-          :style="floatingStyles"
-        >
-          <div class="actions-container">
-            <button
-              type="button"
-              class="animated"
-              :disabled="selectedWord === 0 || (compactMode && wordPropertiesToggle)"
-              @click="moveSelectedWord('left')"
-              aria-label="Move selected word left (if possible)"
-              title="Move right"
-            >
-              <StaticSprite width="4rem" sprite="icon-left" />
-            </button>
-            <button
-              type="button"
-              class="animated"
-              :disabled="!canDeleteSelectedWord.v || (compactMode && wordPropertiesToggle)"
-              @click="deleteWord(selectedWord)"
-              aria-label="Delete selected word"
-              title="Delete selected word"
-            >
-              <StaticSprite width="4rem" sprite="icon-trash" />
-            </button>
-            <button
-              type="button"
-              class="animated"
-              :disabled="selectedWord === wordCount - 2 || (compactMode && wordPropertiesToggle)"
-              @click="moveSelectedWord('right')"
-              aria-label="Move selected word right (if possible)"
-              title="Move right"
-            >
-              <StaticSprite width="4rem" sprite="icon-right" />
-            </button>
-          </div>
-        </div>
+
       </div>
 
       <!-- export panel -->
@@ -149,7 +112,6 @@
 
 <script setup lang="ts">
 import {
-  computed,
   onBeforeMount,
   onMounted,
   type Ref,
@@ -159,12 +121,12 @@ import {
 } from 'vue';
 import {
   WordType,
-  type DynamicSpriteExposes,
   type DynamicSpriteProps,
   type ExportSettingsOptions,
+  type Vector2,
+  type WordGridExposes,
 } from '@/types';
 import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
-import { autoUpdate, limitShift, offset, shift, useFloating } from '@floating-ui/vue';
 import { EventBus } from '@/core/event-bus';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
@@ -174,45 +136,41 @@ import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
 import { combineCanvasData } from '@/core/helpers/canvas.helper';
 import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
 import { clamp } from '@/core/utils/math.utils';
+import WordGridElement from './elements/WordGridElement.vue';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
-const wordElementRefs: TemplateRef<HTMLElement[]> = useTemplateRef('wordElementRefs');
-const wordSpriteRefs: TemplateRef<DynamicSpriteExposes[]> = useTemplateRef('wordSpriteRefs');
-const selectedWordElementRef: Ref<HTMLElement | null> = ref(null);
+const wordGridRef: TemplateRef<WordGridExposes> = useTemplateRef('wordGridRef');
 const isExporting: Ref<boolean> = ref(false);
-
-// floating-ui refs
-const wordActionsElementRef: TemplateRef<HTMLElement> = useTemplateRef('wordActionsElementRef');
-const { floatingStyles, update } = useFloating(selectedWordElementRef, wordActionsElementRef, {
-  placement: 'top',
-  middleware: [
-    offset(26),
-    shift({
-      limiter: limitShift({
-        offset: ({ rects }) => rects.reference.width,
-      }),
-    }),
-  ],
-  whileElementsMounted: autoUpdate,
-});
 
 // compact mode & toggle refs
 const compactMode: Ref<boolean> = ref(false);
 const wordPropertiesToggle: Ref<boolean> = ref(false);
 const exportSettingsToggle: Ref<boolean> = ref(false);
 
-// word data & refs
+// word refs (3x3 grid by default)
 const words: Ref<DynamicSpriteProps[]> = ref([
   {
+    x: 0,
+    y: 1,
     word: 'plus',
     color: '#0ea4ad',
     moreLettersOnTop: true,
     type: WordType.NOUN,
     crossedOut: false,
   },
-  { word: 'is', color: '#ffffff', moreLettersOnTop: true, type: WordType.NOUN, crossedOut: false },
   {
+    x: 1,
+    y: 1,
+    word: 'is',
+    color: '#ffffff',
+    moreLettersOnTop: true,
+    type: WordType.NOUN,
+    crossedOut: false
+  },
+  {
+    x: 2,
+    y: 1,
     word: 'add',
     color: '#0ea4ad',
     moreLettersOnTop: true,
@@ -220,12 +178,8 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     crossedOut: false,
   },
 ]);
-const wordCount = computed(() => words.value.length + 1);
-const selectedWord: Ref<number> = ref(-1);
-const canDeleteSelectedWord: Ref<{ timeout: number | undefined; v: boolean }> = ref({
-  timeout: undefined,
-  v: true,
-});
+const wordGridDimensions: Ref<Vector2> = ref({x: 3, y: 3})
+const selectedWord: Ref<DynamicSpriteProps|null> = ref(null);
 
 // ----------------------------------------------------------------------------
 // lifecycle
@@ -233,11 +187,10 @@ const canDeleteSelectedWord: Ref<{ timeout: number | undefined; v: boolean }> = 
 const checkCompactMode = () => (compactMode.value = window.innerWidth <= 1023);
 const checkPointerTarget = (evt: Event) => {
   if ((evt.target as HTMLElement).id === 'section-words-scrollzone') {
-    selectedWord.value = -1;
-    selectedWordElementRef.value = null;
-    wordActionsElementRef.value!.style.display = 'none';
+    selectedWord.value = null;
     wordPropertiesToggle.value = false;
     exportSettingsToggle.value = false;
+    wordGridRef.value?.deselect()
   }
 };
 onMounted(() => {
@@ -270,65 +223,24 @@ function toggleExportSettingsPanel() {
   }
 }
 
-/* function addWord() {
-  words.value.push({
-    word: '',
-    color: '#ffffff',
-    type: WordType.NOUN,
-    moreLettersOnTop: true,
-    crossedOut: false,
-  });
-  if (selectedWord.value < 0) {
-    setTimeout(() => selectWord(words.value.length - 1), 0);
-  }
-  setTimeout(
-    () => sectionRef.value!.scrollTo({ left: sectionRef.value!.clientWidth, behavior: 'smooth' }),
-    50,
-  );
-} */
+// ----------------------------------------------------------------------------
+// word grid functions
 
-function selectWord(idx: number) {
-  selectedWord.value = idx;
-  selectedWordElementRef.value = wordElementRefs.value!.find(
-    (r) => r.id === `button-word-${idx.toString()}`,
-  )!;
-  wordActionsElementRef.value!.style.display = 'block';
-  wordActionsElementRef.value!.focus();
-  update();
+function handleGridSelect(word: DynamicSpriteProps) {
+  selectedWord.value = word;
+  wordPropertiesToggle.value = false;
+  exportSettingsToggle.value = false;
 }
 
-function moveSelectedWord(direction: 'left' | 'right') {
-  if (direction === 'left' && selectedWord.value === 0) return;
-  if (direction === 'right' && selectedWord.value === words.value!.length - 1) return;
-  clearTimeout(canDeleteSelectedWord.value.timeout);
-  canDeleteSelectedWord.value.v = false;
-
-  const element = words.value[selectedWord.value]!;
-  const moveIndex = direction === 'left' ? selectedWord.value - 1 : selectedWord.value + 1;
-  words.value!.splice(selectedWord.value, 1);
-  words.value!.splice(moveIndex, 0, element);
-  selectedWord.value = moveIndex;
-  selectedWordElementRef.value = wordElementRefs.value!.find(
-    (r) => r.id === `button-word-${moveIndex.toString()}`,
-  )!;
-  wordActionsElementRef.value!.focus();
-  update();
-  canDeleteSelectedWord.value.timeout = window.setTimeout(
-    () => (canDeleteSelectedWord.value.v = true),
-    500,
-  );
-}
-
-function deleteWord(idx: number) {
-  words.value.splice(idx, 1);
-  selectedWord.value = -1;
-  wordActionsElementRef.value!.style.display = 'none';
+function handleGridDelete() {
+  selectedWord.value = null;
+  wordPropertiesToggle.value = false;
+  exportSettingsToggle.value = false;
 }
 
 function resetWords() {
   words.value.splice(0);
-  selectedWord.value = -1;
-  wordActionsElementRef.value!.style.display = 'none';
+  selectedWord.value = null;
 }
 
 async function exportWords(opts: ExportSettingsOptions) {
@@ -474,14 +386,6 @@ main {
     padding: 0.5rem;
     border-radius: 8px;
   }
-  #button-add-word {
-    background: var(--smtx-panel);
-    padding: 0.25rem;
-    margin: 0 1rem;
-    height: fit-content;
-    border-radius: 8px;
-    align-self: center;
-  }
 
   #section-words-scrollzone {
     flex: 1;
@@ -492,20 +396,6 @@ main {
     display: flex;
     align-items: center;
   }
-  #word-grid {
-    margin: auto;
-    padding: 4rem;
-
-    display: grid;
-    grid-template-columns: repeat(v-bind(wordCount), min-content);
-    gap: -1px;
-
-    & > [id^='button-word'] {
-      padding: 4px;
-      border-right: 1px dashed var(--smtx-grid-border);
-      border-bottom: 1px dashed var(--smtx-grid-border);
-    }
-  }
 
   .sprite.caret {
     transform: none;
@@ -513,26 +403,6 @@ main {
     cursor: default;
     position: absolute;
     top: -100%;
-  }
-}
-div#word-actions-panel {
-  display: none;
-  padding: 0.25rem;
-  border-radius: 8px;
-  background: var(--smtx-panel);
-
-  .actions-container {
-    display: flex;
-    align-items: center;
-    button:disabled {
-      filter: brightness(0.25);
-    }
-    button.animated:hover > * {
-      transform: scale(1.1);
-    }
-    button.animated:active > * {
-      transform: scale(0.9);
-    }
   }
 }
 

@@ -3,6 +3,10 @@ export interface Sprite {
   data: ImageData;
 }
 
+export interface Vector2 {
+  x?: number;
+  y?: number;
+}
 export interface SpritesheetRegion {
   x: number;
   y: number;
@@ -14,7 +18,24 @@ export enum WordType {
   NOUN = 'noun',
   PROPERTY = 'property',
 }
+
+// ----------------------------------------------------------------------------
+// WordGridElement
+
+export type WordGridSelection = {
+  el?: HTMLElement
+  data?: DynamicSpriteProps
+}
+export type WordGridExposes = {
+  deselect: () => void;
+}
+
+// ----------------------------------------------------------------------------
+// DynamicSpriteElement
+
 export type DynamicSpriteProps = {
+  x?: number;
+  y?: number;
   width?: string;
   word?: string;
   color?: string;
@@ -25,6 +46,10 @@ export type DynamicSpriteProps = {
 export type DynamicSpriteExposes = {
   extractFrames: (scale?: number) => ImageData[];
 };
+
+// ----------------------------------------------------------------------------
+// ExportSettingsPanel
+
 export type ExportSettingsOptions = {
   scale: number;
   format: 'gif' | 'webp';

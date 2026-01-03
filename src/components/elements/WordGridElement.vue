@@ -195,12 +195,14 @@ function deselect(): void {
 #word-grid {
   margin: auto;
   padding: 4rem;
+  pointer-events: none;
 }
 #inner-grid {
   --width: v-bind(width);
   --height: v-bind(height);
   border-top: 1px dashed var(--smtx-grid-border);
   border-left: 1px dashed var(--smtx-grid-border);
+  pointer-events: all;
 
   display: grid;
   grid-template-columns: repeat(var(--width), 5.5rem);

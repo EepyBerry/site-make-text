@@ -22,10 +22,6 @@ export enum WordType {
 // ----------------------------------------------------------------------------
 // WordGridElement
 
-export type WordGridSelection = {
-  el?: HTMLElement
-  data?: DynamicSpriteProps
-}
 export type WordGridExposes = {
   deselect: () => void;
 }

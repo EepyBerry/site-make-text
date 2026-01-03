@@ -29,18 +29,6 @@
 
     <!-- main section -->
     <section id="section-words">
-      <!-- reset button -->
-      <button
-        id="button-reset"
-        type="button"
-        class="animated"
-        @click="resetWords"
-        aria-label="Remove all words (reset)"
-        title="Remove all words (reset)"
-      >
-        <StaticSprite width="2.5rem" sprite="icon-reset" />
-      </button>
-
       <div ref="sectionRef" id="section-words-scrollzone">
         <!-- main content -->
          <WordGridElement
@@ -52,43 +40,36 @@
           @select="handleGridSelect"
           @delete="handleGridDelete"
         />
-        <!-- <div id="word-grid">
-           <button
-            v-for="(word, idx) of words"
-            :key="idx"
-            ref="wordElementRefs"
-            :id="'button-word-' + idx"
-            type="button"
-            class="animated"
-            @click="selectWord(idx)"
-            :aria-label="'word: ' + word.word"
-            title="Edit word"
-          >
-            <DynamicSprite
-              ref="wordSpriteRefs"
-              :word="word.word"
-              :color="word.color"
-              :type="word.type"
-              :more-letters-on-top="word.moreLettersOnTop"
-              :crossed-out="word.crossedOut"
-              width="5rem"
-              :class="{ empty: word.word!.length === 0 }"
-            />
-          </button>
-          <button
-            type="button"
-            id="button-add-word"
-            class="animated"
-            @click="addWord()"
-            aria-label="Add new word"
-            title="Add new word"
-          >
-            <StaticSprite width="4rem" sprite="icon-plus" />
-          </button>
-        </div> -->
-
-
       </div>
+
+      <!-- grid settings panel -->
+      <div id="grid-settings-panel" :class="{ collapsed: !gridSettingsToggle }">
+        <button
+          id="button-toggle-grid-settings"
+          type="button"
+          class="animated"
+          :class="{ active: !!gridSettingsToggle }"
+          @click="toggleGridSettingsPanel"
+          aria-label="Toggle grid settings panel"
+          title="Toggle grid settings panel"
+        >
+          <StaticSprite v-if="gridSettingsToggle" width="2.5rem" sprite="icon-grid-opened" />
+          <StaticSprite v-else width="2.5rem" sprite="icon-grid-closed" />
+        </button>
+        <GridSettingsPanel @change="updateGridSize" />
+      </div>
+
+      <!-- reset button -->
+      <button
+        id="button-reset"
+        type="button"
+        class="animated"
+        @click="resetWords"
+        aria-label="Remove all words (reset)"
+        title="Remove all words (reset)"
+      >
+        <StaticSprite width="2.5rem" sprite="icon-reset" />
+      </button>
 
       <!-- export panel -->
       <div id="export-settings-panel" :class="{ collapsed: !exportSettingsToggle }">
@@ -137,6 +118,7 @@ import { combineCanvasData } from '@/core/helpers/canvas.helper';
 import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
 import { clamp } from '@/core/utils/math.utils';
 import WordGridElement from './elements/WordGridElement.vue';
+import GridSettingsPanel from './panels/GridSettingsPanel.vue';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
@@ -146,6 +128,7 @@ const isExporting: Ref<boolean> = ref(false);
 // compact mode & toggle refs
 const compactMode: Ref<boolean> = ref(false);
 const wordPropertiesToggle: Ref<boolean> = ref(false);
+const gridSettingsToggle: Ref<boolean> = ref(false);
 const exportSettingsToggle: Ref<boolean> = ref(false);
 
 // word refs (3x3 grid by default)
@@ -189,8 +172,9 @@ const checkPointerTarget = (evt: Event) => {
   if ((evt.target as HTMLElement).id === 'section-words-scrollzone') {
     selectedWord.value = null;
     wordPropertiesToggle.value = false;
+    gridSettingsToggle.value = false;
     exportSettingsToggle.value = false;
-    wordGridRef.value?.deselect()
+    wordGridRef.value?.deselect();
   }
 };
 onMounted(() => {
@@ -212,19 +196,27 @@ function togglePropertiesPanel() {
   if (compactMode.value) {
     wordPropertiesToggle.value  = !wordPropertiesToggle.value;
   }
-  if (wordPropertiesToggle.value) {
-    exportSettingsToggle.value = false;
-  }
+  gridSettingsToggle.value = false;
+  exportSettingsToggle.value = false;
 }
 function toggleExportSettingsPanel() {
   exportSettingsToggle.value = !exportSettingsToggle.value;
-  if (exportSettingsToggle.value) {
-    wordPropertiesToggle.value = false;
-  }
+  wordPropertiesToggle.value = false;
+  gridSettingsToggle.value = false;
+}
+function toggleGridSettingsPanel() {
+  gridSettingsToggle.value = !gridSettingsToggle.value;
+  wordPropertiesToggle.value = false;
+  exportSettingsToggle.value = false;
 }
 
 // ----------------------------------------------------------------------------
 // word grid functions
+
+function updateGridSize(size: Vector2) {
+  wordGridDimensions.value.x = size.x
+  wordGridDimensions.value.y = size.y
+}
 
 function handleGridSelect(word: DynamicSpriteProps) {
   selectedWord.value = word;
@@ -380,8 +372,8 @@ main {
 
   #button-reset {
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
+    top: 1rem;
+    right: 1rem;
     background: var(--smtx-panel);
     padding: 0.5rem;
     border-radius: 8px;
@@ -406,10 +398,36 @@ main {
   }
 }
 
+#grid-settings-panel {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+
+  width: fit-content;
+  max-width: 14rem;
+
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  #button-toggle-grid-settings {
+    align-self: flex-start;
+    padding: 0.5rem;
+    background: var(--smtx-panel);
+    border-radius: 8px;
+    &.active {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+}
+
 #export-settings-panel {
   position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
+  bottom: 1rem;
+  right: 1rem;
 
   width: fit-content;
   max-width: 14rem;
@@ -431,7 +449,7 @@ main {
     }
   }
 }
-#export-settings-panel.collapsed {
+#grid-settings-panel.collapsed, #export-settings-panel.collapsed {
   section {
     display: none;
   }
@@ -457,26 +475,15 @@ main {
   }
 }
 
-.disabled {
-  pointer-events: none;
-  filter: brightness(0.625);
-}
-
 @media screen and (max-width: 1023px) {
   main {
     grid-template-columns: 1fr;
   }
-  #section-words {
-    #button-reset {
-      left: unset;
-      right: 0.5rem;
-    }
-  }
   #word-properties-sidebar {
     z-index: 10;
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
+    top: 1rem;
+    left: 1rem;
     overflow: hidden;
 
     max-height: calc(100% - 1rem);
@@ -493,6 +500,11 @@ main {
     & > * {
       display: none;
     }
+  }
+  #grid-settings-panel {
+    z-index: 10;
+    top: 1rem;
+    left: 5.5rem;
   }
 }
 </style>

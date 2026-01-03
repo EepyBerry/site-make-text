@@ -1,6 +1,6 @@
 :root {
   --smtx-text: #fff;
-  --smtx-text-hint: #515151;
+  --smtx-text-hint: #555;
   --smtx-text-disabled: #c5c5c5;
 
   --smtx-background: #0a090c;
@@ -9,6 +9,9 @@
   --smtx-accent: #912c67;
 
   --smtx-radio: #3a1c27;
+  --smtx-slider-track: var(--smtx-primary);
+  --smtx-slider-thumb: var(--smtx-accent);
+  --smtx-slider-thumb-focus: #f264b7;
 
   --smtx-button: var(--smtx-accent);
   --smtx-button-hover: #682a4e;

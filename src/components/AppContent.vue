@@ -109,16 +109,10 @@ import {
 } from '@/types';
 import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
 import { EventBus } from '@/core/event-bus';
-import JSZip from 'jszip';
-import FileSaver from 'file-saver';
-import GIFImageDataEncoder from '@/core/encoders/gif.encoder';
-import WebPImageDataEncoder from '@/core/encoders/webp.encoder';
-import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
-import { combineCanvasData } from '@/core/helpers/canvas.helper';
 import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
-import { clamp } from '@/core/utils/math.utils';
 import WordGridElement from './elements/WordGridElement.vue';
 import GridSettingsPanel from './panels/GridSettingsPanel.vue';
+import { exportWordData } from '@/core/helpers/export.helper';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
@@ -237,92 +231,9 @@ function resetWords() {
 
 async function exportWords(opts: ExportSettingsOptions) {
   isExporting.value = true;
-  setTimeout(async () => {
-    try {
-      const outputScale = clamp(opts.scale, 1, 10);
-      const scaledOutputSize = outputScale * SPRITESHEET_CELL_SIZE;
-      const wordBlobs: Blob[] = [];
-
-      // init encoders
-      const gifEncoder = new GIFImageDataEncoder();
-      const webpEncoder = new WebPImageDataEncoder();
-
-      // PHASE 1: extract frame data
-      const rawFrames: ImageData[][] = [];
-      for (let i = 0; i < wordSpriteRefs.value!.length; i++) {
-        // get frame data
-        const wordSprite = wordSpriteRefs.value![i]!;
-        const frames: ImageData[] = wordSprite.extractFrames(outputScale);
-        if (!frames || frames.length === 0) continue;
-        rawFrames.push(frames);
-      }
-
-      // PHASE 2 (optional): encode words to target format (with additional combined version)
-      if (!opts.combinedOnly) {
-        for (let r = 0; r < rawFrames.length; r++) {
-          if (opts.format === 'gif') {
-            const encoded = gifEncoder.encode(rawFrames[r]!, scaledOutputSize, scaledOutputSize);
-            wordBlobs.push(new Blob([encoded], { type: 'image/gif' }));
-          } else if (opts.format === 'webp') {
-            const encoded = await webpEncoder.encodeAsync(
-              rawFrames[r]!,
-              scaledOutputSize,
-              scaledOutputSize,
-            );
-            wordBlobs.push(new Blob([encoded], { type: 'image/webp' }));
-          }
-        }
-      }
-
-      // PHASE 3: combine words into one set of frames and encode to target format
-      let combinedBlob: Blob | undefined;
-      const combinedOutputWidth = words.value.length * scaledOutputSize;
-      const combinedOutputHeight = scaledOutputSize;
-      const combinedFrames: ImageData[] = [];
-      for (let c = 0; c < 3; c++) {
-        combinedFrames.push(
-          combineCanvasData(
-            rawFrames.map((r) => r[c]!),
-            words.value.length * scaledOutputSize,
-            scaledOutputSize,
-            scaledOutputSize,
-          ),
-        );
-      }
-      if (opts.format === 'gif') {
-        const encoded = gifEncoder.encode(
-          combinedFrames,
-          combinedOutputWidth,
-          combinedOutputHeight,
-        );
-        combinedBlob = new Blob([encoded], { type: 'image/gif' });
-      } else if (opts.format === 'webp') {
-        const encoded = await webpEncoder.encodeAsync(
-          combinedFrames,
-          combinedOutputWidth,
-          combinedOutputHeight,
-        );
-        combinedBlob = new Blob([encoded], { type: 'image/webp' });
-      }
-
-      // PHASE 4: export as .zip if multiple files (SEPARATE) or as a single file (COMBINED)
-      if (opts.combinedOnly && combinedBlob) {
-        FileSaver.saveAs(combinedBlob!, `word-combined.${opts.format}`);
-      } else {
-        // export as .zip; yes this format is trash, but it's still a bigger default than much better stuff like .tar.gz...
-        // yes i'm kinda sad about that now that i (sort-of) know how terrible it is :c
-        // https://web.archive.org/web/20250118102842/https://games.greggman.com/game/zip-rant/
-        const jsZip = new JSZip();
-        wordBlobs.forEach((wb, i) => jsZip.file(`word-${i}.${opts.format}`, wb));
-        if (combinedBlob) {
-          jsZip.file(`word-combined.${opts.format}`, combinedBlob);
-        }
-        const zipFile = await jsZip.generateAsync({ type: 'blob' });
-        FileSaver.saveAs(zipFile, 'sitemaketext-words.zip');
-      }
-    } finally {
-      isExporting.value = false;
-    }
+  setTimeout(() => {
+    const gridData = wordGridRef.value!.extractGridFrames(opts.scale);
+    exportWordData(wordGridDimensions.value!, gridData, opts).finally(() => isExporting.value = false);
   }, 500);
 }
 </script>
@@ -397,61 +308,48 @@ main {
     top: -100%;
   }
 }
-
-#grid-settings-panel {
+#grid-settings-panel, #export-settings-panel {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-
   width: fit-content;
   max-width: 14rem;
-
   border-radius: 8px;
 
   display: flex;
-  flex-direction: column;
   justify-content: center;
 
-  #button-toggle-grid-settings {
-    align-self: flex-start;
+  #button-toggle-export-settings, #button-toggle-grid-settings {
     padding: 0.5rem;
     background: var(--smtx-panel);
     border-radius: 8px;
+  }
+  &.collapsed section {
+    display: none;
+  }
+}
+#grid-settings-panel {
+  top: 1rem;
+  left: 1rem;
+  flex-direction: column;
+
+  #button-toggle-grid-settings {
+    align-self: flex-start;
     &.active {
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
     }
   }
 }
-
 #export-settings-panel {
-  position: absolute;
   bottom: 1rem;
   right: 1rem;
-
-  width: fit-content;
-  max-width: 14rem;
-
-  border-radius: 8px;
-
-  display: flex;
   flex-direction: column-reverse;
-  justify-content: center;
 
   #button-toggle-export-settings {
     align-self: flex-end;
-    padding: 0.5rem;
-    background: var(--smtx-panel);
-    border-radius: 8px;
     &.active {
       border-top-left-radius: 0;
       border-top-right-radius: 0;
     }
-  }
-}
-#grid-settings-panel.collapsed, #export-settings-panel.collapsed {
-  section {
-    display: none;
   }
 }
 

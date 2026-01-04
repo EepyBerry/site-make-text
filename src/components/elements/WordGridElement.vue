@@ -5,16 +5,17 @@
         <template v-for="_,x of width" :key="x">
           <button
             v-if="!!getGridElement($model, x, y)"
-            ref="wordElementRefs"
             :id="`button-word-${x}-${y}`"
             type="button"
             class="animated"
-            @click="selectWord($event.target!, x, y)"
+            @click="_selectWord($event.target!, x, y)"
             :aria-label="'word: ' + getGridElement($model, x, y)?.word"
             title="Edit word"
           >
             <DynamicSprite
-              ref="wordSpriteRefs"
+              ref="dynamicSpriteHtmlRefs"
+              :x="x"
+              :y="y"
               :word="getGridElement($model, x, y)?.word"
               :color="getGridElement($model, x, y)?.color"
               :type="getGridElement($model, x, y)?.type"
@@ -28,7 +29,7 @@
             <button
               type="button"
               class="action-add animated"
-              @click="addWord(x, y)"
+              @click="_addWord(x, y)"
               aria-label="Add new word"
               title="Add new word"
             >
@@ -53,7 +54,7 @@
           class="animated"
           aria-label="Delete word"
           title="Delete word"
-          @click="deleteSelectedWord"
+          @click="_deleteSelectedWord"
         >
           <StaticSprite width="3rem" sprite="icon-trash" />
         </button>
@@ -64,7 +65,7 @@
           class="animated"
           aria-label="Move word left (if possible)"
           title="Move word left (if possible)"
-          @click="moveSelectedWord(-1, 0)"
+          @click="_moveSelectedWord(-1, 0)"
         >
           <StaticSprite width="3rem" sprite="icon-left" />
         </button>
@@ -75,7 +76,7 @@
           class="animated"
           aria-label="Move word up (if possible)"
           title="Move word up (if possible)"
-          @click="moveSelectedWord(0, -1)"
+          @click="_moveSelectedWord(0, -1)"
         >
           <StaticSprite width="3rem" sprite="icon-up" />
         </button>
@@ -86,7 +87,7 @@
           class="animated"
           aria-label="Move word right (if possible)"
           title="Move word right (if possible)"
-          @click="moveSelectedWord(1, 0)"
+          @click="_moveSelectedWord(1, 0)"
         >
           <StaticSprite width="3rem" sprite="icon-right" />
         </button>
@@ -97,7 +98,7 @@
           class="animated"
           aria-label="Move word down (if possible)"
           title="Move word down (if possible)"
-          @click="moveSelectedWord(0, 1)"
+          @click="_moveSelectedWord(0, 1)"
         >
           <StaticSprite width="3rem" sprite="icon-down" />
         </button>
@@ -108,7 +109,7 @@
 
 <script setup lang="ts">
 import { getGridElement, getGridElementIndex, isBetween, isZeroOrPositive } from '@/core/utils/math.utils';
-import { WordType, type DynamicSpriteProps, type Vector2 } from '@/types';
+import { WordType, type DynamicSpriteExposes, type DynamicSpriteFrameData, type DynamicSpriteProps, type Vector2 } from '@/types';
 import { useFloating, offset, autoUpdate } from '@floating-ui/vue';
 import { ref, useTemplateRef, type Ref, type TemplateRef } from 'vue';
 
@@ -122,11 +123,12 @@ withDefaults(defineProps<{
 })
 const $model = defineModel<DynamicSpriteProps[]>()
 const $emit = defineEmits(['select', 'move', 'delete', 'delete-row', 'delete-column'])
-defineExpose({ deselect })
+defineExpose({ deselect, extractGridFrames })
 
 // component refs
 const selectedWordCoords: Ref<Vector2> = ref({ x: -1, y: -1 })
 const selectedWordHtml: Ref<HTMLElement|null> = ref(null)
+const dynamicSpriteHtmlRefs: Ref<DynamicSpriteExposes[]|null> = useTemplateRef('dynamicSpriteHtmlRefs')
 
 // floating-ui refs
 const floatingActionsHtmlRef: TemplateRef<HTMLElement> = useTemplateRef('gridCellActionsElementRef');
@@ -139,9 +141,22 @@ const { floatingStyles, update } = useFloating(selectedWordHtml, floatingActions
 });
 
 // ----------------------------------------------------------------------------
-// grid functions
+// exposed functions
 
-function addWord(x: number, y: number): void {
+function deselect(): void {
+  selectedWordCoords.value = { x: -1, y: -1 };
+  selectedWordHtml.value = null;
+  floatingActionsHtmlRef.value!.blur();
+}
+
+function extractGridFrames(scale?: number): DynamicSpriteFrameData[] {
+  return dynamicSpriteHtmlRefs.value?.map(ds => ds.extractFrames(scale)) ?? []
+}
+
+// ----------------------------------------------------------------------------
+// internal functions
+
+function _addWord(x: number, y: number): void {
   $model.value!.push({
     x,
     y,
@@ -151,10 +166,10 @@ function addWord(x: number, y: number): void {
     moreLettersOnTop: true,
     crossedOut: false,
   });
-  setTimeout(() => selectWord(document.getElementById(`button-word-${x}-${y}`)!, x, y))
+  setTimeout(() => _selectWord(document.getElementById(`button-word-${x}-${y}`)!, x, y))
 }
 
-function selectWord(htmlTarget: EventTarget|HTMLElement, x: number, y: number): void {
+function _selectWord(htmlTarget: EventTarget|HTMLElement, x: number, y: number): void {
   selectedWordCoords.value = { x, y };
   selectedWordHtml.value = htmlTarget as HTMLElement;
   floatingActionsHtmlRef.value!.focus();
@@ -162,7 +177,7 @@ function selectWord(htmlTarget: EventTarget|HTMLElement, x: number, y: number): 
   $emit('select', getGridElement($model.value, x, y));
 }
 
-function moveSelectedWord(dx: number, dy: number) {
+function _moveSelectedWord(dx: number, dy: number) {
   const wordData = getGridElement($model.value, selectedWordCoords.value.x!, selectedWordCoords.value.y!)!
   const maybeWordOnTargetPos = getGridElement($model.value, selectedWordCoords.value.x! + dx, selectedWordCoords.value.y! + dy)
   if (maybeWordOnTargetPos) {
@@ -172,10 +187,10 @@ function moveSelectedWord(dx: number, dy: number) {
 
   wordData.x = selectedWordCoords.value.x! + dx
   wordData.y = selectedWordCoords.value.y! + dy
-  setTimeout(() => selectWord(document.getElementById(`button-word-${wordData.x}-${wordData.y}`)!, wordData.x!, wordData.y!))
+  setTimeout(() => _selectWord(document.getElementById(`button-word-${wordData.x}-${wordData.y}`)!, wordData.x!, wordData.y!))
 }
 
-function deleteSelectedWord() {
+function _deleteSelectedWord() {
   const elemIdx = getGridElementIndex($model.value, selectedWordCoords.value.x!, selectedWordCoords.value.y!);
   if (elemIdx < 0) return;
 
@@ -184,11 +199,6 @@ function deleteSelectedWord() {
   $emit('delete');
 }
 
-function deselect(): void {
-  selectedWordCoords.value = { x: -1, y: -1 };
-  selectedWordHtml.value = null;
-  floatingActionsHtmlRef.value!.blur();
-}
 </script>
 
 <style lang="scss">

@@ -30,8 +30,14 @@ export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffe
       await amfImg.setImageData(amfPixels, {
         width,
         height,
-        lossless: 9,
+        lossless: 5,
+        method: 6,
         exact: true,
+        advanced: {
+          segments: 1,
+          alphaFiltering: 0,
+          alphaQuality: 0,
+        }
       });
 
       // create new AMF frame from image

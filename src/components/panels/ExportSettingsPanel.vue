@@ -1,15 +1,13 @@
 <template>
   <section id="section-export-settings">
     <StaticSprite width="2.5rem" sprite="icon-export-scale" />
-    <input
+    <SliderElement
       id="setting-scale"
       v-model="exportSettings.scale"
-      type="number"
       min="1"
-      max="10"
-      style="text-transform: uppercase"
-      aria-label="Exported image scale (1 = 24px*24px)"
-      title="Exported image scale (1 = 24px*24px)"
+      max="5"
+      aria-label="Export scale (1-4, increments of 24px)"
+      title="Export scale (1-4, increments of 24px)"
     />
 
     <StaticSprite width="2.5rem" sprite="icon-export-type" />
@@ -79,6 +77,7 @@ import RadioElement from '@/components/elements/RadioElement.vue';
 import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
 import type { ExportSettingsOptions } from '@/types';
 import { ref, type Ref } from 'vue';
+import SliderElement from '../elements/SliderElement.vue';
 
 const exportSettings: Ref<ExportSettingsOptions> = ref({
   scale: 3,

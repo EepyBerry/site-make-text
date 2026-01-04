@@ -1,16 +1,15 @@
+<script setup lang="ts">
+import StaticSprite from './elements/StaticSpriteElement.vue';
+
+</script>
+
 <template>
   <header id="smtx-header">
-    <DynamicSprite
-      width="4rem"
-      word="site"
-      color="#8e44c7"
-      type="noun"
-      :more-letters-on-top="false"
-    />
+    <StaticSprite width="4rem" sprite="icon-logo-site" />
     <hr />
-    <DynamicSprite width="4rem" word="make" :more-letters-on-top="false" />
+    <StaticSprite width="4rem" sprite="icon-logo-make" />
     <hr />
-    <DynamicSprite width="4rem" word="text" color="#e336a3" :more-letters-on-top="false" />
+    <StaticSprite width="4rem" sprite="icon-logo-text" />
   </header>
 </template>
 

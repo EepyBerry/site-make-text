@@ -26,7 +26,7 @@
           internal-aria-label="Set word as a noun"
           internal-title="Set word as a noun"
         >
-          <DynamicSprite word="noun" type="noun" width="2.125rem" />
+          <StaticSprite width="2.125rem" sprite="icon-noun" />
         </RadioOptionElement>
         <RadioOptionElement
           v-model="spriteProps!.type"
@@ -36,7 +36,7 @@
           internal-aria-label="Set word as a property (adds background)"
           internal-title="Set word as a property"
         >
-          <DynamicSprite word="prop" type="property" width="2.125rem" />
+          <StaticSprite width="2.125rem" sprite="icon-prop" />
         </RadioOptionElement>
       </RadioElement>
 
@@ -50,7 +50,7 @@
           internal-aria-label="Show less letters on top of a word"
           internal-title="Show less letters on top of a word"
         >
-          <DynamicSprite word="off" type="noun" width="2.25rem" />
+          <StaticSprite width="2.25rem" sprite="icon-off" />
         </RadioOptionElement>
         <RadioOptionElement
           v-model="spriteProps!.moreLettersOnTop"
@@ -60,7 +60,7 @@
           internal-aria-label="Show more letters on top of a word"
           internal-title="Show more letters on top of a word"
         >
-          <DynamicSprite word="on" type="noun" width="2.25rem" />
+          <StaticSprite width="2.25rem" sprite="icon-on" />
         </RadioOptionElement>
       </RadioElement>
 
@@ -74,7 +74,7 @@
           internal-aria-label="Do not cross out word"
           internal-title="Do not cross out word"
         >
-          <DynamicSprite word="off" type="noun" width="2.25rem" />
+          <StaticSprite width="2.25rem" sprite="icon-off" />
         </RadioOptionElement>
         <RadioOptionElement
           v-model="spriteProps!.crossedOut"
@@ -84,7 +84,7 @@
           internal-aria-label="Cross out word"
           internal-title="Cross out word"
         >
-          <DynamicSprite word="on" type="noun" width="2.25rem" />
+          <StaticSprite width="2.25rem" sprite="icon-on" />
         </RadioOptionElement>
       </RadioElement>
 

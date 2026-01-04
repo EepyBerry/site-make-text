@@ -8,7 +8,8 @@ import type { AnimatedSprite } from '@/core/models/animated-sprite.model';
 import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
 import { updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
-import { WordType, type DynamicSpriteProps } from '@/types';
+import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/types';
+import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
 
 const spriteCanvas = useTemplateRef('spriteCanvas')!;
 const emptySprite: Ref<AnimatedSprite | null> = ref(null);
@@ -17,14 +18,7 @@ const crossSprite: Ref<AnimatedSprite | null> = ref(null);
 const letterSprites: Ref<AnimatedSprite[]> = ref([]);
 const spriteFrameIndex: Ref<number> = ref(0);
 
-const $props = withDefaults(defineProps<DynamicSpriteProps>(), {
-  width: '2rem',
-  word: 'TEXT',
-  color: '#ffffff',
-  type: WordType.NOUN,
-  moreLettersOnTop: true,
-  crossedOut: false,
-});
+const $props = withDefaults(defineProps<DynamicSpriteProps>(), { x: -1, y: -1 })
 
 onMounted(() => {
   if (!EventBus.spritesheetInitEvent.value) return;
@@ -54,10 +48,10 @@ defineExpose({ extractFrames });
 // ----------------------------------------------------------------------------
 // exposed functions
 
-function extractFrames(scale: number = 2): ImageData[] {
-  const scaledImageSize: number = 24 * scale;
+function extractFrames(scale: number = 2): DynamicSpriteFrameData {
+  const scaledImageSize: number = SPRITESHEET_CELL_SIZE * scale;
 
-  const rawCanvas: OffscreenCanvas = new OffscreenCanvas(24, 24);
+  const rawCanvas: OffscreenCanvas = new OffscreenCanvas(SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
   const scaleCanvas: OffscreenCanvas = new OffscreenCanvas(scaledImageSize, scaledImageSize);
   const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
   const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
@@ -75,7 +69,7 @@ function extractFrames(scale: number = 2): ImageData[] {
 
   // skip empty words
   if (!letterSprites.value || letterSprites.value.length === 0) {
-    return [];
+    return { x: $props.x, y: $props.y, frames: [] };
   }
 
   // iterate on frames and draw them one by one on canvas first, and then as a gif frame
@@ -117,7 +111,7 @@ function extractFrames(scale: number = 2): ImageData[] {
     scaleCtx.drawImage(rawCanvas, 0, 0);
     frames.push(scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize));
   }
-  return frames;
+  return { x: $props.x, y: $props.y, frames };
 }
 
 // ----------------------------------------------------------------------------
@@ -140,26 +134,26 @@ function _loadCrossSprite() {
 }
 function _reloadLetterSprites() {
   letterSprites.value.splice(0);
-  for (let i = 0; i < $props.word.length; i++) {
+  for (let i = 0; i < $props.word!.length; i++) {
     // get letter; replace invalid letters by '?'
-    let letter = $props.word.charAt(i);
+    let letter = $props.word!.charAt(i);
     if (!/^[A-Za-z\?\!]+$/.test(letter)) letter = '?';
 
     // check if we must use small letters; special case for 5-letter words
     const useSmallLetters: boolean =
-      $props.word.length === 5
+      $props.word!.length === 5
         ? $props.moreLettersOnTop
           ? i <= 2
           : i >= 2
-        : [3, 6, 7].includes($props.word.length);
+        : [3, 6, 7].includes($props.word!.length);
 
     // check if we must use tiny letters; special case for 7-letter words
     const useTinyLetters: boolean =
-      $props.word.length === 7
+      $props.word!.length === 7
         ? $props.moreLettersOnTop
           ? i <= 3
           : i >= 3
-        : [7, 8].includes($props.word.length);
+        : [7, 8].includes($props.word!.length);
 
     // get each letter's AnimatedSprite
     const letterAnimSprite = getAnimatedSprite(
@@ -220,11 +214,11 @@ function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
 }
 
 function _clearCanvas(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
-  ctx.clearRect(0, 0, 24, 24);
+  ctx.clearRect(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
 }
 function _applyColor(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
-  ctx.fillStyle = $props.color;
-  ctx.fillRect(0, 0, 24, 24);
+  ctx.fillStyle = $props.color!;
+  ctx.fillRect(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
   ctx.fillStyle = '#ffffff';
 }
 
@@ -339,13 +333,13 @@ function _drawBlock(
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   frameIndex: number,
 ) {
-  const wordImgData = ctx.getImageData(0, 0, 24, 24);
+  const wordImgData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
 
   ctx.putImageData(blockSprite.value!.frames[frameIndex]!.data, 0, 0);
-  ctx.fillStyle = $props.color;
-  ctx.fillRect(0, 0, 24, 24);
+  ctx.fillStyle = $props.color!;
+  ctx.fillRect(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
 
-  const blockImageData = ctx.getImageData(0, 0, 24, 24);
+  const blockImageData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
   for (let i = 0; i < wordImgData.data.length; i += 4) {
     blockImageData.data[i + 3] = wordImgData.data[i + 3]! > 0 ? 0 : blockImageData.data[i + 3]!;
   }
@@ -360,7 +354,7 @@ function _drawCross(
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   frameIndex: number,
 ) {
-  const wordImgData = ctx.getImageData(0, 0, 24, 24);
+  const wordImgData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
 
   const crossFrameData = crossSprite.value!.frames[frameIndex]!.data;
   for (let i = 0; i < crossFrameData.data.length; i += 4) {

@@ -24,7 +24,8 @@ export enum WordType {
 
 export type WordGridExposes = {
   deselect: () => void;
-}
+  extractGridFrames: (scale?: number) => DynamicSpriteFrameData[];
+};
 
 // ----------------------------------------------------------------------------
 // DynamicSpriteElement
@@ -39,8 +40,9 @@ export type DynamicSpriteProps = {
   moreLettersOnTop?: boolean;
   crossedOut?: boolean;
 };
+export type DynamicSpriteFrameData = { frames: ImageData[] } & Required<Vector2>;
 export type DynamicSpriteExposes = {
-  extractFrames: (scale?: number) => ImageData[];
+  extractFrames: (scale?: number) => DynamicSpriteFrameData;
 };
 
 // ----------------------------------------------------------------------------

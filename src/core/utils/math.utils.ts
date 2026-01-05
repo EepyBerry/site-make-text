@@ -12,10 +12,10 @@ export function getGridElementIndex<T extends Vector2>(gridData: T[] | undefined
   return gridData?.findIndex((d) => d.x === x && d.y === y);
 }
 
-export function isBetween(n: number|null|undefined, min: number, max: number): boolean {
+export function isBetween(n: number | null | undefined, min: number, max: number): boolean {
   if (n === undefined || n === null) return false;
-  return n >= min && n <= max
+  return n >= min && n <= max;
 }
-export function isZeroOrPositive(n: number|null|undefined): boolean {
+export function isZeroOrPositive(n: number | null | undefined): boolean {
   return n !== undefined && n !== null && n >= 0;
 }

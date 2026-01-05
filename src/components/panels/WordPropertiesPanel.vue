@@ -114,7 +114,7 @@ import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
 import { ColorPicker } from 'vue-accessible-color-picker';
 
 defineProps<{ showHint: boolean }>();
-const spriteProps = defineModel<DynamicSpriteProps|null>();
+const spriteProps = defineModel<DynamicSpriteProps | null>();
 const spriteColor = computed(() => spriteProps.value?.color);
 
 function setColor(data: { colors: object; cssColor: string }) {

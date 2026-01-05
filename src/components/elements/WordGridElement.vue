@@ -1,8 +1,8 @@
 <template>
   <div id="word-grid" class="grid">
     <div id="inner-grid">
-      <template v-for="_,y of height" :key="y">
-        <template v-for="_,x of width" :key="x">
+      <template v-for="(_, y) of height" :key="y">
+        <template v-for="(_, x) of width" :key="x">
           <button
             v-if="!!getGridElement($model, x, y)"
             :id="`button-word-${x}-${y}`"
@@ -81,7 +81,7 @@
           <StaticSprite width="3rem" sprite="up" />
         </button>
         <button
-          v-show="isBetween(selectedWordCoords.x, 0, width-2)"
+          v-show="isBetween(selectedWordCoords.x, 0, width - 2)"
           type="button"
           id="action-move-right"
           class="animated"
@@ -92,7 +92,7 @@
           <StaticSprite width="3rem" sprite="right" />
         </button>
         <button
-          v-show="isBetween(selectedWordCoords.y, 0, height-2)"
+          v-show="isBetween(selectedWordCoords.y, 0, height - 2)"
           type="button"
           id="action-move-down"
           class="animated"
@@ -109,34 +109,41 @@
 
 <script setup lang="ts">
 import { getGridElement, getGridElementIndex, isBetween, isZeroOrPositive } from '@/core/utils/math.utils';
-import { WordType, type DynamicSpriteExposes, type DynamicSpriteFrameData, type DynamicSpriteProps, type Vector2 } from '@/types';
+import {
+  WordType,
+  type DynamicSpriteExposes,
+  type DynamicSpriteFrameData,
+  type DynamicSpriteProps,
+  type Vector2,
+} from '@/types';
 import { useFloating, offset, autoUpdate } from '@floating-ui/vue';
 import { ref, useTemplateRef, type Ref, type TemplateRef } from 'vue';
 
 // vue component data
-withDefaults(defineProps<{
-  width?: number,
-  height?: number
-}>(), {
-  width: 3,
-  height: 3
-})
-const $model = defineModel<DynamicSpriteProps[]>()
-const $emit = defineEmits(['select', 'move', 'delete', 'delete-row', 'delete-column'])
-defineExpose({ deselect, extractGridFrames })
+withDefaults(
+  defineProps<{
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    width: 3,
+    height: 3,
+  },
+);
+const $model = defineModel<DynamicSpriteProps[]>();
+const $emit = defineEmits(['select', 'move', 'delete', 'delete-row', 'delete-column']);
+defineExpose({ deselect, extractGridFrames });
 
 // component refs
-const selectedWordCoords: Ref<Vector2> = ref({ x: -1, y: -1 })
-const selectedWordHtml: Ref<HTMLElement|null> = ref(null)
-const dynamicSpriteHtmlRefs: Ref<DynamicSpriteExposes[]|null> = useTemplateRef('dynamicSpriteHtmlRefs')
+const selectedWordCoords: Ref<Vector2> = ref({ x: -1, y: -1 });
+const selectedWordHtml: Ref<HTMLElement | null> = ref(null);
+const dynamicSpriteHtmlRefs: Ref<DynamicSpriteExposes[] | null> = useTemplateRef('dynamicSpriteHtmlRefs');
 
 // floating-ui refs
 const floatingActionsHtmlRef: TemplateRef<HTMLElement> = useTemplateRef('gridCellActionsElementRef');
 const { floatingStyles, update } = useFloating(selectedWordHtml, floatingActionsHtmlRef, {
   placement: 'top',
-  middleware: [
-    offset(({rects}) => -rects.reference.height/2 - rects.floating.height/2)
-  ],
+  middleware: [offset(({ rects }) => -(rects.reference.height / 2) - (rects.floating.height / 2))],
   whileElementsMounted: autoUpdate,
 });
 
@@ -150,7 +157,7 @@ function deselect(): void {
 }
 
 function extractGridFrames(scale?: number): DynamicSpriteFrameData[] {
-  return dynamicSpriteHtmlRefs.value?.map(ds => ds.extractFrames(scale)) ?? []
+  return dynamicSpriteHtmlRefs.value?.map((ds) => ds.extractFrames(scale)) ?? [];
 }
 
 // ----------------------------------------------------------------------------
@@ -166,10 +173,10 @@ function _addWord(x: number, y: number): void {
     moreLettersOnTop: true,
     crossedOut: false,
   });
-  setTimeout(() => _selectWord(document.getElementById(`button-word-${x}-${y}`)!, x, y))
+  setTimeout(() => _selectWord(document.getElementById(`button-word-${x}-${y}`)!, x, y));
 }
 
-function _selectWord(htmlTarget: EventTarget|HTMLElement, x: number, y: number): void {
+function _selectWord(htmlTarget: EventTarget | HTMLElement, x: number, y: number): void {
   selectedWordCoords.value = { x, y };
   selectedWordHtml.value = htmlTarget as HTMLElement;
   floatingActionsHtmlRef.value!.focus();
@@ -178,16 +185,22 @@ function _selectWord(htmlTarget: EventTarget|HTMLElement, x: number, y: number):
 }
 
 function _moveSelectedWord(dx: number, dy: number) {
-  const wordData = getGridElement($model.value, selectedWordCoords.value.x!, selectedWordCoords.value.y!)!
-  const maybeWordOnTargetPos = getGridElement($model.value, selectedWordCoords.value.x! + dx, selectedWordCoords.value.y! + dy)
+  const wordData = getGridElement($model.value, selectedWordCoords.value.x!, selectedWordCoords.value.y!)!;
+  const maybeWordOnTargetPos = getGridElement(
+    $model.value,
+    selectedWordCoords.value.x! + dx,
+    selectedWordCoords.value.y! + dy,
+  );
   if (maybeWordOnTargetPos) {
-    maybeWordOnTargetPos.x = selectedWordCoords.value.x!
-    maybeWordOnTargetPos.y = selectedWordCoords.value.y!
+    maybeWordOnTargetPos.x = selectedWordCoords.value.x!;
+    maybeWordOnTargetPos.y = selectedWordCoords.value.y!;
   }
 
-  wordData.x = selectedWordCoords.value.x! + dx
-  wordData.y = selectedWordCoords.value.y! + dy
-  setTimeout(() => _selectWord(document.getElementById(`button-word-${wordData.x}-${wordData.y}`)!, wordData.x!, wordData.y!))
+  wordData.x = selectedWordCoords.value.x! + dx;
+  wordData.y = selectedWordCoords.value.y! + dy;
+  setTimeout(() =>
+    _selectWord(document.getElementById(`button-word-${wordData.x}-${wordData.y}`)!, wordData.x!, wordData.y!),
+  );
 }
 
 function _deleteSelectedWord() {
@@ -198,7 +211,6 @@ function _deleteSelectedWord() {
   deselect();
   $emit('delete');
 }
-
 </script>
 
 <style lang="scss">

@@ -8,20 +8,13 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
       <p>a smol web-toy by EepyBerry :3</p>
       <p>
         not affiliated with
-        <a href="https://hempuli.com/baba/" target="_blank" rel="noreferrer noopener"
-          >[Baba Is You]</a
-        >
+        <a href="https://hempuli.com/baba/" target="_blank" rel="noreferrer noopener">[Baba Is You]</a>
         or its creators
       </p>
     </div>
     <ul id="footer-links">
       <li>
-        <a
-          class="image-link"
-          href="https://eepyberry.me"
-          target="_blank"
-          title="EepyBerry's website"
-        >
+        <a class="image-link" href="https://eepyberry.me" target="_blank" title="EepyBerry's website">
           <StaticSprite sprite="eepyberry" width="3rem" />
         </a>
       </li>

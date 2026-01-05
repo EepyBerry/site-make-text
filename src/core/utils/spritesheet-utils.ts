@@ -1,10 +1,5 @@
 import type { Ref } from 'vue';
-import {
-  SPRITESHEET_WIDTH,
-  REM_SIZE,
-  SPRITESHEET_HEIGHT,
-  SPRITESHEET_CELL_SIZE,
-} from '@/core/globals';
+import { SPRITESHEET_WIDTH, REM_SIZE, SPRITESHEET_HEIGHT, SPRITESHEET_CELL_SIZE } from '@/core/globals';
 
 export function computeSpritesheetBackgroundSize(elWidth: string): number[] {
   const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
@@ -13,11 +8,7 @@ export function computeSpritesheetBackgroundSize(elWidth: string): number[] {
   return [backgroundSizeX, backgroundSizeY];
 }
 
-export function computeSpritesheetBackgroundPosition(
-  frameX: number,
-  frameY: number,
-  elWidth: string,
-): number[] {
+export function computeSpritesheetBackgroundPosition(frameX: number, frameY: number, elWidth: string): number[] {
   const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
   const backgroundPositionX = (frameX * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
   const backgroundPositionY = (frameY * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;

@@ -1,11 +1,11 @@
 <template>
   <div v-if="$props.showHint" id="word-properties-hint">
-    <StaticSprite width="4rem" sprite="icon-word-hint" />
+    <StaticSprite width="4rem" sprite="word-hint" />
     <p>select a word to see its properties</p>
   </div>
   <div v-else id="word-properties-panel-scrollzone">
     <section id="section-sprite-props">
-      <StaticSprite width="2.5rem" sprite="icon-word" />
+      <StaticSprite width="2.5rem" sprite="word" />
       <input
         id="prop-word"
         v-model="spriteProps!.word"
@@ -16,7 +16,7 @@
         title="Word to write (A-Z?! characters only)"
       />
 
-      <StaticSprite width="2.5rem" sprite="icon-type" />
+      <StaticSprite width="2.5rem" sprite="type" />
       <RadioElement>
         <RadioOptionElement
           v-model="spriteProps!.type"
@@ -26,7 +26,7 @@
           internal-aria-label="Set word as a noun"
           internal-title="Set word as a noun"
         >
-          <StaticSprite width="2.125rem" sprite="icon-noun" />
+          <StaticSprite width="2.125rem" sprite="noun" />
         </RadioOptionElement>
         <RadioOptionElement
           v-model="spriteProps!.type"
@@ -36,11 +36,11 @@
           internal-aria-label="Set word as a property (adds background)"
           internal-title="Set word as a property"
         >
-          <StaticSprite width="2.125rem" sprite="icon-prop" />
+          <StaticSprite width="2.125rem" sprite="prop" />
         </RadioOptionElement>
       </RadioElement>
 
-      <StaticSprite width="2.5rem" sprite="icon-morelettersontop" />
+      <StaticSprite width="2.5rem" sprite="morelettersontop" />
       <RadioElement>
         <RadioOptionElement
           v-model="spriteProps!.moreLettersOnTop"
@@ -50,7 +50,7 @@
           internal-aria-label="Show less letters on top of a word"
           internal-title="Show less letters on top of a word"
         >
-          <StaticSprite width="2.25rem" sprite="icon-off" />
+          <StaticSprite width="2.25rem" sprite="off" />
         </RadioOptionElement>
         <RadioOptionElement
           v-model="spriteProps!.moreLettersOnTop"
@@ -60,11 +60,11 @@
           internal-aria-label="Show more letters on top of a word"
           internal-title="Show more letters on top of a word"
         >
-          <StaticSprite width="2.25rem" sprite="icon-on" />
+          <StaticSprite width="2.25rem" sprite="on" />
         </RadioOptionElement>
       </RadioElement>
 
-      <StaticSprite width="2.5rem" sprite="icon-crossedout" />
+      <StaticSprite width="2.5rem" sprite="crossedout" />
       <RadioElement>
         <RadioOptionElement
           v-model="spriteProps!.crossedOut"
@@ -74,7 +74,7 @@
           internal-aria-label="Do not cross out word"
           internal-title="Do not cross out word"
         >
-          <StaticSprite width="2.25rem" sprite="icon-off" />
+          <StaticSprite width="2.25rem" sprite="off" />
         </RadioOptionElement>
         <RadioOptionElement
           v-model="spriteProps!.crossedOut"
@@ -84,11 +84,11 @@
           internal-aria-label="Cross out word"
           internal-title="Cross out word"
         >
-          <StaticSprite width="2.25rem" sprite="icon-on" />
+          <StaticSprite width="2.25rem" sprite="on" />
         </RadioOptionElement>
       </RadioElement>
 
-      <StaticSprite width="2.5rem" sprite="icon-color" />
+      <StaticSprite width="2.5rem" sprite="color" />
       <div id="prop-color"></div>
     </section>
     <section id="section-sprite-color">

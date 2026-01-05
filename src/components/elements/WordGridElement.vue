@@ -33,7 +33,7 @@
               aria-label="Add new word"
               title="Add new word"
             >
-              <StaticSprite width="2rem" sprite="icon-plus" />
+              <StaticSprite width="2rem" sprite="plus" />
             </button>
           </span>
         </template>
@@ -56,7 +56,7 @@
           title="Delete word"
           @click="_deleteSelectedWord"
         >
-          <StaticSprite width="3rem" sprite="icon-trash" />
+          <StaticSprite width="3rem" sprite="trash" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.x, 1, width)"
@@ -67,7 +67,7 @@
           title="Move word left (if possible)"
           @click="_moveSelectedWord(-1, 0)"
         >
-          <StaticSprite width="3rem" sprite="icon-left" />
+          <StaticSprite width="3rem" sprite="left" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.y, 1, height)"
@@ -78,7 +78,7 @@
           title="Move word up (if possible)"
           @click="_moveSelectedWord(0, -1)"
         >
-          <StaticSprite width="3rem" sprite="icon-up" />
+          <StaticSprite width="3rem" sprite="up" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.x, 0, width-2)"
@@ -89,7 +89,7 @@
           title="Move word right (if possible)"
           @click="_moveSelectedWord(1, 0)"
         >
-          <StaticSprite width="3rem" sprite="icon-right" />
+          <StaticSprite width="3rem" sprite="right" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.y, 0, height-2)"
@@ -100,7 +100,7 @@
           title="Move word down (if possible)"
           @click="_moveSelectedWord(0, 1)"
         >
-          <StaticSprite width="3rem" sprite="icon-down" />
+          <StaticSprite width="3rem" sprite="down" />
         </button>
       </div>
     </div>

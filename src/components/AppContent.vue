@@ -2,7 +2,7 @@
   <main>
     <!-- export "loader" -->
     <div id="export-loader" :class="{ visible: isExporting }">
-      <StaticSprite width="10rem" sprite="icon-wait" />
+      <StaticSprite width="5rem" sprite="wait" />
       <p>&lt;exporting...&gt;</p>
     </div>
 
@@ -21,8 +21,8 @@
         aria-label="Toggle word properties panel"
         title="Toggle word properties panel"
       >
-        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" sprite="icon-properties-opened" />
-        <StaticSprite v-else width="2.5rem" sprite="icon-properties-closed" />
+        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" sprite="properties-opened" />
+        <StaticSprite v-else width="2.5rem" sprite="properties-closed" />
       </button>
       <WordPropertiesPanel :show-hint="!selectedWord" v-model="selectedWord" />
     </aside>
@@ -53,8 +53,8 @@
           aria-label="Toggle grid settings panel"
           title="Toggle grid settings panel"
         >
-          <StaticSprite v-if="gridSettingsToggle" width="2.5rem" sprite="icon-grid-opened" />
-          <StaticSprite v-else width="2.5rem" sprite="icon-grid-closed" />
+          <StaticSprite v-if="gridSettingsToggle" width="2.5rem" sprite="grid-opened" />
+          <StaticSprite v-else width="2.5rem" sprite="grid-closed" />
         </button>
         <GridSettingsPanel @change="updateGridSize" />
       </div>
@@ -68,7 +68,7 @@
         aria-label="Remove all words (reset)"
         title="Remove all words (reset)"
       >
-        <StaticSprite width="2.5rem" sprite="icon-reset" />
+        <StaticSprite width="2.5rem" sprite="reset" />
       </button>
 
       <!-- export panel -->
@@ -82,8 +82,8 @@
           aria-label="Toggle word properties panel"
           title="Toggle word properties panel"
         >
-          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" sprite="icon-export-opened" />
-          <StaticSprite v-else width="2.5rem" sprite="icon-export-closed" />
+          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" sprite="export-opened" />
+          <StaticSprite v-else width="2.5rem" sprite="export-closed" />
         </button>
         <ExportSettingsPanel @export="exportWords" />
       </div>
@@ -261,7 +261,7 @@ main {
     inset: 0;
     background: #000c;
 
-    font-size: 1.25rem;
+    font-size: 1rem;
 
     display: flex;
     flex-direction: column;

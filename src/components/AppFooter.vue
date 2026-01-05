@@ -22,7 +22,7 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
           target="_blank"
           title="EepyBerry's website"
         >
-          <StaticSprite sprite="icon-eepyberry" width="3rem" />
+          <StaticSprite sprite="eepyberry" width="3rem" />
         </a>
       </li>
       <li>
@@ -32,7 +32,7 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
           target="_blank"
           title="GitHub project page"
         >
-          <StaticSprite sprite="icon-github" width="3rem" />
+          <StaticSprite sprite="github" width="3rem" />
         </a>
       </li>
     </ul>

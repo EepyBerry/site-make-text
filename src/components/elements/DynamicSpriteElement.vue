@@ -119,17 +119,17 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 
 function _loadEmptySprite() {
   const emptyAnimSprite = getAnimatedSprite('empty');
-  if (!emptyAnimSprite) throw new Error('Cannot find sprite for icon-empty');
+  if (!emptyAnimSprite) throw new Error('Cannot find sprite for "empty"');
   emptySprite.value = emptyAnimSprite;
 }
 function _loadBlockSprite() {
   const blockAnimSprite = getAnimatedSprite('block');
-  if (!blockAnimSprite) throw new Error('Cannot find sprite for icon-block');
+  if (!blockAnimSprite) throw new Error('Cannot find sprite for "block"');
   blockSprite.value = blockAnimSprite;
 }
 function _loadCrossSprite() {
   const crossAnimSprite = getAnimatedSprite('cross');
-  if (!crossAnimSprite) throw new Error('Cannot find sprite for icon-empty');
+  if (!crossAnimSprite) throw new Error('Cannot find sprite for "cross"');
   crossSprite.value = crossAnimSprite;
 }
 function _reloadLetterSprites() {

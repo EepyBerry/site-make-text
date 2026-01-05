@@ -5,11 +5,13 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
 
 <template>
   <header id="smtx-header">
-    <StaticSprite width="4rem" sprite="icon-logo-site" />
-    <hr />
-    <StaticSprite width="4rem" sprite="icon-logo-make" />
-    <hr />
-    <StaticSprite width="4rem" sprite="icon-logo-text" />
+    <div id="logo-container">
+      <StaticSprite width="4rem" sprite="logo-site" />
+      <hr />
+      <StaticSprite width="4rem" sprite="logo-make" />
+      <hr />
+      <StaticSprite width="4rem" sprite="logo-text" />
+    </div>
   </header>
 </template>
 
@@ -19,7 +21,8 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
   padding: 1rem;
   background: transparent;
   border-bottom: 4px dashed white;
-
+}
+#logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,11 +37,10 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
 
 @media screen and (max-width: 767px) {
   #smtx-header {
-    padding: 0.5rem;
+    padding: 0;
 
-    .sprite {
-      width: 3rem;
-      height: 3rem;
+    #logo-container {
+      transform: scale(0.75);
     }
   }
 }

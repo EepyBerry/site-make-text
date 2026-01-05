@@ -5,11 +5,7 @@ import * as WebP from 'node-webpmux';
 export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffer> {
   private isInternalLibraryReady: boolean = false;
 
-  public async encodeAsync(
-    frames: ImageData[],
-    width: number,
-    height: number,
-  ): Promise<ArrayBuffer> {
+  public async encodeAsync(frames: ImageData[], width: number, height: number): Promise<ArrayBuffer> {
     if (!this.isInternalLibraryReady) {
       console.log('<SiteMakeText> Initializing webpmux.wasm...');
       await WebP.Image.initLib();
@@ -30,8 +26,14 @@ export default class WebPImageDataEncoder implements ImageDataEncoder<ArrayBuffe
       await amfImg.setImageData(amfPixels, {
         width,
         height,
-        lossless: 9,
+        lossless: 5,
+        method: 6,
         exact: true,
+        advanced: {
+          segments: 1,
+          alphaFiltering: 0,
+          alphaQuality: 0,
+        },
       });
 
       // create new AMF frame from image

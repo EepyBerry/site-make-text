@@ -1,16 +1,16 @@
+<script setup lang="ts">
+import StaticSprite from './elements/StaticSpriteElement.vue';
+</script>
+
 <template>
   <header id="smtx-header">
-    <DynamicSprite
-      width="4rem"
-      word="site"
-      color="#8e44c7"
-      type="noun"
-      :more-letters-on-top="false"
-    />
-    <hr />
-    <DynamicSprite width="4rem" word="make" :more-letters-on-top="false" />
-    <hr />
-    <DynamicSprite width="4rem" word="text" color="#e336a3" :more-letters-on-top="false" />
+    <div id="logo-container">
+      <StaticSprite width="4rem" sprite="logo-site" />
+      <hr />
+      <StaticSprite width="4rem" sprite="logo-make" />
+      <hr />
+      <StaticSprite width="4rem" sprite="logo-text" />
+    </div>
   </header>
 </template>
 
@@ -20,7 +20,8 @@
   padding: 1rem;
   background: transparent;
   border-bottom: 4px dashed white;
-
+}
+#logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,11 +36,10 @@
 
 @media screen and (max-width: 767px) {
   #smtx-header {
-    padding: 0.5rem;
+    padding: 0;
 
-    .sprite {
-      width: 3rem;
-      height: 3rem;
+    #logo-container {
+      transform: scale(0.75);
     }
   }
 }

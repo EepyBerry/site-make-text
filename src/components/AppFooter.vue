@@ -8,21 +8,14 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
       <p>a smol web-toy by EepyBerry :3</p>
       <p>
         not affiliated with
-        <a href="https://hempuli.com/baba/" target="_blank" rel="noreferrer noopener"
-          >[Baba Is You]</a
-        >
+        <a href="https://hempuli.com/baba/" target="_blank" rel="noreferrer noopener">[Baba Is You]</a>
         or its creators
       </p>
     </div>
     <ul id="footer-links">
       <li>
-        <a
-          class="image-link"
-          href="https://eepyberry.me"
-          target="_blank"
-          title="EepyBerry's website"
-        >
-          <StaticSprite sprite="icon-eepyberry" width="3rem" />
+        <a class="image-link" href="https://eepyberry.me" target="_blank" title="EepyBerry's website">
+          <StaticSprite sprite="eepyberry" width="3rem" />
         </a>
       </li>
       <li>
@@ -32,7 +25,7 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
           target="_blank"
           title="GitHub project page"
         >
-          <StaticSprite sprite="icon-github" width="3rem" />
+          <StaticSprite sprite="github" width="3rem" />
         </a>
       </li>
     </ul>

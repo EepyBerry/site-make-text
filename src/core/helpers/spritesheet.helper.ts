@@ -6,10 +6,7 @@ import { ref, type Ref } from 'vue';
 import { AnimatedSprite } from '../models/animated-sprite.model';
 import { SPRITESHEET_HEIGHT, SPRITESHEET_WIDTH } from '../globals';
 
-const SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(
-  SPRITESHEET_WIDTH,
-  SPRITESHEET_HEIGHT,
-);
+const SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT);
 const SPRITESHEET_ANIMSPRITES: Record<string, SpritesheetRegion[]> = appSpritesheetJson;
 
 export const SMTX_ANIMATED_SPRITES: Ref<AnimatedSprite[]> = ref([]);
@@ -40,10 +37,7 @@ async function cutSpritesheet(): Promise<void> {
   EventBus.sendSpritesheetInitEvent();
 }
 
-async function cutSpritesheetRegion(
-  key: string,
-  regionsRef: SpritesheetRegion[],
-): Promise<Sprite[]> {
+async function cutSpritesheetRegion(key: string, regionsRef: SpritesheetRegion[]): Promise<Sprite[]> {
   const frames: SpritesheetRegion[] | undefined = SPRITESHEET_ANIMSPRITES[key];
   if (!frames || frames.length === 0) throw new Error('Region does not exist for key: ' + key);
 

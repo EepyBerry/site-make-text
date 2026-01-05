@@ -215,6 +215,7 @@ function updateGridSize(size: Vector2) {
 function handleGridSelect(word: DynamicSpriteProps) {
   selectedWord.value = word;
   wordPropertiesToggle.value = false;
+  gridSettingsToggle.value = false;
   exportSettingsToggle.value = false;
 }
 

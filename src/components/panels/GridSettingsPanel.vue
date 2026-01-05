@@ -32,12 +32,11 @@ import SliderElement from '../elements/SliderElement.vue';
 
 const gridSettings: Ref<Vector2> = ref({
   x: 3,
-  y: 3
+  y: 3,
 });
 defineEmits(['change']);
 </script>
 <style lang="scss">
-
 #section-grid-settings {
   width: 100%;
   padding: 0.5rem;

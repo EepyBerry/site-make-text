@@ -31,7 +31,7 @@
     <section id="section-words">
       <div ref="sectionRef" id="section-words-scrollzone">
         <!-- main content -->
-         <WordGridElement
+        <WordGridElement
           ref="wordGridRef"
           id="word-grid"
           v-model="words"
@@ -92,14 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  onBeforeMount,
-  onMounted,
-  type Ref,
-  ref,
-  type TemplateRef,
-  useTemplateRef,
-} from 'vue';
+import { onBeforeMount, onMounted, type Ref, ref, type TemplateRef, useTemplateRef } from 'vue';
 import {
   WordType,
   type DynamicSpriteProps,
@@ -143,7 +136,7 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     color: '#ffffff',
     moreLettersOnTop: true,
     type: WordType.NOUN,
-    crossedOut: false
+    crossedOut: false,
   },
   {
     x: 2,
@@ -155,8 +148,8 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     crossedOut: false,
   },
 ]);
-const wordGridDimensions: Ref<Vector2> = ref({x: 3, y: 3})
-const selectedWord: Ref<DynamicSpriteProps|null> = ref(null);
+const wordGridDimensions: Ref<Vector2> = ref({ x: 3, y: 3 });
+const selectedWord: Ref<DynamicSpriteProps | null> = ref(null);
 
 // ----------------------------------------------------------------------------
 // lifecycle
@@ -175,7 +168,7 @@ onMounted(() => {
   sectionRef.value!.addEventListener('pointerdown', checkPointerTarget);
   EventBus.registerWindowEventListener('resize', checkCompactMode);
   EventBus.registerWindowEventListener('deviceorientation', checkCompactMode);
-  checkCompactMode()
+  checkCompactMode();
 });
 onBeforeMount(() => {
   sectionRef.value?.removeEventListener('pointerdown', checkPointerTarget);
@@ -188,7 +181,7 @@ onBeforeMount(() => {
 
 function togglePropertiesPanel() {
   if (compactMode.value) {
-    wordPropertiesToggle.value  = !wordPropertiesToggle.value;
+    wordPropertiesToggle.value = !wordPropertiesToggle.value;
   }
   gridSettingsToggle.value = false;
   exportSettingsToggle.value = false;
@@ -208,8 +201,8 @@ function toggleGridSettingsPanel() {
 // word grid functions
 
 function updateGridSize(size: Vector2) {
-  wordGridDimensions.value.x = size.x
-  wordGridDimensions.value.y = size.y
+  wordGridDimensions.value.x = size.x;
+  wordGridDimensions.value.y = size.y;
 }
 
 function handleGridSelect(word: DynamicSpriteProps) {
@@ -234,7 +227,7 @@ async function exportWords(opts: ExportSettingsOptions) {
   isExporting.value = true;
   setTimeout(() => {
     const gridData = wordGridRef.value!.extractGridFrames(opts.scale);
-    exportWordData(wordGridDimensions.value!, gridData, opts).finally(() => isExporting.value = false);
+    exportWordData(wordGridDimensions.value!, gridData, opts).finally(() => (isExporting.value = false));
   }, 500);
 }
 </script>
@@ -309,7 +302,8 @@ main {
     top: -100%;
   }
 }
-#grid-settings-panel, #export-settings-panel {
+#grid-settings-panel,
+#export-settings-panel {
   position: absolute;
   width: fit-content;
   max-width: 14rem;
@@ -318,7 +312,8 @@ main {
   display: flex;
   justify-content: center;
 
-  #button-toggle-export-settings, #button-toggle-grid-settings {
+  #button-toggle-export-settings,
+  #button-toggle-grid-settings {
     padding: 0.5rem;
     background: var(--smtx-panel);
     border-radius: 8px;

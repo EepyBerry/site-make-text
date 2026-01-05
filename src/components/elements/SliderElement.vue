@@ -1,10 +1,5 @@
 <template>
-  <input
-    type="range"
-    step="1"
-    :value="$model"
-    @input="set($event)"
-  />
+  <input type="range" step="1" :value="$model" @input="set($event)" />
 </template>
 
 <script setup lang="ts">
@@ -15,7 +10,7 @@ function set(ev: Event) {
 </script>
 
 <style scoped lang="scss">
-input[type=range] {
+input[type='range'] {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
@@ -62,6 +57,5 @@ input[type=range] {
     outline: none;
     background: url('@/assets/spritesheet/slider-thumb-focus.png');
   }
-
 }
 </style>

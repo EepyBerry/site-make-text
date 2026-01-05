@@ -84,7 +84,7 @@ function _combineWordDataOnCanvas(
   if (!ctx) throw new Error('Cannot combine canvas data: context was not properly initialized');
 
   // Place individual frame data on the canvas
-  const offsets: Vector2 = {x: 0, y: 0};
+  const offsets: Vector2 = { x: 0, y: 0 };
   for (let i = 0; i < wordData.length; i++) {
     if (wordData[i]!.frames.length === 0) continue;
     offsets.x = scaledCellSize * wordData[i]!.x!;

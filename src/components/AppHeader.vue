@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import StaticSprite from './elements/StaticSpriteElement.vue';
-
 </script>
 
 <template>

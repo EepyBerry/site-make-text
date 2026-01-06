@@ -79,8 +79,8 @@
           class="animated"
           :class="{ active: !!exportSettingsToggle }"
           @click="toggleExportSettingsPanel"
-          aria-label="Toggle word properties panel"
-          title="Toggle word properties panel"
+          aria-label="Toggle export settings panel"
+          title="Toggle export settings panel"
         >
           <StaticSprite v-if="exportSettingsToggle" width="2.5rem" sprite="export-opened" />
           <StaticSprite v-else width="2.5rem" sprite="export-closed" />

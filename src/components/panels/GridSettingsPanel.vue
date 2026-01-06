@@ -18,8 +18,8 @@
       v-model="gridSettings.y"
       min="1"
       max="11"
-      aria-label="Grid width in cells"
-      title="Grid width in cells"
+      aria-label="Grid height in cells"
+      title="Grid height in cells"
       @input="$emit('change', gridSettings)"
     />
     <p>{{ gridSettings.y }}</p>

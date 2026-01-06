@@ -63,8 +63,8 @@
           type="button"
           id="action-move-left"
           class="animated"
-          aria-label="Move word left (if possible)"
-          title="Move word left (if possible)"
+          aria-label="Move word left"
+          title="Move word left"
           @click="_moveSelectedWord(-1, 0)"
         >
           <StaticSprite width="3rem" sprite="left" />
@@ -74,8 +74,8 @@
           type="button"
           id="action-move-up"
           class="animated"
-          aria-label="Move word up (if possible)"
-          title="Move word up (if possible)"
+          aria-label="Move word up"
+          title="Move word up"
           @click="_moveSelectedWord(0, -1)"
         >
           <StaticSprite width="3rem" sprite="up" />
@@ -85,8 +85,8 @@
           type="button"
           id="action-move-right"
           class="animated"
-          aria-label="Move word right (if possible)"
-          title="Move word right (if possible)"
+          aria-label="Move word right"
+          title="Move word right"
           @click="_moveSelectedWord(1, 0)"
         >
           <StaticSprite width="3rem" sprite="right" />
@@ -96,8 +96,8 @@
           type="button"
           id="action-move-down"
           class="animated"
-          aria-label="Move word down (if possible)"
-          title="Move word down (if possible)"
+          aria-label="Move word down"
+          title="Move word down"
           @click="_moveSelectedWord(0, 1)"
         >
           <StaticSprite width="3rem" sprite="down" />

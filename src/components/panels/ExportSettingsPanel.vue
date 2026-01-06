@@ -20,8 +20,8 @@
         pid="setting-type"
         id="all"
         :value="false"
-        internal-aria-label="Export all words separately (with combined image)"
-        internal-title="Export all words separately (with combined image)"
+        internal-aria-label="Export all words separately"
+        internal-title="Export all words separately"
       >
         <DynamicSprite word="separate" width="2.5rem" :more-letters-on-top="false" />
       </RadioOptionElement>

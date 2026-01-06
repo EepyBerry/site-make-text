@@ -143,7 +143,7 @@ const dynamicSpriteHtmlRefs: Ref<DynamicSpriteExposes[] | null> = useTemplateRef
 const floatingActionsHtmlRef: TemplateRef<HTMLElement> = useTemplateRef('gridCellActionsElementRef');
 const { floatingStyles, update } = useFloating(selectedWordHtml, floatingActionsHtmlRef, {
   placement: 'top',
-  middleware: [offset(({ rects }) => -(rects.reference.height / 2) - (rects.floating.height / 2))],
+  middleware: [offset(({ rects }) => -(rects.reference.height / 2) - rects.floating.height / 2)],
   whileElementsMounted: autoUpdate,
 });
 

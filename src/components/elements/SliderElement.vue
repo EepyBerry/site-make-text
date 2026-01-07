@@ -11,8 +11,9 @@ function set(ev: Event) {
 
 <style scoped lang="scss">
 input[type='range'] {
-  appearance: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   width: 100%;
   padding: 0;
 
@@ -20,32 +21,78 @@ input[type='range'] {
   border: none;
   align-self: center;
 
+  // webkit styles (chrome)
   &::-webkit-slider-runnable-track {
     -webkit-appearance: none;
+    -moz-appearance: none;
     appearance: none;
-    height: 8px;
+    border: none;
     border-radius: 2px;
+    height: 8px;
+    background-color: transparent;
     background: var(--smtx-slider-track);
   }
-
-  // thumb styles
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
+    -moz-appearance: none;
     appearance: none;
     margin-top: -0.5rem;
     z-index: 1;
+    background-color: transparent;
     background: url('@/assets/spritesheet/slider-thumb.png');
-    border-radius: 50%;
+    border: none;
     height: 1.5rem;
     width: 1.5rem;
     cursor: pointer;
   }
-  &::-moz-range-thumb {
-    z-index: 1;
-    background: url('@/assets/spritesheet/slider-thumb.png');
-    border-radius: 2px;
+
+  // moz styles (firefox)
+  &::-moz-range-track {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     border: none;
-    width: 6px;
+    border-radius: 2px;
+    height: 8px;
+    background-color: transparent;
+    background: var(--smtx-slider-track);
+  }
+  &::-moz-range-thumb {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-top: -0.5rem;
+    z-index: 1;
+    background-color: transparent;
+    background: url('@/assets/spritesheet/slider-thumb.png');
+    border: none;
+    height: 1.5rem;
+    width: 1.5rem;
+    cursor: pointer;
+  }
+
+  // ms styles (ie, edge)
+  &::-ms-track {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    border-radius: 2px;
+    height: 8px;
+    background-color: transparent;
+    background: var(--smtx-slider-track);
+  }
+  &::-ms-thumb {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-top: -0.5rem;
+    z-index: 1;
+    background-color: transparent;
+    background: url('@/assets/spritesheet/slider-thumb.png');
+    border: none;
+    height: 1.5rem;
+    width: 1.5rem;
     cursor: pointer;
   }
 
@@ -53,7 +100,13 @@ input[type='range'] {
     outline: none;
     background: url('@/assets/spritesheet/slider-thumb-focus.png');
   }
+
   &:focus::-moz-range-thumb {
+    outline: none;
+    background: url('@/assets/spritesheet/slider-thumb-focus.png');
+  }
+
+  &:focus::-ms-thumb {
     outline: none;
     background: url('@/assets/spritesheet/slider-thumb-focus.png');
   }

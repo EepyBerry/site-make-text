@@ -1,25 +1,46 @@
-import type { Sprite, SpritesheetRegion } from '@/types';
-import appSpritesheetJson from '@/assets/spritesheet/app-spritesheet.json';
-import appSpritesheet from '@/assets/spritesheet/app-spritesheet.png';
+import type { Sprite, SpritesheetRegion } from '@/core/types';
 import { EventBus } from '../event-bus';
 import { ref, type Ref } from 'vue';
 import { AnimatedSprite } from '../models/animated-sprite.model';
-import { SPRITESHEET_HEIGHT, SPRITESHEET_WIDTH } from '../globals';
+import {
+  MAIN_SPRITESHEET_HEIGHT,
+  MAIN_SPRITESHEET_WIDTH,
+  OBJECT_SPRITESHEET_HEIGHT,
+  OBJECT_SPRITESHEET_WIDTH,
+} from '../globals';
+import mainSpritesheet from '@/assets/spritesheets/app-spritesheet.png';
+import mainSpritesheetJson from '@/assets/spritesheets/app-spritesheet.json';
+import objectSpritesheet from '@/assets/spritesheets/object-spritesheet.png';
+import objectSpritesheetJson from '@/assets/spritesheets/object-spritesheet.json';
 
-const SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT);
-const SPRITESHEET_ANIMSPRITES: Record<string, SpritesheetRegion[]> = appSpritesheetJson;
+const MAIN_SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(MAIN_SPRITESHEET_WIDTH, MAIN_SPRITESHEET_HEIGHT);
+const MAIN_SPRITESHEET_REGIONS: Record<string, SpritesheetRegion[]> = mainSpritesheetJson;
+const OBJECT_SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(
+  OBJECT_SPRITESHEET_WIDTH,
+  OBJECT_SPRITESHEET_HEIGHT,
+);
+const OBJECT_SPRITESHEET_REGIONS: Record<string, SpritesheetRegion[]> = objectSpritesheetJson;
 
 export const SMTX_ANIMATED_SPRITES: Ref<AnimatedSprite[]> = ref([]);
 
-export async function initSpritesheetCanvas() {
-  const ctx = SPRITESHEET_CANVAS.getContext('2d', { willReadFrequently: true })!;
-  const img = new Image(SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT);
-  img.onload = () => {
-    ctx.drawImage(img, 0, 0);
-    ctx.imageSmoothingEnabled = false;
-    cutSpritesheet();
+export async function initSpritesheets() {
+  const mainCtx = MAIN_SPRITESHEET_CANVAS.getContext('2d', { willReadFrequently: true })!;
+  const mainImg = new Image(MAIN_SPRITESHEET_WIDTH, MAIN_SPRITESHEET_HEIGHT);
+  mainImg.onload = () => {
+    mainCtx.drawImage(mainImg, 0, 0);
+    mainCtx.imageSmoothingEnabled = false;
+    cutSpritesheet(MAIN_SPRITESHEET_CANVAS, MAIN_SPRITESHEET_REGIONS);
   };
-  img.src = appSpritesheet;
+  mainImg.src = mainSpritesheet;
+
+  const objCtx = OBJECT_SPRITESHEET_CANVAS.getContext('2d', { willReadFrequently: true })!;
+  const objImg = new Image(OBJECT_SPRITESHEET_WIDTH, OBJECT_SPRITESHEET_HEIGHT);
+  objImg.onload = () => {
+    objCtx.drawImage(objImg, 0, 0);
+    objCtx.imageSmoothingEnabled = false;
+    cutSpritesheet(OBJECT_SPRITESHEET_CANVAS, OBJECT_SPRITESHEET_REGIONS);
+  };
+  objImg.src = objectSpritesheet;
 }
 
 export function getAnimatedSprite(key: string): AnimatedSprite | undefined {
@@ -29,25 +50,27 @@ export function getAnimatedSprite(key: string): AnimatedSprite | undefined {
 // ----------------------------------------------------------------------------
 // internal functions
 
-async function cutSpritesheet(): Promise<void> {
-  for (const region of Object.entries(SPRITESHEET_ANIMSPRITES)) {
-    const sprites: Sprite[] = await cutSpritesheetRegion(region[0], region[1]);
-    SMTX_ANIMATED_SPRITES.value.push(new AnimatedSprite(region[0], sprites));
+async function cutSpritesheet(canvas: OffscreenCanvas, jsonRegions: Record<string, SpritesheetRegion[]>): Promise<void> {
+  for (const jsonKey of Object.keys(jsonRegions)) {
+    const sprites: Sprite[] = await cutSpritesheetRegion(canvas, jsonRegions, jsonKey);
+    SMTX_ANIMATED_SPRITES.value.push(new AnimatedSprite(jsonKey, sprites));
   }
   EventBus.sendSpritesheetInitEvent();
 }
 
-async function cutSpritesheetRegion(key: string, regionsRef: SpritesheetRegion[]): Promise<Sprite[]> {
-  const frames: SpritesheetRegion[] | undefined = SPRITESHEET_ANIMSPRITES[key];
-  if (!frames || frames.length === 0) throw new Error('Region does not exist for key: ' + key);
+async function cutSpritesheetRegion(canvas: OffscreenCanvas, jsonRegions: Record<string, SpritesheetRegion[]>, key: string): Promise<Sprite[]> {
+  const regions: SpritesheetRegion[] | undefined = jsonRegions[key];
+  if (!regions || regions.length === 0) throw new Error('Region does not exist for key: ' + key);
 
-  const spritesheetCtx = SPRITESHEET_CANVAS.getContext('2d', { willReadFrequently: true })!;
+  const spritesheetCtx = canvas.getContext('2d', { willReadFrequently: true })!;
   const resultSprites: Sprite[] = [];
-  for (let idx = 0; idx < frames.length; idx++) {
-    const f = frames[idx]!;
-    const imageData = spritesheetCtx.getImageData(f.x, f.y, f.w, f.h);
+
+  let curRegion: SpritesheetRegion | null = null
+  for (let idx = 0; idx < regions.length; idx++) {
+    curRegion = regions[idx]!;
+    const imageData = spritesheetCtx.getImageData(curRegion.x, curRegion.y, curRegion.w, curRegion.h);
     resultSprites.push({
-      region: regionsRef[idx]!,
+      region: curRegion,
       data: imageData,
     });
   }

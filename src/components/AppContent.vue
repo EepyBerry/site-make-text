@@ -99,7 +99,7 @@ import {
   type ExportSettingsOptions,
   type Vector2,
   type WordGridExposes,
-} from '@/types';
+} from '@/core/types';
 import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
 import { EventBus } from '@/core/event-bus';
 import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
@@ -128,6 +128,7 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     moreLettersOnTop: true,
     type: WordType.NOUN,
     crossedOut: false,
+    drawObject: false,
   },
   {
     x: 1,
@@ -137,6 +138,7 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     moreLettersOnTop: true,
     type: WordType.NOUN,
     crossedOut: false,
+    drawObject: false,
   },
   {
     x: 2,
@@ -146,6 +148,7 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     moreLettersOnTop: true,
     type: WordType.PROPERTY,
     crossedOut: false,
+    drawObject: false,
   },
 ]);
 const wordGridDimensions: Ref<Vector2> = ref({ x: 3, y: 3 });

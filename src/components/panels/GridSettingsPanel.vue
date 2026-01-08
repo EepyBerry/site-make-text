@@ -26,7 +26,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import type { Vector2 } from '@/types';
+import type { Vector2 } from '@/core/types';
 import { ref, type Ref } from 'vue';
 import SliderElement from '../elements/SliderElement.vue';
 

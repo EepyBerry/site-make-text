@@ -6,9 +6,9 @@
 import { EventBus } from '@/core/event-bus';
 import type { AnimatedSprite } from '@/core/models/animated-sprite.model';
 import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
-import { updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
+import { getWordObject, isWordSpecial, updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
-import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/types';
+import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/core/types';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
 
 const spriteCanvas = useTemplateRef('spriteCanvas')!;
@@ -16,12 +16,14 @@ const emptySprite: Ref<AnimatedSprite | null> = ref(null);
 const blockSprite: Ref<AnimatedSprite | null> = ref(null);
 const crossSprite: Ref<AnimatedSprite | null> = ref(null);
 const letterSprites: Ref<AnimatedSprite[]> = ref([]);
+const specialObjectSprite: Ref<AnimatedSprite | null> = ref(null);
 const spriteFrameIndex: Ref<number> = ref(0);
 
 const $props = withDefaults(defineProps<DynamicSpriteProps>(), { x: -1, y: -1 });
 
 onMounted(() => {
   if (!EventBus.spritesheetInitEvent.value) return;
+  _checkSpecialMode();
   _loadEmptySprite();
   _loadBlockSprite();
   _loadCrossSprite();
@@ -29,10 +31,12 @@ onMounted(() => {
   _updateCanvas(spriteCanvas.value!);
 });
 watch($props, () => {
+  _checkSpecialMode();
   _reloadLetterSprites();
   _updateCanvas(spriteCanvas.value!);
 });
 watch(EventBus.spritesheetInitEvent, () => {
+  _checkSpecialMode();
   _loadEmptySprite();
   _loadBlockSprite();
   _loadCrossSprite();
@@ -116,6 +120,13 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 // ----------------------------------------------------------------------------
 // internal functions
 
+function _checkSpecialMode() {
+  if (!isWordSpecial($props)) return;
+  const objectAnimSprite = getAnimatedSprite(getWordObject($props.word!));
+  specialObjectSprite.value = objectAnimSprite ?? null;
+  console.log(specialObjectSprite.value?.frames[0]?.data);
+}
+
 function _loadEmptySprite() {
   const emptyAnimSprite = getAnimatedSprite('empty');
   if (!emptyAnimSprite) throw new Error('Cannot find sprite for "empty"');
@@ -163,11 +174,19 @@ function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
   _clearCanvas(ctx);
   ctx.globalCompositeOperation = 'source-in';
 
+  // early return if the word is empty
   if (!letterSprites.value || letterSprites.value.length === 0) {
     _drawEmpty(ctx, spriteFrameIndex.value);
     return;
   }
 
+  // early return if we draw the object instead of the letters
+  if ($props.drawObject === true) {
+    _drawObject(ctx, spriteFrameIndex.value);
+    return;
+  }
+
+  // continue here if we draw the letters
   switch (letterSprites.value.length) {
     case 1:
       _drawLetter(ctx, spriteFrameIndex.value);
@@ -195,7 +214,6 @@ function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
       break;
   }
   _applyColor(ctx);
-
   if ($props.type === WordType.PROPERTY) {
     _drawBlock(ctx, spriteFrameIndex.value);
   }
@@ -312,17 +330,34 @@ function _drawBlock(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingCont
  * @param ctx
  */
 function _drawCross(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, frameIndex: number) {
-  const wordImgData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
+  const canvasData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
 
   const crossFrameData = crossSprite.value!.frames[frameIndex]!.data;
   for (let i = 0; i < crossFrameData.data.length; i += 4) {
-    wordImgData.data[i + 0] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 0]! : wordImgData.data[i + 0]!;
-    wordImgData.data[i + 1] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 1]! : wordImgData.data[i + 1]!;
-    wordImgData.data[i + 2] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 2]! : wordImgData.data[i + 2]!;
-    wordImgData.data[i + 3] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 3]! : wordImgData.data[i + 3]!;
+    canvasData.data[i + 0] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 0]! : canvasData.data[i + 0]!;
+    canvasData.data[i + 1] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 1]! : canvasData.data[i + 1]!;
+    canvasData.data[i + 2] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 2]! : canvasData.data[i + 2]!;
+    canvasData.data[i + 3] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 3]! : canvasData.data[i + 3]!;
   }
-  ctx.putImageData(wordImgData, 0, 0);
+  ctx.putImageData(canvasData, 0, 0);
 }
+
+// ----------------------------------------------------------------------------
+// special mode functions (when a word corresponds to an object and object drawing is enabled)
+
+function _drawObject(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, frameIndex: number) {
+  const canvasData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
+  const objectFrameData = specialObjectSprite.value!.frames[frameIndex]!.data;
+  const propsColorRGB = [Number(`0x${$props.color!.slice(1, 3)}`), Number(`0x${$props.color!.slice(3, 5)}`), Number(`0x${$props.color!.slice(5, 7)}`)]
+  for (let i = 0; i < objectFrameData.data.length; i += 4) {
+    canvasData.data[i+0] = (objectFrameData.data[i+0] === 170) ? propsColorRGB[0]! : objectFrameData.data[i+0]!
+    canvasData.data[i+1] = (objectFrameData.data[i+1] === 170) ? propsColorRGB[1]! : objectFrameData.data[i+1]!
+    canvasData.data[i+2] = (objectFrameData.data[i+2] === 170) ? propsColorRGB[2]! : objectFrameData.data[i+2]!
+    canvasData.data[i+3] = objectFrameData.data[i+3]!
+  }
+  ctx.putImageData(canvasData, 0, 0);
+}
+
 </script>
 
 <style scoped lang="scss">

@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import type { WordType } from '@/types';
+import type { WordType } from '@/core/types';
 import { useTemplateRef } from 'vue';
 
 defineProps<{

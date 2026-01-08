@@ -21,9 +21,11 @@
               :type="getGridElement($model, x, y)?.type"
               :more-letters-on-top="getGridElement($model, x, y)?.moreLettersOnTop"
               :crossed-out="getGridElement($model, x, y)?.crossedOut"
+              :draw-object="getGridElement($model, x, y)?.drawObject"
               width="5rem"
               :class="{ empty: getGridElement($model, x, y)?.word?.length === 0 }"
             />
+            <StaticSprite v-if="isWordSpecial(getGridElement($model, x, y))" class="word-special-hint" sprite="special-sparkle" width="5rem" />
           </button>
           <span v-else>
             <button
@@ -115,9 +117,10 @@ import {
   type DynamicSpriteFrameData,
   type DynamicSpriteProps,
   type Vector2,
-} from '@/types';
+} from '@/core/types';
 import { useFloating, offset, autoUpdate } from '@floating-ui/vue';
 import { ref, useTemplateRef, type Ref, type TemplateRef } from 'vue';
+import { isWordSpecial } from '@/core/utils/spritesheet-utils';
 
 // vue component data
 withDefaults(
@@ -172,6 +175,7 @@ function _addWord(x: number, y: number): void {
     type: WordType.NOUN,
     moreLettersOnTop: true,
     crossedOut: false,
+    drawObject: false,
   });
   setTimeout(() => _selectWord(document.getElementById(`button-word-${x}-${y}`)!, x, y));
 }
@@ -258,6 +262,11 @@ function _deleteSelectedWord() {
       opacity: 1;
     }
   }
+}
+.word-special-hint {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
 }
 
 #word-actions-panel {

@@ -88,6 +88,32 @@
         </RadioOptionElement>
       </RadioElement>
 
+      <template v-if="isWordSpecial(spriteProps)">
+        <StaticSprite width="2.5rem" sprite="special" />
+        <RadioElement>
+          <RadioOptionElement
+            v-model="spriteProps!.drawObject"
+            pid="prop-special"
+            id="drawword"
+            :value="false"
+            internal-aria-label="Draw letters as-is"
+            internal-title="Draw letters as-is"
+          >
+            <StaticSprite width="2.25rem" sprite="off" />
+          </RadioOptionElement>
+          <RadioOptionElement
+            v-model="spriteProps!.drawObject"
+            pid="prop-special"
+            id="drawobject"
+            :value="true"
+            internal-aria-label="Draw object representing this word"
+            internal-title="Draw object representing this word"
+          >
+            <StaticSprite width="2.25rem" sprite="on" />
+          </RadioOptionElement>
+        </RadioElement>
+      </template>
+
       <StaticSprite width="2.5rem" sprite="color" />
       <div id="prop-color"></div>
     </section>
@@ -107,11 +133,12 @@
 </template>
 
 <script setup lang="ts">
-import { WordType, type DynamicSpriteProps } from '@/types';
+import { WordType, type DynamicSpriteProps } from '@/core/types';
 import { computed } from 'vue';
 import RadioElement from '@/components/elements/RadioElement.vue';
 import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
 import { ColorPicker } from 'vue-accessible-color-picker';
+import { isWordSpecial } from '@/core/utils/spritesheet-utils';
 
 defineProps<{ showHint: boolean }>();
 const spriteProps = defineModel<DynamicSpriteProps | null>();
@@ -151,7 +178,6 @@ function setColor(data: { colors: object; cssColor: string }) {
 
   display: grid;
   grid-template-columns: 3rem 1fr;
-  grid-template-rows: repeat(4, auto);
   gap: 1rem 0;
 
   input {

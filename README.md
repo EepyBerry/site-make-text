@@ -41,8 +41,8 @@ Huge thanks to the awesome people below:
 
 ## 📓 Licensing
 
-The main spritesheet used by this application is released to the public domain under the Creative Commons Zero 1.0 Universal license ([CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)).
-Please consult the spritesheet [license file](src/assets/spritesheet/LICENCE) for full information.
+The spritesheets used by this application are released to the public domain under the Creative Commons Zero 1.0 Universal license ([CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)).
+Please consult the spritesheet [license file](src/assets/spritesheets/LICENCE) for full information.
 
 The rest of the assets and source code from this project are provided under the "I'm So Tired" Software License 1.0 - No-Resale version.<br>
 Please consult the main [license file](LICENSE) for full information.

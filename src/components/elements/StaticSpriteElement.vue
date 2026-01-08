@@ -6,10 +6,10 @@ import { EventBus } from '@/core/event-bus';
 import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
 import {
   computeSpritesheetBackgroundPosition,
-  computeSpritesheetBackgroundSize,
+  computeMainSpritesheetBackgroundSize,
   updateFrameIndex,
 } from '@/core/utils/spritesheet-utils';
-import type { SpritesheetRegion } from '@/types';
+import type { SpritesheetRegion } from '@/core/types';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 
 const spriteImageRef = useTemplateRef('spriteImageRef');
@@ -33,7 +33,7 @@ watch(EventBus.tickEvent, () => {
 
 function setBackgroundSize() {
   spriteFrameRegions.value.push(...getAnimatedSprite($props.sprite)!.regions);
-  const relativeBackgroundSize = computeSpritesheetBackgroundSize($props.width);
+  const relativeBackgroundSize = computeMainSpritesheetBackgroundSize($props.width);
   spriteImageRef.value!.style.backgroundSize = `${relativeBackgroundSize[0]}px ${relativeBackgroundSize[1]}px`;
 }
 function setBackgroundPosition() {
@@ -52,7 +52,7 @@ function setBackgroundPosition() {
   aspect-ratio: 1 / 1;
   width: v-bind(width);
   height: v-bind(width);
-  background-image: url('/src/assets/spritesheet/app-spritesheet.png');
+  background-image: url('/src/assets/spritesheets/app-spritesheet.png');
   background-repeat: no-repeat;
 }
 </style>

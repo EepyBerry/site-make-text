@@ -39,6 +39,7 @@ export type DynamicSpriteProps = {
   type?: WordType | string;
   moreLettersOnTop?: boolean;
   crossedOut?: boolean;
+  drawObject?: boolean;
 };
 export type DynamicSpriteFrameData = { frames: ImageData[] } & Required<Vector2>;
 export type DynamicSpriteExposes = {

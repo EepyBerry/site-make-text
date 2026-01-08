@@ -1,4 +1,4 @@
-import type { DynamicSpriteFrameData, ExportSettingsOptions, Vector2 } from '@/types';
+import type { DynamicSpriteFrameData, ExportSettingsOptions, Vector2 } from '@/core/types';
 import { SPRITESHEET_CELL_SIZE } from '../globals';
 import { clamp } from '../utils/math.utils';
 import GIFImageDataEncoder from '../encoders/gif.encoder';

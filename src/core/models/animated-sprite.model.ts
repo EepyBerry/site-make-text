@@ -1,4 +1,4 @@
-import type { Sprite, SpritesheetRegion } from '@/types';
+import type { Sprite, SpritesheetRegion } from '@/core/types';
 
 export class AnimatedSprite {
   private _key: string;

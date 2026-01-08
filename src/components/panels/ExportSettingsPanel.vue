@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import RadioElement from '@/components/elements/RadioElement.vue';
 import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
-import type { ExportSettingsOptions } from '@/types';
+import type { ExportSettingsOptions } from '@/core/types';
 import { ref, type Ref } from 'vue';
 import SliderElement from '../elements/SliderElement.vue';
 

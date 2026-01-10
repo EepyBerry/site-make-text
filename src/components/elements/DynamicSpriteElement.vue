@@ -10,6 +10,8 @@ import { getWordObject, isWordSpecial, updateFrameIndex, updateRawFrameIndex } f
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/core/types';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
+import { allComponentsEqualTo } from '@/core/utils/color.utils';
+import tinycolor from 'tinycolor2';
 
 const spriteCanvas = useTemplateRef('spriteCanvas')!;
 const emptySprite: Ref<AnimatedSprite | null> = ref(null);
@@ -121,10 +123,12 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 // internal functions
 
 function _checkSpecialMode() {
-  if (!isWordSpecial($props)) return;
+  if (!isWordSpecial($props)) {
+    specialObjectSprite.value = null;
+    return;
+  }
   const objectAnimSprite = getAnimatedSprite(getWordObject($props.word!));
   specialObjectSprite.value = objectAnimSprite ?? null;
-  console.log(specialObjectSprite.value?.frames[0]?.data);
 }
 
 function _loadEmptySprite() {
@@ -181,7 +185,7 @@ function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
   }
 
   // early return if we draw the object instead of the letters
-  if ($props.drawObject === true) {
+  if ($props.drawObject === true && specialObjectSprite.value !== null) {
     _drawObject(ctx, spriteFrameIndex.value);
     return;
   }
@@ -348,11 +352,37 @@ function _drawCross(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingCont
 function _drawObject(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, frameIndex: number) {
   const canvasData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
   const objectFrameData = specialObjectSprite.value!.frames[frameIndex]!.data;
-  const propsColorRGB = [Number(`0x${$props.color!.slice(1, 3)}`), Number(`0x${$props.color!.slice(3, 5)}`), Number(`0x${$props.color!.slice(5, 7)}`)]
+  let propsColorRGB: tinycolor.Instance | null = null
   for (let i = 0; i < objectFrameData.data.length; i += 4) {
-    canvasData.data[i+0] = (objectFrameData.data[i+0] === 170) ? propsColorRGB[0]! : objectFrameData.data[i+0]!
-    canvasData.data[i+1] = (objectFrameData.data[i+1] === 170) ? propsColorRGB[1]! : objectFrameData.data[i+1]!
-    canvasData.data[i+2] = (objectFrameData.data[i+2] === 170) ? propsColorRGB[2]! : objectFrameData.data[i+2]!
+    if (allComponentsEqualTo(objectFrameData.data[i+0]!, objectFrameData.data[i+1]!, objectFrameData.data[i+2]!, 221)) {
+      propsColorRGB = tinycolor($props.color)
+      propsColorRGB.lighten(30);
+      canvasData.data[i+0] = propsColorRGB.toRgb().r
+      canvasData.data[i+1] = propsColorRGB.toRgb().g
+      canvasData.data[i+2] = propsColorRGB.toRgb().b
+      canvasData.data[i+3] = objectFrameData.data[i+3]!
+      continue;
+    }
+    if (allComponentsEqualTo(objectFrameData.data[i+0]!, objectFrameData.data[i+1]!, objectFrameData.data[i+2]!, 170)) {
+      propsColorRGB = tinycolor($props.color)
+      canvasData.data[i+0] = propsColorRGB.toRgb().r
+      canvasData.data[i+1] = propsColorRGB.toRgb().g
+      canvasData.data[i+2] = propsColorRGB.toRgb().b
+      canvasData.data[i+3] = objectFrameData.data[i+3]!
+      continue;
+    }
+    if (allComponentsEqualTo(objectFrameData.data[i+0]!, objectFrameData.data[i+1]!, objectFrameData.data[i+2]!, 85)) {
+      propsColorRGB = tinycolor($props.color)
+      propsColorRGB.darken(15);
+      canvasData.data[i+0] = propsColorRGB.toRgb().r
+      canvasData.data[i+1] = propsColorRGB.toRgb().g
+      canvasData.data[i+2] = propsColorRGB.toRgb().b
+      canvasData.data[i+3] = objectFrameData.data[i+3]!
+      continue;
+    }
+    canvasData.data[i+0] = objectFrameData.data[i+0]!
+    canvasData.data[i+1] = objectFrameData.data[i+1]!
+    canvasData.data[i+2] = objectFrameData.data[i+2]!
     canvasData.data[i+3] = objectFrameData.data[i+3]!
   }
   ctx.putImageData(canvasData, 0, 0);

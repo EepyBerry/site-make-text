@@ -3,14 +3,10 @@
 </template>
 <script setup lang="ts">
 import { EventBus } from '@/core/event-bus';
-import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
-import {
-  computeSpritesheetBackgroundPosition,
-  computeMainSpritesheetBackgroundSize,
-  updateFrameIndex,
-} from '@/core/utils/spritesheet-utils';
+import { getAnimatedSprite, getSpritesheet, updateFrameIndex } from '@/core/helpers/spritesheet.helper';
 import type { SpritesheetRegion } from '@/core/types';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
+import { REM_SIZE, SPRITESHEET_CELL_SIZE } from '@/core/globals';
 
 const spriteImageRef = useTemplateRef('spriteImageRef');
 const spriteFrameRegions: Ref<SpritesheetRegion[]> = ref([]);
@@ -45,6 +41,22 @@ function setBackgroundPosition() {
   );
   spriteImageRef.value!.style.backgroundPosition = `-${relativeBackgroundPosition[0]}px -${relativeBackgroundPosition[1]}px`;
 }
+
+function computeMainSpritesheetBackgroundSize(elWidth: string): number[] {
+  const mainSpritesheet = getSpritesheet('main')!
+  const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
+  const backgroundSizeX = (mainSpritesheet.width * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  const backgroundSizeY = (mainSpritesheet.height * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  return [backgroundSizeX, backgroundSizeY];
+}
+
+function computeSpritesheetBackgroundPosition(frameX: number, frameY: number, elWidth: string): number[] {
+  const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
+  const backgroundPositionX = (frameX * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  const backgroundPositionY = (frameY * elWidthAsNumber) / SPRITESHEET_CELL_SIZE;
+  return [backgroundPositionX, backgroundPositionY];
+}
+
 </script>
 
 <style scoped lang="scss">

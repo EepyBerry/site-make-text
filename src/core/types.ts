@@ -1,11 +1,17 @@
-export interface Sprite {
-  region: SpritesheetRegion;
-  data: ImageData;
-}
+// ----------------------------------------------------------------------------
+// spritesheet types
 
-export interface Vector2 {
-  x?: number;
-  y?: number;
+import type { SpritesheetSource } from './models/animated-sprite.model';
+
+export interface Spritesheet {
+  width: number;
+  height: number;
+  source: SpritesheetSource;
+  descriptor: JsonSpritesheetDescriptor;
+}
+export interface JsonSpritesheetDescriptor {
+  wordmap: Record<string, string>;
+  regions: Record<string, SpritesheetRegion[]>;
 }
 export interface SpritesheetRegion {
   x: number;
@@ -14,9 +20,21 @@ export interface SpritesheetRegion {
   h: number;
 }
 
+export interface Sprite {
+  region: SpritesheetRegion;
+  data: ImageData;
+}
+
+// ----------------------------------------------------------------------------
+// generic types
+
 export enum WordType {
   NOUN = 'noun',
   PROPERTY = 'property',
+}
+export interface Vector2 {
+  x?: number;
+  y?: number;
 }
 
 // ----------------------------------------------------------------------------
@@ -44,6 +62,15 @@ export type DynamicSpriteProps = {
 export type DynamicSpriteFrameData = { frames: ImageData[] } & Required<Vector2>;
 export type DynamicSpriteExposes = {
   extractFrames: (scale?: number) => DynamicSpriteFrameData;
+};
+
+// ----------------------------------------------------------------------------
+// SpritesheetSettingsPanel
+
+export type SpritesheetSettingsOptions = {
+  usermadeFile?: File;
+  usermadeDescriptor?: JsonSpritesheetDescriptor;
+  enableUsermadeObjects: boolean;
 };
 
 // ----------------------------------------------------------------------------

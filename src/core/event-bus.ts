@@ -8,6 +8,7 @@ type WindowEventRegistryOptions = { autoEnable: boolean };
 
 export class EventBus {
   public static spritesheetInitEvent: Ref<boolean> = ref(false);
+  public static spritesheetReloadEvent: Ref<number> = ref(0);
   public static tickEvent: Ref<number> = ref(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static windowEventRegistry: Map<keyof WindowEventMap, any> = new Map<
@@ -19,6 +20,11 @@ export class EventBus {
   // sent once when spritesheet data is initialized
   public static sendSpritesheetInitEvent() {
     EventBus.spritesheetInitEvent.value = true;
+  }
+
+  // sent when the custom spritesheet has changed
+  public static sendSpritesheetReloadEvent() {
+    EventBus.spritesheetReloadEvent.value = new Date().getMilliseconds();
   }
 
   // use current millis as a tick event value

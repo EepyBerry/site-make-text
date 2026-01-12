@@ -88,7 +88,7 @@
         </RadioOptionElement>
       </RadioElement>
 
-      <template v-if="isWordSpecial(spriteProps)">
+      <template v-if="isWordSpecial(spriteProps?.word)">
         <StaticSprite width="2.5rem" sprite="special" />
         <RadioElement>
           <RadioOptionElement
@@ -138,7 +138,7 @@ import { computed } from 'vue';
 import RadioElement from '@/components/elements/RadioElement.vue';
 import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
 import { ColorPicker } from 'vue-accessible-color-picker';
-import { isWordSpecial } from '@/core/utils/spritesheet-utils';
+import { isWordSpecial } from '@/core/helpers/spritesheet.helper';
 
 defineProps<{ showHint: boolean }>();
 const spriteProps = defineModel<DynamicSpriteProps | null>();

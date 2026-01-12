@@ -42,6 +42,23 @@
         />
       </div>
 
+      <!-- spritesheet settings panel -->
+      <div id="spritesheet-settings-panel" :class="{ collapsed: !spritesheetSettingsToggle }">
+        <button
+          id="button-toggle-spritesheet-settings"
+          type="button"
+          class="animated"
+          :class="{ active: !!spritesheetSettingsToggle }"
+          @click="toggleSpritesheetSettingsPanel"
+          aria-label="Toggle spritesheet settings panel"
+          title="Toggle spritesheet settings panel"
+        >
+          <StaticSprite v-if="spritesheetSettingsToggle" width="2.5rem" sprite="spritesheet-opened" />
+          <StaticSprite v-else width="2.5rem" sprite="spritesheet-closed" />
+        </button>
+        <SpritesheetSettingsPanel @change="updateGridSize" />
+      </div>
+
       <!-- grid settings panel -->
       <div id="grid-settings-panel" :class="{ collapsed: !gridSettingsToggle }">
         <button
@@ -106,6 +123,7 @@ import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
 import WordGridElement from './elements/WordGridElement.vue';
 import GridSettingsPanel from './panels/GridSettingsPanel.vue';
 import { exportWordData } from '@/core/helpers/export.helper';
+import SpritesheetSettingsPanel from './panels/SpritesheetSettingsPanel.vue';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
@@ -115,6 +133,7 @@ const isExporting: Ref<boolean> = ref(false);
 // compact mode & toggle refs
 const compactMode: Ref<boolean> = ref(false);
 const wordPropertiesToggle: Ref<boolean> = ref(false);
+const spritesheetSettingsToggle: Ref<boolean> = ref(false);
 const gridSettingsToggle: Ref<boolean> = ref(false);
 const exportSettingsToggle: Ref<boolean> = ref(false);
 
@@ -162,6 +181,7 @@ const checkPointerTarget = (evt: Event) => {
   if ((evt.target as HTMLElement).id === 'section-words-scrollzone') {
     selectedWord.value = null;
     wordPropertiesToggle.value = false;
+    spritesheetSettingsToggle.value = false;
     gridSettingsToggle.value = false;
     exportSettingsToggle.value = false;
     wordGridRef.value?.deselect();
@@ -186,17 +206,26 @@ function togglePropertiesPanel() {
   if (compactMode.value) {
     wordPropertiesToggle.value = !wordPropertiesToggle.value;
   }
+  spritesheetSettingsToggle.value = false;
   gridSettingsToggle.value = false;
   exportSettingsToggle.value = false;
 }
 function toggleExportSettingsPanel() {
   exportSettingsToggle.value = !exportSettingsToggle.value;
   wordPropertiesToggle.value = false;
+  spritesheetSettingsToggle.value = false;
   gridSettingsToggle.value = false;
 }
 function toggleGridSettingsPanel() {
   gridSettingsToggle.value = !gridSettingsToggle.value;
   wordPropertiesToggle.value = false;
+  spritesheetSettingsToggle.value = false;
+  exportSettingsToggle.value = false;
+}
+function toggleSpritesheetSettingsPanel() {
+  spritesheetSettingsToggle.value = !spritesheetSettingsToggle.value;
+  wordPropertiesToggle.value = false;
+  gridSettingsToggle.value = false;
   exportSettingsToggle.value = false;
 }
 
@@ -305,17 +334,18 @@ main {
     top: -100%;
   }
 }
+#spritesheet-settings-panel,
 #grid-settings-panel,
 #export-settings-panel {
   position: absolute;
   width: fit-content;
-  max-width: 14rem;
   border-radius: 8px;
 
   display: flex;
   justify-content: center;
 
   #button-toggle-export-settings,
+  #button-toggle-spritesheet-settings,
   #button-toggle-grid-settings {
     padding: 0.5rem;
     background: var(--smtx-panel);
@@ -325,9 +355,22 @@ main {
     display: none;
   }
 }
-#grid-settings-panel {
+#spritesheet-settings-panel {
   top: 1rem;
   left: 1rem;
+  flex-direction: column;
+
+  #button-toggle-spritesheet-settings {
+    align-self: flex-start;
+    &.active {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+}
+#grid-settings-panel {
+  top: 1rem;
+  left: 5.5rem;
   flex-direction: column;
 
   #button-toggle-grid-settings {
@@ -398,10 +441,15 @@ main {
       display: none;
     }
   }
-  #grid-settings-panel {
+  #spritesheet-settings-panel {
     z-index: 10;
     top: 1rem;
     left: 5.5rem;
+  }
+  #grid-settings-panel {
+    z-index: 10;
+    top: 1rem;
+    left: 10rem;
   }
 }
 </style>

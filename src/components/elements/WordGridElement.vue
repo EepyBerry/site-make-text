@@ -25,7 +25,7 @@
               width="5rem"
               :class="{ empty: getGridElement($model, x, y)?.word?.length === 0 }"
             />
-            <StaticSprite v-if="isWordSpecial(getGridElement($model, x, y))" class="word-special-hint" sprite="special-sparkle" width="5rem" />
+            <StaticSprite v-if="isWordSpecial(getGridElement($model, x, y)?.word)" class="word-special-hint" sprite="special-sparkle" width="5rem" />
           </button>
           <span v-else>
             <button
@@ -120,7 +120,7 @@ import {
 } from '@/core/types';
 import { useFloating, offset, autoUpdate } from '@floating-ui/vue';
 import { ref, useTemplateRef, type Ref, type TemplateRef } from 'vue';
-import { isWordSpecial } from '@/core/utils/spritesheet-utils';
+import { isWordSpecial } from '@/core/helpers/spritesheet.helper';
 
 // vue component data
 withDefaults(
@@ -231,12 +231,12 @@ function _deleteSelectedWord() {
   pointer-events: all;
 
   display: grid;
-  grid-template-columns: repeat(var(--width), 5.5rem);
-  grid-template-rows: repeat(var(--height), 5.5rem);
+  grid-template-columns: repeat(var(--width), 5rem);
+  grid-template-rows: repeat(var(--height), 5rem);
 
   & > * {
-    width: 5.5rem;
-    height: 5.5rem;
+    width: 5rem;
+    height: 5rem;
     border-right: 1px dashed var(--smtx-grid-border);
     border-bottom: 1px dashed var(--smtx-grid-border);
 

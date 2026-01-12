@@ -5,8 +5,7 @@
 <script setup lang="ts">
 import { EventBus } from '@/core/event-bus';
 import type { AnimatedSprite } from '@/core/models/animated-sprite.model';
-import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
-import { getWordObject, isWordSpecial, updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
+import { getAnimatedSprite, getWordObject, isWordSpecial, updateFrameIndex, updateRawFrameIndex } from '@/core/helpers/spritesheet.helper';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/core/types';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
@@ -38,6 +37,14 @@ watch($props, () => {
   _updateCanvas(spriteCanvas.value!);
 });
 watch(EventBus.spritesheetInitEvent, () => {
+  _checkSpecialMode();
+  _loadEmptySprite();
+  _loadBlockSprite();
+  _loadCrossSprite();
+  _reloadLetterSprites();
+  _updateCanvas(spriteCanvas.value!);
+});
+watch(EventBus.spritesheetReloadEvent, () => {
   _checkSpecialMode();
   _loadEmptySprite();
   _loadBlockSprite();
@@ -123,7 +130,7 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 // internal functions
 
 function _checkSpecialMode() {
-  if (!isWordSpecial($props)) {
+  if (!isWordSpecial($props.word)) {
     specialObjectSprite.value = null;
     return;
   }

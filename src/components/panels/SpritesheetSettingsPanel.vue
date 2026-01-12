@@ -26,8 +26,8 @@
     <RadioElement id="object-spritesheet-toggle">
       <RadioOptionElement
         v-model="spritesheetSettings.enableUsermadeObjects"
-        pid="setting-type"
-        id="all"
+        pid="setting-spritesheet"
+        id="default-only"
         :value="false"
         internal-aria-label="Use default object spritesheet only"
         internal-title="Use default object spritesheet only"
@@ -37,8 +37,8 @@
       </RadioOptionElement>
       <RadioOptionElement
         v-model="spritesheetSettings.enableUsermadeObjects"
-        pid="setting-format"
-        id="combined"
+        pid="setting-spritesheet"
+        id="default-with-custom"
         :value="true"
         internal-aria-label="Use custom spritesheet; overrides default sprites"
         internal-title="Use custom spritesheet; overrides default sprites"

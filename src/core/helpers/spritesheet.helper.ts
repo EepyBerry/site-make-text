@@ -84,7 +84,6 @@ export async function loadUsermadeObjectSpritesheet(
 }
 
 export function setEnableUsermadeObjectSpritesheet(value: boolean) {
-  console.log('dskljfsh ' + value);
   SMTX_ENABLE_USERMADE_SPRITESHEET.value = value;
   EventBus.sendSpritesheetReloadEvent();
 }

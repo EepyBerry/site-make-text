@@ -27,7 +27,7 @@
       </RadioOptionElement>
       <RadioOptionElement
         v-model="exportSettings.combinedOnly"
-        pid="setting-format"
+        pid="setting-type"
         id="combined"
         :value="true"
         internal-aria-label="Export combined image only"

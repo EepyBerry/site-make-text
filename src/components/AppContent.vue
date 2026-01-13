@@ -56,7 +56,7 @@
           <StaticSprite v-if="spritesheetSettingsToggle" width="2.5rem" sprite="spritesheet-opened" />
           <StaticSprite v-else width="2.5rem" sprite="spritesheet-closed" />
         </button>
-        <SpritesheetSettingsPanel @change="updateGridSize" />
+        <SpritesheetSettingsPanel />
       </div>
 
       <!-- grid settings panel -->

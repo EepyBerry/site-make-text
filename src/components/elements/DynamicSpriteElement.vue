@@ -88,6 +88,17 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
   const frames: ImageData[] = [];
   for (let i = 0; i < 3; i++) {
     _clearCanvas(rawCtx);
+
+    // early skip if we draw the object instead of the letters
+    if ($props.drawObject === true && specialObjectSprite.value !== null) {
+      _drawObject(rawCtx, i);
+      _clearCanvas(scaleCtx);
+      scaleCtx.drawImage(rawCanvas, 0, 0);
+      frames.push(scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize));
+      continue;
+    }
+
+    // Draw letters
     switch (letterSprites.value.length) {
       case 1:
         _drawLetter(rawCtx, i);

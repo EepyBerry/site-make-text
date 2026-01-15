@@ -5,11 +5,11 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
 <template>
   <header id="smtx-header">
     <div id="logo-container">
-      <StaticSprite width="4rem" sprite="logo-site" />
+      <StaticSprite width="4rem" height="4rem" sprite="logo-site" />
       <hr />
-      <StaticSprite width="4rem" sprite="logo-make" />
+      <StaticSprite width="4rem" height="4rem" sprite="logo-make" />
       <hr />
-      <StaticSprite width="4rem" sprite="logo-text" />
+      <StaticSprite width="4rem" height="4rem" sprite="logo-text" />
     </div>
   </header>
 </template>

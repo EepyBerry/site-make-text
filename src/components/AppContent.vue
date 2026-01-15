@@ -2,7 +2,7 @@
   <main>
     <!-- export "loader" -->
     <div id="export-loader" :class="{ visible: isExporting }">
-      <StaticSprite width="5rem" sprite="wait" />
+      <StaticSprite width="5rem" height="5rem" sprite="wait" />
       <p>&lt;exporting...&gt;</p>
     </div>
 
@@ -21,15 +21,15 @@
         aria-label="Toggle word properties panel"
         title="Toggle word properties panel"
       >
-        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" sprite="properties-opened" />
-        <StaticSprite v-else width="2.5rem" sprite="properties-closed" />
+        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" height="2.5rem" sprite="properties-opened" />
+        <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="properties-closed" />
       </button>
       <WordPropertiesPanel :show-hint="!selectedWord" v-model="selectedWord" />
     </aside>
 
     <!-- main section -->
-    <section id="section-words">
-      <div ref="sectionRef" id="section-words-scrollzone">
+    <section id="words">
+      <div ref="sectionRef" id="words-scrollzone">
         <!-- main content -->
         <WordGridElement
           ref="wordGridRef"
@@ -53,8 +53,8 @@
           aria-label="Toggle spritesheet settings panel"
           title="Toggle spritesheet settings panel"
         >
-          <StaticSprite v-if="spritesheetSettingsToggle" width="2.5rem" sprite="spritesheet-opened" />
-          <StaticSprite v-else width="2.5rem" sprite="spritesheet-closed" />
+          <StaticSprite v-if="spritesheetSettingsToggle" width="2.5rem" height="2.5rem" sprite="spritesheet-opened" />
+          <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="spritesheet-closed" />
         </button>
         <SpritesheetSettingsPanel />
       </div>
@@ -70,8 +70,8 @@
           aria-label="Toggle grid settings panel"
           title="Toggle grid settings panel"
         >
-          <StaticSprite v-if="gridSettingsToggle" width="2.5rem" sprite="grid-opened" />
-          <StaticSprite v-else width="2.5rem" sprite="grid-closed" />
+          <StaticSprite v-if="gridSettingsToggle" width="2.5rem" height="2.5rem" sprite="grid-opened" />
+          <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="grid-closed" />
         </button>
         <GridSettingsPanel @change="updateGridSize" />
       </div>
@@ -85,7 +85,7 @@
         aria-label="Remove all words (reset)"
         title="Remove all words (reset)"
       >
-        <StaticSprite width="2.5rem" sprite="reset" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="reset" />
       </button>
 
       <!-- export panel -->
@@ -99,8 +99,8 @@
           aria-label="Toggle export settings panel"
           title="Toggle export settings panel"
         >
-          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" sprite="export-opened" />
-          <StaticSprite v-else width="2.5rem" sprite="export-closed" />
+          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" height="2.5rem" sprite="export-opened" />
+          <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="export-closed" />
         </button>
         <ExportSettingsPanel @export="exportWords" />
       </div>
@@ -178,7 +178,7 @@ const selectedWord: Ref<DynamicSpriteProps | null> = ref(null);
 
 const checkCompactMode = () => (compactMode.value = window.innerWidth <= 1023);
 const checkPointerTarget = (evt: Event) => {
-  if ((evt.target as HTMLElement).id === 'section-words-scrollzone') {
+  if ((evt.target as HTMLElement).id === 'words-scrollzone') {
     selectedWord.value = null;
     wordPropertiesToggle.value = false;
     spritesheetSettingsToggle.value = false;
@@ -301,7 +301,7 @@ main {
   }
 }
 
-#section-words {
+#words {
   position: relative;
   overflow: hidden;
   display: flex;
@@ -316,7 +316,7 @@ main {
     border-radius: 8px;
   }
 
-  #section-words-scrollzone {
+  #words-scrollzone {
     flex: 1;
     width: 100%;
     height: 100%;

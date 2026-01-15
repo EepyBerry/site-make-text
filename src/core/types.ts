@@ -78,6 +78,12 @@ export type SpritesheetSettingsOptions = {
 
 export type ExportSettingsOptions = {
   scale: number;
+  cropGrid: boolean;
   format: 'gif' | 'webp';
   combinedOnly: boolean;
 };
+
+// ----------------------------------------------------------------------------
+// Dialogs
+
+export type DialogExposes = { open: () => void }

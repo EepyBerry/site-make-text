@@ -1,6 +1,6 @@
 <template>
-  <section id="section-spritesheet-settings">
-    <StaticSprite width="2.5rem" sprite="spritesheet-image" />
+  <section id="spritesheet-settings">
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="spritesheet-image" />
     <FileInputElement
       pid="setting-spritesheet-file"
       accept="image/*"
@@ -8,10 +8,10 @@
       internal-aria-label="Import the spritesheet image"
       @change="handleSpritesheetFile"
     >Import&nbsp;file...</FileInputElement>
-    <StaticSprite v-if="spritesheetSettings.usermadeFile" class="file-indicator" width="2rem" sprite="check" />
-    <StaticSprite v-else class="file-indicator" width="2rem" sprite="cross" />
+    <StaticSprite v-if="spritesheetSettings.usermadeFile" class="file-indicator" width="2rem"  height="2rem" sprite="check" />
+    <StaticSprite v-else class="file-indicator" width="2rem" height="2rem" sprite="cross" />
 
-    <StaticSprite width="2.5rem" sprite="spritesheet-descriptor" />
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="spritesheet-descriptor" />
     <FileInputElement
       pid="setting-descriptor"
       accept="application/json"
@@ -19,10 +19,10 @@
       internal-title="Import the spritesheet descriptor file"
       internal-aria-label="Import the spritesheet descriptor file"
     >Import&nbsp;file...</FileInputElement>
-    <StaticSprite v-if="spritesheetSettings.usermadeDescriptor" class="file-indicator" width="2rem" sprite="check" />
-    <StaticSprite v-else class="file-indicator" width="2rem" sprite="cross" />
+    <StaticSprite v-if="spritesheetSettings.usermadeDescriptor" class="file-indicator" width="2rem"  height="2rem" sprite="check" />
+    <StaticSprite v-else class="file-indicator" width="2rem" height="2rem" sprite="cross" />
 
-    <StaticSprite width="2.5rem" sprite="spritesheet-type" />
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="spritesheet-type" />
     <RadioElement id="object-spritesheet-toggle">
       <RadioOptionElement
         v-model="spritesheetSettings.enableUsermadeObjects"
@@ -33,7 +33,7 @@
         internal-title="Use default object spritesheet only"
         @select="setEnableUsermadeObjectSpritesheet(false)"
       >
-        <StaticSprite width="2.5rem" sprite="off" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="off" />
       </RadioOptionElement>
       <RadioOptionElement
         v-model="spritesheetSettings.enableUsermadeObjects"
@@ -44,7 +44,7 @@
         internal-title="Use custom spritesheet; overrides default sprites"
         @select="setEnableUsermadeObjectSpritesheet(true)"
       >
-        <StaticSprite width="2.5rem" sprite="on" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="on" />
       </RadioOptionElement>
     </RadioElement>
   </section>
@@ -100,7 +100,7 @@ function checkSpritesheetValidity() {
 
 </script>
 <style lang="scss">
-#section-spritesheet-settings {
+#spritesheet-settings {
   width: 100%;
   padding: 0.5rem;
   background: var(--smtx-panel);

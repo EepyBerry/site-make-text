@@ -21,7 +21,7 @@
         id="nocrop"
         :value="false"
         internal-aria-label="Export grid as-is"
-        internal-title="Export all words separately"
+        internal-title="Export grid as-is"
       >
       <StaticSprite width="2.5rem" height="2.5rem" sprite="off" />
       </RadioOptionElement>
@@ -47,7 +47,7 @@
         internal-aria-label="Export all words separately"
         internal-title="Export all words separately"
       >
-        <DynamicSprite word="separate" width="2.5rem" height="2.5rem" :more-letters-on-top="false" />
+        <DynamicSprite word="separate" width="2.5rem" :more-letters-on-top="false" />
       </RadioOptionElement>
       <RadioOptionElement
         v-model="exportSettings.combinedOnly"
@@ -57,7 +57,7 @@
         internal-aria-label="Export combined image only"
         internal-title="Export combined image only"
       >
-        <DynamicSprite word="combined" width="2.5rem" height="2.5rem" :more-letters-on-top="false" />
+        <DynamicSprite word="combined" width="2.5rem" :more-letters-on-top="false" />
       </RadioOptionElement>
     </RadioElement>
 

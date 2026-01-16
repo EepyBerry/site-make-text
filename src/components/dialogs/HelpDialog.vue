@@ -13,11 +13,11 @@
       <div id="spritesheet-file-explanations">
         <div class="file-explanation">
           <StaticSprite width="3.5rem" height="3.5rem" sprite="spritesheet-image" />
-          <span>An image of your sprites, arranged as a grid of <strong>24px·24px</strong> cells (.png, .webp,...)</span>
+          <span>An image of your sprites, arranged as a grid of <strong>24x24px</strong> cells (.png, .webp,...)</span>
         </div>
         <div class="file-explanation">
           <StaticSprite width="3.5rem" height="3.5rem" sprite="spritesheet-descriptor" />
-          <span>A "descriptor" file containing the sizes and positions of your sprites (.json)</span>
+          <span>A "descriptor" file containing positions of your sprites (.json)</span>
         </div>
       </div>
       <p>
@@ -122,6 +122,10 @@
 import type { DialogExposes } from '@/core/types';
 import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
 import ExampleJsonDescriptor from './ExampleJsonDescriptor.vue';
+import FileSaver from 'file-saver';
+import JSZip from 'jszip';
+import exampleSpritesheetImageUrl from '/examples/example-spritesheet.png?url'
+import exampleSpritesheetDescriptorUrl from '/examples/example-spritesheet.json?url'
 
 const dialogRef = useTemplateRef('dialogRef');
 const handleClick = (evt: Event) => {
@@ -144,8 +148,14 @@ function open() {
   dialogRef.value!.showModal()
 }
 
-function downloadExampleSpritesheet() {
-  // TODO
+async function downloadExampleSpritesheet() {
+  const jsZip = new JSZip();
+  const exampleImage = await fetch(exampleSpritesheetImageUrl);
+  const exampleDescriptor = await fetch(exampleSpritesheetDescriptorUrl);
+  jsZip.file('example-spritesheet.png', await exampleImage.blob());
+  jsZip.file('example-spritesheet.json', await exampleDescriptor.blob());
+  const zipFile = await jsZip.generateAsync({ type: 'blob' });
+  FileSaver.saveAs(zipFile, 'sitemaketext-example-spritesheet.zip');
 }
 </script>
 

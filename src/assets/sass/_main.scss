@@ -51,6 +51,7 @@ body:has(dialog[open]) {
 
 ul,
 ol {
+  list-style-position: inside;
   list-style-type: none;
   padding: 0;
 }

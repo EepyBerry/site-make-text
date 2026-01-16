@@ -153,13 +153,13 @@ async function cutSpritesheetRegion(
   key: string,
 ): Promise<Sprite[]> {
   const regions: SpritesheetRegion[] | undefined = jsonRegions[key];
-  if (!regions || regions.length === 0) throw new Error('Region does not exist for key: ' + key);
+  if (!regions || regions.length < 1) throw new Error('Region does not exist for key: ' + key);
 
   const resultSprites: Sprite[] = [];
   let curRegion: SpritesheetRegion | null = null;
-  for (let idx = 0; idx < regions.length; idx++) {
-    curRegion = regions[idx]!;
-    const imageData = canvasContext.getImageData(curRegion.x, curRegion.y, curRegion.w, curRegion.h);
+  for (let idx = 0; idx < 3; idx++) {
+    curRegion = regions[idx] ?? regions[idx - 1]!;
+    const imageData = canvasContext.getImageData(curRegion.x, curRegion.y, curRegion.w ?? 24, curRegion.h ?? 24);
     resultSprites.push({
       region: curRegion,
       data: imageData,

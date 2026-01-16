@@ -325,14 +325,6 @@ main {
     display: flex;
     align-items: center;
   }
-
-  .sprite.caret {
-    transform: none;
-    pointer-events: none;
-    cursor: default;
-    position: absolute;
-    top: -100%;
-  }
 }
 #spritesheet-settings-panel,
 #grid-settings-panel,

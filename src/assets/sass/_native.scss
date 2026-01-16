@@ -59,3 +59,7 @@ a:not(:has(div)):visited {
 a:not(:has(div)):hover {
   filter: brightness(1.5);
 }
+
+span[emphasis], p[emphasis] {
+  color: var(--smtx-text-highlight);
+}

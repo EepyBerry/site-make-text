@@ -16,8 +16,8 @@ export interface JsonSpritesheetDescriptor {
 export interface SpritesheetRegion {
   x: number;
   y: number;
-  w: number;
-  h: number;
+  w?: number;
+  h?: number;
 }
 
 export interface Sprite {

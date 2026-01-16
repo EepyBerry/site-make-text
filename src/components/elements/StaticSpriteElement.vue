@@ -64,6 +64,8 @@ function computeMainSpritesheetBackgroundPosition(frameX: number, frameY: number
 
 <style scoped lang="scss">
 .sprite {
+  min-width: v-bind(width);
+  min-height: v-bind(height);
   width: v-bind(width);
   height: v-bind(height);
   background-image: url('/src/assets/spritesheets/app-spritesheet.png');

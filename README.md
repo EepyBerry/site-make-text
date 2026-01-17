@@ -9,8 +9,11 @@
   <img src="https://img.shields.io/badge/Vite-7.2-%23BD34FE?logo=vite&labelColor=%2335495E&logoColor=white">
 </p>
 
-A simple word maker in the style of [Baba Is You](https://hempuli.com/baba/)! <br>
+A simple word (and object!) maker in the style of [Baba Is You](https://hempuli.com/baba/)! <br>
 Includes options to make `NOUN`s, `PROPERTY`s, cross them out, colour them and more!
+
+## Latest update: v1.3 - SITE MAKE FRIEND 🐈
+⭐ Introduces the ability to add your own objects via a custom spritesheet, and export them alongside your words!
 
 **💬✨ [Check out the app here!](https://site-make-text.eepyberry.me) ✨💬**
 

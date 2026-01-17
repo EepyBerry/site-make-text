@@ -31,3 +31,13 @@ div.vacp-color-picker {
     text-align: center;
   }
 }
+
+@media screen and (max-width: 767px) {
+  div.vacp-color-space-thumb {
+    --vacp-thumb-size: calc(var(--vacp-spacing, 6px) * 4.75);
+  }
+  input#color-picker-hue-slider {
+    --vacp-slider-track-height: calc(var(--vacp-spacing, 6px) * 4);
+    --vacp-slider-thumb-size: calc(var(--vacp-spacing, 6px) * 5 - var(--vacp-width-border, 1px) * 2);
+  }
+}

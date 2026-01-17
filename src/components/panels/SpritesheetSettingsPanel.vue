@@ -82,7 +82,6 @@ const spritesheetSettings: Ref<SpritesheetSettingsOptions> = ref({
   usermadeDescriptor: undefined,
   enableUsermadeObjects: false,
 });
-defineEmits(['sreload', 'schange']);
 
 async function handleSpritesheetFile(file: File) {
   if (!file) return;

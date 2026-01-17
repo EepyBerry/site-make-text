@@ -51,6 +51,7 @@ export async function loadDefaultObjectSpritesheet() {
       source: 'object-default',
       descriptor: defaultObjSpritesheetDescriptor,
     });
+    console.log(SMTX_ANIMSPRITE_REGISTRY.value);
     EventBus.sendSpritesheetInitEvent();
   });
 }
@@ -102,11 +103,11 @@ export function updateRawFrameIndex(index: number): number {
 }
 
 export function isWordSpecial(word?: string) {
-  return getObjectWordMap()[word ?? ''] !== undefined;
+  return getObjectWordMap()[word?.toLowerCase() ?? ''] !== undefined;
 }
 
 export function getWordObject(word: string): string {
-  return getObjectWordMap()[word]!.toLowerCase();
+  return getObjectWordMap()[word.toLowerCase()]!.toLowerCase();
 }
 
 // ----------------------------------------------------------------------------

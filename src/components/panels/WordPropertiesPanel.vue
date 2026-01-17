@@ -11,7 +11,6 @@
         v-model="spriteProps!.word"
         type="text"
         maxlength="8"
-        style="text-transform: uppercase"
         aria-label="Word to write (A-Z?! characters only)"
         title="Word to write (A-Z?! characters only)"
       />
@@ -185,6 +184,9 @@ function setColor(data: { colors: object; cssColor: string }) {
     font-size: 1.25rem;
     font-weight: 600;
     border-radius: 2px;
+  }
+  #prop-word {
+    text-transform: uppercase;
   }
   #prop-color {
     width: 100%;

@@ -59,7 +59,7 @@ export type DynamicSpriteProps = {
   crossedOut?: boolean;
   drawObject?: boolean;
 };
-export type DynamicSpriteFrameData = { frames: ImageData[] } & Required<Vector2>;
+export type DynamicSpriteFrameData = { frames: ImageData[], isEmpty: boolean } & Required<Vector2>;
 export type DynamicSpriteExposes = {
   extractFrames: (scale?: number) => DynamicSpriteFrameData;
 };

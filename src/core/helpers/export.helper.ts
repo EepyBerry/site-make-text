@@ -77,34 +77,38 @@ function _combineWordDataOnCanvas(
   frameIndex: number,
   cropGrid: boolean,
 ): ImageData {
-  // Calculate cropped grid data; will be needed if cropping is enabled
-  const minFilledCoords = { x: 11, y: 11 };
-  const maxFilledCoords = { x: 0, y: 0 };
-  wordData.forEach((wd) => {
-    minFilledCoords.x = wd.x < minFilledCoords.x ? wd.x : minFilledCoords.x;
-    minFilledCoords.y = wd.y < minFilledCoords.y ? wd.y : minFilledCoords.y;
-    maxFilledCoords.x = wd.x > maxFilledCoords.x ? wd.x : maxFilledCoords.x;
-    maxFilledCoords.y = wd.y > maxFilledCoords.y ? wd.y : maxFilledCoords.y;
-  });
-  const croppedScaledGridDimensions = {
-    x: (maxFilledCoords.x - minFilledCoords.x + 1) * scaledCellSize,
-    y: (maxFilledCoords.y - minFilledCoords.y + 1) * scaledCellSize,
-  };
+  // Take all valid words (non-empty & has frames) and set initial canvas data
+  const validWordData = wordData.filter((wd) => wd.frames.length > 0 && !wd.isEmpty);
+  const canvasDimensions = { x: Number(scaledGridDimensions.x), y: Number(scaledGridDimensions.y) };
+  const canvasCroppingOffset = { x: 0, y: 0 };
+
+  // Calculate cropped grid data if cropping is enabled
+  if (cropGrid) {
+    const minFilledCoords = { x: 11, y: 11 };
+    const maxFilledCoords = { x: 0, y: 0 };
+    validWordData.forEach((wd) => {
+      minFilledCoords.x = wd.x < minFilledCoords.x ? wd.x : minFilledCoords.x;
+      minFilledCoords.y = wd.y < minFilledCoords.y ? wd.y : minFilledCoords.y;
+      maxFilledCoords.x = wd.x > maxFilledCoords.x ? wd.x : maxFilledCoords.x;
+      maxFilledCoords.y = wd.y > maxFilledCoords.y ? wd.y : maxFilledCoords.y;
+    });
+    canvasDimensions.x = (maxFilledCoords.x - minFilledCoords.x + 1) * scaledCellSize;
+    canvasDimensions.y = (maxFilledCoords.y - minFilledCoords.y + 1) * scaledCellSize;
+    canvasCroppingOffset.x = -minFilledCoords.x;
+    canvasCroppingOffset.y = -minFilledCoords.y;
+  }
 
   // Create the target canvas
-  const canvas: OffscreenCanvas = new OffscreenCanvas(
-    cropGrid ? croppedScaledGridDimensions.x : scaledGridDimensions.x!,
-    cropGrid ? croppedScaledGridDimensions.y : scaledGridDimensions.y!,
-  );
+  const canvas: OffscreenCanvas = new OffscreenCanvas(canvasDimensions.x, canvasDimensions.y);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Cannot combine canvas data: context was not properly initialized');
 
-  // Place individual frame data on the canvas
+  // Place individual frame data on the canvas (canvasCroppingOffset will be non-zero if cropping is enabled; see above)
   const offsets: Vector2 = { x: 0, y: 0 };
-  for (let i = 0; i < wordData.filter((wd) => wd.frames.length > 0).length; i++) {
-    offsets.x = scaledCellSize * (wordData[i]!.x! - (cropGrid ? minFilledCoords.x : 0));
-    offsets.y = scaledCellSize * (wordData[i]!.y! - (cropGrid ? minFilledCoords.y : 0));
-    ctx.putImageData(wordData[i]!.frames[frameIndex]!, offsets.x, offsets.y);
+  for (let i = 0; i < validWordData.length; i++) {
+    offsets.x = scaledCellSize * (validWordData[i]!.x! + canvasCroppingOffset.x);
+    offsets.y = scaledCellSize * (validWordData[i]!.y! + canvasCroppingOffset.y);
+    ctx.putImageData(validWordData[i]!.frames[frameIndex]!, offsets.x, offsets.y);
   }
   return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }

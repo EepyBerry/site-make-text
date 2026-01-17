@@ -134,7 +134,7 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
     scaleCtx.drawImage(rawCanvas, 0, 0);
     frames.push(scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize));
   }
-  return { x: $props.x, y: $props.y, frames };
+  return { x: $props.x, y: $props.y, frames, isEmpty: $props.word?.length === 0 };
 }
 
 // ----------------------------------------------------------------------------

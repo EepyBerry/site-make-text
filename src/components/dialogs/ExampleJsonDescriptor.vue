@@ -1,5 +1,7 @@
 <template>
-<!-- Base HTML generated using hilite.me --><div><pre><span></span><span >{</span>
+  <!-- Base HTML generated using hilite.me -->
+  <div>
+    <pre><span></span><span >{</span>
 <span >  </span><span json-prop>&quot;wordmap&quot;</span>: {
 <span >    </span><span json-prop>&quot;cookie&quot;</span>: <span json-string>&quot;sugar-cookie&quot;</span><span >,</span>
 <span >    </span><span json-prop>&quot;milk&quot;</span>: <span json-string>&quot;milk-glass&quot;</span>
@@ -17,20 +19,27 @@
 <span >    ]</span>
 <span >  }</span>
 <span >}</span>
-</pre></div>
+</pre>
+  </div>
 </template>
 <style scoped lang="scss">
 div {
   background: var(--smtx-background);
   border: 1px solid var(--smtx-text-hint);
   border-radius: 2px;
-  padding:.2em .6em;
+  padding: 0.2em 0.6em;
 }
 pre {
   margin: 0;
   line-height: 125%;
 }
-span[json-prop] { color: #FF79C6; }
-span[json-string] { color: #BD93F9; }
-span[json-number] { color: #FFB86C; }
+span[json-prop] {
+  color: #ff79c6;
+}
+span[json-string] {
+  color: #bd93f9;
+}
+span[json-number] {
+  color: #ffb86c;
+}
 </style>

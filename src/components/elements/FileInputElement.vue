@@ -1,34 +1,33 @@
 <template>
-  <button class="button-file-input" @click="fileInputRef!.click()" :title="internalTitle" :aria-label="internalAriaLabel">
+  <button
+    class="button-file-input"
+    @click="fileInputRef!.click()"
+    :title="internalTitle"
+    :aria-label="internalAriaLabel"
+  >
     <span v-if="fileName">{{ fileName }}</span>
     <span v-else><slot></slot></span>
   </button>
-  <input
-    ref="fileInputRef"
-    :pid="pid"
-    type="file"
-    :accept="accept"
-    @change="handleFile"
-  />
+  <input ref="fileInputRef" :pid="pid" type="file" :accept="accept" @change="handleFile" />
 </template>
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue';
 
-const fileName = ref('')
-const fileInputRef = useTemplateRef('fileInputRef')
-defineProps<{ pid: string, accept: string, internalTitle?: string, internalAriaLabel?: string }>()
-const $emit = defineEmits(['change'])
+const fileName = ref('');
+const fileInputRef = useTemplateRef('fileInputRef');
+defineProps<{ pid: string; accept: string; internalTitle?: string; internalAriaLabel?: string }>();
+const $emit = defineEmits(['change']);
 
 function handleFile(event: Event) {
-  const tgt: HTMLInputElement = event.target as HTMLInputElement
+  const tgt: HTMLInputElement = event.target as HTMLInputElement;
   if (tgt.files!.length === 0) return;
   fileName.value = tgt.files![0]!.name;
-  $emit('change', tgt.files![0]!)
+  $emit('change', tgt.files![0]!);
 }
 </script>
 
 <style lang="scss">
-input[type=file] {
+input[type='file'] {
   display: none;
 }
 button.button-file-input {

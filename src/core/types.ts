@@ -59,7 +59,7 @@ export type DynamicSpriteProps = {
   crossedOut?: boolean;
   drawObject?: boolean;
 };
-export type DynamicSpriteFrameData = { frames: ImageData[], isEmpty: boolean } & Required<Vector2>;
+export type DynamicSpriteFrameData = { frames: ImageData[]; isEmpty: boolean } & Required<Vector2>;
 export type DynamicSpriteExposes = {
   extractFrames: (scale?: number) => DynamicSpriteFrameData;
 };
@@ -86,4 +86,4 @@ export type ExportSettingsOptions = {
 // ----------------------------------------------------------------------------
 // Dialogs
 
-export type DialogExposes = { open: () => void }
+export type DialogExposes = { open: () => void };

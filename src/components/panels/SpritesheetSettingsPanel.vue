@@ -7,8 +7,15 @@
       internal-title="Import the spritesheet image"
       internal-aria-label="Import the spritesheet image"
       @change="handleSpritesheetFile"
-    >Import&nbsp;file...</FileInputElement>
-    <StaticSprite v-if="spritesheetSettings.usermadeFile" class="file-indicator" width="2rem"  height="2rem" sprite="check" />
+      >Import&nbsp;file...</FileInputElement
+    >
+    <StaticSprite
+      v-if="spritesheetSettings.usermadeFile"
+      class="file-indicator"
+      width="2rem"
+      height="2rem"
+      sprite="check"
+    />
     <StaticSprite v-else class="file-indicator" width="2rem" height="2rem" sprite="cross" />
 
     <StaticSprite width="2.5rem" height="2.5rem" sprite="spritesheet-descriptor" />
@@ -18,8 +25,15 @@
       @change="handleDescriptorFile"
       internal-title="Import the spritesheet descriptor file"
       internal-aria-label="Import the spritesheet descriptor file"
-    >Import&nbsp;file...</FileInputElement>
-    <StaticSprite v-if="spritesheetSettings.usermadeDescriptor" class="file-indicator" width="2rem"  height="2rem" sprite="check" />
+      >Import&nbsp;file...</FileInputElement
+    >
+    <StaticSprite
+      v-if="spritesheetSettings.usermadeDescriptor"
+      class="file-indicator"
+      width="2rem"
+      height="2rem"
+      sprite="check"
+    />
     <StaticSprite v-else class="file-indicator" width="2rem" height="2rem" sprite="cross" />
 
     <StaticSprite width="2.5rem" height="2.5rem" sprite="spritesheet-type" />
@@ -54,7 +68,11 @@ import type { JsonSpritesheetDescriptor, SpritesheetSettingsOptions } from '@/co
 import { ref, type Ref } from 'vue';
 import RadioElement from '@/components/elements/RadioElement.vue';
 import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
-import { loadUsermadeObjectSpritesheet, setEnableUsermadeObjectSpritesheet } from '@/core/helpers/spritesheet.helper';
+import {
+  loadUsermadeObjectSpritesheet,
+  removeUsermadeObjectSprites,
+  setEnableUsermadeObjectSpritesheet,
+} from '@/core/helpers/spritesheet.helper';
 import { JsonSpritesheetDescriptorSchema } from '@/core/zod-schemas';
 import type { ZodError } from 'zod';
 import FileInputElement from '../elements/FileInputElement.vue';
@@ -62,42 +80,42 @@ import FileInputElement from '../elements/FileInputElement.vue';
 const spritesheetSettings: Ref<SpritesheetSettingsOptions> = ref({
   usermadeFile: undefined,
   usermadeDescriptor: undefined,
-  enableUsermadeObjects: false
+  enableUsermadeObjects: false,
 });
 defineEmits(['sreload', 'schange']);
 
 async function handleSpritesheetFile(file: File) {
   if (!file) return;
-  spritesheetSettings.value.usermadeFile = file
+  spritesheetSettings.value.usermadeFile = file;
   checkSpritesheetValidity();
 }
 
 async function handleDescriptorFile(file: File) {
   if (!file) return;
   const descriptorFile: File = file;
-  const jsonData = JSON.parse(await descriptorFile.text())
+  const jsonData = JSON.parse(await descriptorFile.text());
 
   // Check descriptor file structure before proceeding
   try {
-    const validatedDescriptor: JsonSpritesheetDescriptor = JsonSpritesheetDescriptorSchema.parse(jsonData) as JsonSpritesheetDescriptor
+    const validatedDescriptor: JsonSpritesheetDescriptor = JsonSpritesheetDescriptorSchema.parse(
+      jsonData,
+    ) as JsonSpritesheetDescriptor;
     spritesheetSettings.value.usermadeDescriptor = validatedDescriptor;
     checkSpritesheetValidity();
   } catch (error) {
-    console.error((error as ZodError).issues)
+    console.error((error as ZodError).issues);
+    spritesheetSettings.value.usermadeDescriptor = undefined;
+    removeUsermadeObjectSprites();
   }
 }
 
 function checkSpritesheetValidity() {
-  if (!spritesheetSettings.value.usermadeFile
-    || !spritesheetSettings.value.usermadeDescriptor) {
+  if (!spritesheetSettings.value.usermadeFile || !spritesheetSettings.value.usermadeDescriptor) {
+    removeUsermadeObjectSprites();
     return;
   }
-  loadUsermadeObjectSpritesheet(
-    spritesheetSettings.value.usermadeFile!,
-    spritesheetSettings.value.usermadeDescriptor!
-  );
+  loadUsermadeObjectSpritesheet(spritesheetSettings.value.usermadeFile!, spritesheetSettings.value.usermadeDescriptor!);
 }
-
 </script>
 <style lang="scss">
 #spritesheet-settings {

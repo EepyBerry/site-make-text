@@ -31,13 +31,19 @@
         <StaticSprite width="12rem" height="1.5rem" sprite="text-spritesheets" aria-label="Spritesheets" />
       </header>
       <WarningBoxElement>
-        <p>Certain browsers may not load your spritesheets' colors correctly due to bugs with the HTML Canvas API. If this is the case, please either:</p>
+        <p>
+          Certain browsers may not load your spritesheets' colors correctly due to bugs with the HTML Canvas API. If
+          this is the case, please either:
+        </p>
         <ul>
           <li>check that the image has an <span emphasis>"sRGB"</span> color profile applied, or</li>
           <li>disable color management in your browser to see the correct colors</li>
         </ul>
-        <br>
-        <p>The example spritesheet linked below has the correct color profile set, you can use it as a base to avoid issues.</p>
+        <br />
+        <p>
+          The example spritesheet linked below has the correct color profile set, you can use it as a base to avoid
+          issues.
+        </p>
       </WarningBoxElement>
       <p>You can import a custom object spritesheet to suit your needs. To do this, you need <i>two</i> files:</p>
       <div id="spritesheet-file-explanations">
@@ -95,8 +101,8 @@
           alt="Words 'cookie' and 'milk' next to their respective sprites"
         />
         <p>
-          Now, you may be wondering what happens if we <span emphasis>import a sprite for an existing word</span>... and this is <i>exactly</i> what
-          this example shows!
+          Now, you may be wondering what happens if we <span emphasis>import a sprite for an existing word</span>... and
+          this is <i>exactly</i> what this example shows!
         </p>
         <p>
           This app has a number of default sprites as a little treat
@@ -180,7 +186,7 @@
         </li>
         <li>All the people who helped me test this website &lt;3</li>
       </ul>
-      <img id="sleeping-cat" src="/sleeping-cat.webp" width="72">
+      <img id="sleeping-cat" src="/sleeping-cat.webp" width="72" />
     </section>
   </dialog>
 </template>

@@ -31,7 +31,7 @@ defineProps<{
   internalAriaLabel?: string;
   internalTitle?: string;
 }>();
-const $emit = defineEmits(['select'])
+const $emit = defineEmits(['select']);
 const optionModel = defineModel<string | number | boolean | WordType>();
 const htmlRadio = useTemplateRef('htmlRadio');
 

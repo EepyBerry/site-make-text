@@ -5,7 +5,13 @@
 <script setup lang="ts">
 import { EventBus } from '@/core/event-bus';
 import type { AnimatedSprite } from '@/core/models/animated-sprite.model';
-import { getAnimatedSprite, getWordObject, isWordSpecial, updateFrameIndex, updateRawFrameIndex } from '@/core/helpers/spritesheet.helper';
+import {
+  getAnimatedSprite,
+  getWordObject,
+  isWordSpecial,
+  updateFrameIndex,
+  updateRawFrameIndex,
+} from '@/core/helpers/spritesheet.helper';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
 import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/core/types';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
@@ -370,42 +376,57 @@ function _drawCross(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingCont
 function _drawObject(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, frameIndex: number) {
   const canvasData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
   const objectFrameData = specialObjectSprite.value!.frames[frameIndex]!.data;
-  let propsColorRGB: tinycolor.Instance | null = null
+  let propsColorRGB: tinycolor.Instance | null = null;
   for (let i = 0; i < objectFrameData.data.length; i += 4) {
-    if (allComponentsEqualTo(objectFrameData.data[i+0]!, objectFrameData.data[i+1]!, objectFrameData.data[i+2]!, 221)) {
-      propsColorRGB = tinycolor($props.color)
+    if (
+      allComponentsEqualTo(
+        objectFrameData.data[i + 0]!,
+        objectFrameData.data[i + 1]!,
+        objectFrameData.data[i + 2]!,
+        221,
+      )
+    ) {
+      propsColorRGB = tinycolor($props.color);
       propsColorRGB.lighten(30);
-      canvasData.data[i+0] = propsColorRGB.toRgb().r
-      canvasData.data[i+1] = propsColorRGB.toRgb().g
-      canvasData.data[i+2] = propsColorRGB.toRgb().b
-      canvasData.data[i+3] = objectFrameData.data[i+3]!
+      canvasData.data[i + 0] = propsColorRGB.toRgb().r;
+      canvasData.data[i + 1] = propsColorRGB.toRgb().g;
+      canvasData.data[i + 2] = propsColorRGB.toRgb().b;
+      canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
       continue;
     }
-    if (allComponentsEqualTo(objectFrameData.data[i+0]!, objectFrameData.data[i+1]!, objectFrameData.data[i+2]!, 170)) {
-      propsColorRGB = tinycolor($props.color)
-      canvasData.data[i+0] = propsColorRGB.toRgb().r
-      canvasData.data[i+1] = propsColorRGB.toRgb().g
-      canvasData.data[i+2] = propsColorRGB.toRgb().b
-      canvasData.data[i+3] = objectFrameData.data[i+3]!
+    if (
+      allComponentsEqualTo(
+        objectFrameData.data[i + 0]!,
+        objectFrameData.data[i + 1]!,
+        objectFrameData.data[i + 2]!,
+        170,
+      )
+    ) {
+      propsColorRGB = tinycolor($props.color);
+      canvasData.data[i + 0] = propsColorRGB.toRgb().r;
+      canvasData.data[i + 1] = propsColorRGB.toRgb().g;
+      canvasData.data[i + 2] = propsColorRGB.toRgb().b;
+      canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
       continue;
     }
-    if (allComponentsEqualTo(objectFrameData.data[i+0]!, objectFrameData.data[i+1]!, objectFrameData.data[i+2]!, 85)) {
-      propsColorRGB = tinycolor($props.color)
+    if (
+      allComponentsEqualTo(objectFrameData.data[i + 0]!, objectFrameData.data[i + 1]!, objectFrameData.data[i + 2]!, 85)
+    ) {
+      propsColorRGB = tinycolor($props.color);
       propsColorRGB.darken(15);
-      canvasData.data[i+0] = propsColorRGB.toRgb().r
-      canvasData.data[i+1] = propsColorRGB.toRgb().g
-      canvasData.data[i+2] = propsColorRGB.toRgb().b
-      canvasData.data[i+3] = objectFrameData.data[i+3]!
+      canvasData.data[i + 0] = propsColorRGB.toRgb().r;
+      canvasData.data[i + 1] = propsColorRGB.toRgb().g;
+      canvasData.data[i + 2] = propsColorRGB.toRgb().b;
+      canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
       continue;
     }
-    canvasData.data[i+0] = objectFrameData.data[i+0]!
-    canvasData.data[i+1] = objectFrameData.data[i+1]!
-    canvasData.data[i+2] = objectFrameData.data[i+2]!
-    canvasData.data[i+3] = objectFrameData.data[i+3]!
+    canvasData.data[i + 0] = objectFrameData.data[i + 0]!;
+    canvasData.data[i + 1] = objectFrameData.data[i + 1]!;
+    canvasData.data[i + 2] = objectFrameData.data[i + 2]!;
+    canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
   }
   ctx.putImageData(canvasData, 0, 0);
 }
-
 </script>
 
 <style scoped lang="scss">

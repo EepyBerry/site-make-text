@@ -12,7 +12,7 @@ const spriteImageRef = useTemplateRef('spriteImageRef');
 const spriteFrameRegions: Ref<SpritesheetRegion[]> = ref([]);
 const spriteFrameIndex: Ref<number> = ref(0);
 
-const $props = withDefaults(defineProps<{ sprite: string; width?: string, height?: string }>(), { width: '2rem' });
+const $props = withDefaults(defineProps<{ sprite: string; width?: string; height?: string }>(), { width: '2rem' });
 onMounted(() => {
   if (!EventBus.tickEvent.value) return;
   setBackgroundSize();
@@ -44,22 +44,28 @@ function setBackgroundPosition() {
 }
 
 function computeMainSpritesheetBackgroundSize(elWidth: string, elHeight: string): number[] {
-  const mainSpritesheet = getSpritesheet('main')!
+  const mainSpritesheet = getSpritesheet('main')!;
   const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
   const elHeightAsNumber: number = parseFloat(elHeight) * REM_SIZE;
-  const backgroundSizeX = (mainSpritesheet.width * elWidthAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.w!;
-  const backgroundSizeY = (mainSpritesheet.height * elHeightAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.h!;
+  const backgroundSizeX =
+    (mainSpritesheet.width * elWidthAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.w!;
+  const backgroundSizeY =
+    (mainSpritesheet.height * elHeightAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.h!;
   return [backgroundSizeX, backgroundSizeY];
 }
 
-function computeMainSpritesheetBackgroundPosition(frameX: number, frameY: number, elWidth: string, elHeight: string): number[] {
+function computeMainSpritesheetBackgroundPosition(
+  frameX: number,
+  frameY: number,
+  elWidth: string,
+  elHeight: string,
+): number[] {
   const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
   const elHeightAsNumber: number = parseFloat(elHeight) * REM_SIZE;
   const backgroundPositionX = (frameX * elWidthAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.w!;
   const backgroundPositionY = (frameY * elHeightAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.h!;
   return [backgroundPositionX, backgroundPositionY];
 }
-
 </script>
 
 <style scoped lang="scss">

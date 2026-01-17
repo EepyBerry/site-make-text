@@ -55,10 +55,7 @@ export async function loadDefaultObjectSpritesheet() {
   });
 }
 
-export async function loadUsermadeObjectSpritesheet(
-  spritesheetFile: ImageBitmapSource,
-  descriptor: JsonSpritesheetDescriptor,
-) {
+export function removeUsermadeObjectSprites() {
   // remove all custom object sprites from registry
   const objSprites = SMTX_ANIMSPRITE_REGISTRY.value.filter((as) => as.source !== 'object-usermade');
   SMTX_ANIMSPRITE_REGISTRY.value.splice(0);
@@ -69,8 +66,13 @@ export async function loadUsermadeObjectSpritesheet(
   if (usermadeSpritesheetIdx >= 0) {
     SMTX_SPRITESHEET_REGISTRY.value.splice(usermadeSpritesheetIdx, 1);
   }
+  EventBus.sendSpritesheetReloadEvent();
+}
 
-  // replace with new data
+export async function loadUsermadeObjectSpritesheet(
+  spritesheetFile: ImageBitmapSource,
+  descriptor: JsonSpritesheetDescriptor,
+) {
   drawImageOntoCanvas(spritesheetFile, async (canvas, ctx) => {
     await cutSpritesheet('object-usermade', ctx, descriptor.regions);
     SMTX_SPRITESHEET_REGISTRY.value.push({
@@ -102,11 +104,11 @@ export function updateRawFrameIndex(index: number): number {
 }
 
 export function isWordSpecial(word?: string) {
-  return getObjectWordMap()[word ?? ''] !== undefined;
+  return getObjectWordMap()[word?.toLowerCase() ?? ''] !== undefined;
 }
 
 export function getWordObject(word: string): string {
-  return getObjectWordMap()[word]!.toLowerCase();
+  return getObjectWordMap()[word.toLowerCase()]!.toLowerCase();
 }
 
 // ----------------------------------------------------------------------------

@@ -43,7 +43,7 @@ import type { DialogExposes } from '@/core/types';
 const helpDialogRef: TemplateRef<DialogExposes> = useTemplateRef('helpDialogRef');
 
 function openHelpDialog() {
-  helpDialogRef.value!.open()
+  helpDialogRef.value!.open();
 }
 </script>
 

@@ -47,16 +47,16 @@ function computeMainSpritesheetBackgroundSize(elWidth: string, elHeight: string)
   const mainSpritesheet = getSpritesheet('main')!
   const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
   const elHeightAsNumber: number = parseFloat(elHeight) * REM_SIZE;
-  const backgroundSizeX = (mainSpritesheet.width * elWidthAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.w;
-  const backgroundSizeY = (mainSpritesheet.height * elHeightAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.h;
+  const backgroundSizeX = (mainSpritesheet.width * elWidthAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.w!;
+  const backgroundSizeY = (mainSpritesheet.height * elHeightAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.h!;
   return [backgroundSizeX, backgroundSizeY];
 }
 
 function computeMainSpritesheetBackgroundPosition(frameX: number, frameY: number, elWidth: string, elHeight: string): number[] {
   const elWidthAsNumber: number = parseFloat(elWidth) * REM_SIZE;
   const elHeightAsNumber: number = parseFloat(elHeight) * REM_SIZE;
-  const backgroundPositionX = (frameX * elWidthAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.w;
-  const backgroundPositionY = (frameY * elHeightAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.h;
+  const backgroundPositionX = (frameX * elWidthAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.w!;
+  const backgroundPositionY = (frameY * elHeightAsNumber) / spriteFrameRegions.value[spriteFrameIndex.value]!.h!;
   return [backgroundPositionX, backgroundPositionY];
 }
 

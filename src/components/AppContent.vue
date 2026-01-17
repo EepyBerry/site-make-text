@@ -253,6 +253,8 @@ function handleGridDelete() {
 function resetWords() {
   words.value.splice(0);
   selectedWord.value = null;
+  wordGridDimensions.value.x = 3;
+  wordGridDimensions.value.y = 3;
 }
 
 async function exportWords(opts: ExportSettingsOptions) {

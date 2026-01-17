@@ -48,10 +48,3 @@ body:has(dialog[open]) {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: none;
 }
-
-ul,
-ol {
-  list-style-position: inside;
-  list-style-type: none;
-  padding: 0;
-}

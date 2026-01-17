@@ -13,11 +13,10 @@ import { EventBus } from './core/event-bus';
 import { initAppSpritesheet, loadDefaultObjectSpritesheet } from './core/helpers/spritesheet.helper';
 import { FRAME_DURATION_MS } from './core/globals';
 
-// main tick loop to synchronize every sprite
+// init + main tick loop to synchronize every sprite
 onMounted(async () => {
   await initAppSpritesheet();
   await loadDefaultObjectSpritesheet();
-  EventBus.sendSpritesheetInitEvent();
   setInterval(EventBus.sendTickEvent, FRAME_DURATION_MS);
 });
 </script>

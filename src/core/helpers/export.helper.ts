@@ -100,7 +100,7 @@ function _combineWordDataOnCanvas(
 
   // Create the target canvas
   const canvas: OffscreenCanvas = new OffscreenCanvas(canvasDimensions.x, canvasDimensions.y);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
   if (!ctx) throw new Error('Cannot combine canvas data: context was not properly initialized');
 
   // Place individual frame data on the canvas (canvasCroppingOffset will be non-zero if cropping is enabled; see above)

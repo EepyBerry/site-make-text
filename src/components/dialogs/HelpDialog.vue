@@ -5,19 +5,52 @@
     </button>
     <section id="help-controls">
       <header><StaticSprite width="8rem" height="1.5rem" sprite="text-controls" aria-label="Controls" /></header>
+      <div id="controls-grid">
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="properties-closed" />
+        <p>
+          Toggles the word properties panel (word, type, color, etc.)
+          <br /><span subscript>(small devices only)</span>
+        </p>
+
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="spritesheet-closed" />
+        <p>Toggles the spritesheet settings panel (file imports, toggle)</p>
+
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="grid-closed" />
+        <p>Toggles the grid settings panel (width, height)</p>
+
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="export-closed" />
+        <p>Toggles the export settings panel (cropping, format, etc.)</p>
+
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="reset" />
+        <p>Removes all words from the grid and sets its size to 3x3</p>
+      </div>
     </section>
-    <hr>
+    <hr />
     <section id="help-spritesheets">
-      <header><StaticSprite width="12rem" height="1.5rem" sprite="text-spritesheets" aria-label="Spritesheets" /></header>
+      <header>
+        <StaticSprite width="12rem" height="1.5rem" sprite="text-spritesheets" aria-label="Spritesheets" />
+      </header>
+      <WarningBoxElement>
+        <p>Certain browsers may not load your spritesheets' colors correctly due to bugs with the HTML Canvas API. If this is the case, please either:</p>
+        <ul>
+          <li>check that the image has an <span emphasis>"sRGB"</span> color profile applied, or</li>
+          <li>disable color management in your browser to see the correct colors</li>
+        </ul>
+        <br>
+        <p>The example spritesheet linked below has the correct color profile set, you can use it as a base to avoid issues.</p>
+      </WarningBoxElement>
       <p>You can import a custom object spritesheet to suit your needs. To do this, you need <i>two</i> files:</p>
       <div id="spritesheet-file-explanations">
         <div class="file-explanation">
           <StaticSprite width="3.5rem" height="3.5rem" sprite="spritesheet-image" />
-          <span>An image of your sprites, arranged as a grid of <strong>24x24px</strong> cells (.png, .webp,...)</span>
+          <span
+            >An <span emphasis>image</span> of your sprites, arranged as a grid of <strong>24x24px</strong> cells (.png,
+            .webp,...)</span
+          >
         </div>
         <div class="file-explanation">
           <StaticSprite width="3.5rem" height="3.5rem" sprite="spritesheet-descriptor" />
-          <span>A "descriptor" file containing positions of your sprites (.json)</span>
+          <span>A <span emphasis>descriptor file</span> containing positions of your sprites (.json)</span>
         </div>
       </div>
       <p>
@@ -33,37 +66,57 @@
         </button>
         as a starting point.
       </p>
-      <p>Here is what a descriptor file looks like:</p>
+      <p>Here is what a <span emphasis>descriptor file</span> looks like:</p>
       <ExampleJsonDescriptor id="example-json-descriptor" />
       <ul>
-        <li><span style="color: #FF79C6">&quot;wordmap&quot;</span>: maps the typed words to the region names below</li>
-        <li><span style="color: #FF79C6">&quot;regions&quot;</span>: contains every region as a collection of frames (min. 1 frame, max. 3 frames)</li>
-        <li><span style="color: #FF79C6">&quot;sugar-cookie&quot;</span>: one region containing three frames; coordinates point to the top-leftmost pixel of this frame</li>
-        <li><span style="color: #FF79C6">&quot;milk-glass&quot;</span>: another region pointing to three different frames</li>
+        <li><span style="color: #ff79c6">&quot;wordmap&quot;</span>: maps the typed words to the region names below</li>
+        <li>
+          <span style="color: #ff79c6">&quot;regions&quot;</span>: contains every region as a collection of frames (min.
+          1 frame, max. 3 frames)
+        </li>
+        <li>
+          <span style="color: #ff79c6">&quot;sugar-cookie&quot;</span>: one region containing three frames; coordinates
+          point to the top-leftmost pixel of this frame
+        </li>
+        <li>
+          <span style="color: #ff79c6">&quot;milk-glass&quot;</span>: another region pointing to three different frames
+        </li>
       </ul>
 
       <div class="text-block">
         <p>
-          After importing and enabling this example spritesheet, the words <span style="color: #BD93F9">&quot;cookie&quot;</span> and <span style="color: #BD93F9">&quot;milk&quot;</span>
+          After importing and enabling this example spritesheet, the words
+          <span style="color: #bd93f9">&quot;cookie&quot;</span> and
+          <span style="color: #bd93f9">&quot;milk&quot;</span>
           are now mapped to two sprites, as shown below next to their respective word:
         </p>
-        <img src="/examples/example-cookie-milk.webp" alt="Words 'cookie' and 'milk' next to their respective sprites">
+        <img
+          src="/examples/example-cookie-milk.webp"
+          alt="Words 'cookie' and 'milk' next to their respective sprites"
+        />
         <p>
-          Now, you may be wondering what happens if we import a sprite for an existing word...
-          and this is exactly what this example shows!
+          Now, you may be wondering what happens if we <span emphasis>import a sprite for an existing word</span>... and this is <i>exactly</i> what
+          this example shows!
         </p>
         <p>
-          This app has a number of default sprites as a little treat <span class="subscript">(can you find them all? :3)</span>,
-          and <span style="color: #BD93F9">&quot;cookie&quot;</span> is one of them. In this case, the sprite that will be
-          shown will be the one imported <i>last</i>, thus the one from the custom spritesheet.
+          This app has a number of default sprites as a little treat
+          <span subscript>(can you find them all? :3)</span>, and
+          <span style="color: #bd93f9">&quot;cookie&quot;</span> is one of them. In this case, the sprite that will be
+          shown will be the one imported <span emphasis>last</span>, thus the one from the custom spritesheet.
         </p>
       </div>
       <div class="text-block">
         <p>
-          Another, more advanced feature is the ability to use special tints to lighten/darken the selected color.
-          Try comparing the sprites above with the example spritesheet!
+          Another, more advanced feature is the ability to use
+          <span emphasis>special tints to lighten/darken the selected color</span>. Try comparing the sprites above with
+          the example spritesheet!
         </p>
-        <p>To do this, here is a small table with the exact colors needed in your sprites, and their effect when the pixel is colored:</p>
+        <p>
+          To do this, here is a small table with the exact colors needed in your sprites, and their effect when the
+          pixel is colored:
+        </p>
+      </div>
+      <div class="text-block">
         <table id="sprite-gradient-map-table">
           <thead>
             <tr>
@@ -108,15 +161,26 @@
         </table>
       </div>
     </section>
-    <hr>
+    <hr />
     <section id="help-credits">
       <header><StaticSprite width="7rem" height="1.5rem" sprite="text-credits" aria-label="Credits" /></header>
       <ul>
-        <li><a href="https://hempuli.com" target="_blank" rel="noreferrer noopener nofollow">[Arvi "Hempuli" Teikari]</a>, creator of Baba Is You</li>
-        <li><a href="https://github.com/ApeironTsuka/node-webpmux" target="_blank" rel="noreferrer noopener nofollow">[node-webpmux]</a>, WebP encoding library</li>
-        <li><a href="https://github.com/mattdesl/gifenc" target="_blank" rel="noreferrer noopener nofollow">[gifenc]</a>, GIF encoding library</li>
+        <li>
+          <a href="https://hempuli.com" target="_blank" rel="noreferrer noopener nofollow">[Arvi "Hempuli" Teikari]</a>,
+          creator of Baba Is You
+        </li>
+        <li>
+          <a href="https://github.com/ApeironTsuka/node-webpmux" target="_blank" rel="noreferrer noopener nofollow"
+            >[node-webpmux]</a
+          >, WebP encoding library
+        </li>
+        <li>
+          <a href="https://github.com/mattdesl/gifenc" target="_blank" rel="noreferrer noopener nofollow">[gifenc]</a>,
+          GIF encoding library
+        </li>
         <li>All the people who helped me test this website &lt;3</li>
       </ul>
+      <img id="sleeping-cat" src="/sleeping-cat.webp" width="72">
     </section>
   </dialog>
 </template>
@@ -127,8 +191,9 @@ import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
 import ExampleJsonDescriptor from './ExampleJsonDescriptor.vue';
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
-import exampleSpritesheetImageUrl from '/examples/example-spritesheet.png?url'
-import exampleSpritesheetDescriptorUrl from '/examples/example-spritesheet.json?url'
+import exampleSpritesheetImageUrl from '/examples/example-spritesheet.png?url';
+import exampleSpritesheetDescriptorUrl from '/examples/example-spritesheet.json?url';
+import WarningBoxElement from '../elements/WarningBoxElement.vue';
 
 const dialogRef = useTemplateRef('dialogRef');
 const handleClick = (evt: Event) => {
@@ -136,19 +201,19 @@ const handleClick = (evt: Event) => {
     dialogRef.value!.close();
     return;
   }
-  if (!dialogRef.value!.contains(evt.target as HTMLElement) ) {
+  if (!dialogRef.value!.contains(evt.target as HTMLElement)) {
     dialogRef.value!.close();
   }
 };
 
 onMounted(() => {
-  dialogRef.value?.addEventListener('click', handleClick)
+  dialogRef.value?.addEventListener('click', handleClick);
 });
 onBeforeUnmount(() => dialogRef.value?.removeEventListener('click', handleClick));
-defineExpose<DialogExposes>({ open })
+defineExpose<DialogExposes>({ open });
 
 function open() {
-  dialogRef.value!.showModal()
+  dialogRef.value!.showModal();
 }
 
 async function downloadExampleSpritesheet() {
@@ -197,7 +262,9 @@ dialog {
     display: inline;
     color: var(--smtx-link);
     font-size: inherit;
-    &:hover { filter: brightness(1.25); }
+    &:hover {
+      filter: brightness(1.25);
+    }
   }
 
   // native element overrides
@@ -208,7 +275,9 @@ dialog {
     border: 2px dashed #fff;
     margin: 2rem 0;
   }
-  ul { list-style-type: '- '; }
+  ul {
+    list-style-type: '- ';
+  }
 }
 dialog[open] {
   opacity: 1;
@@ -219,60 +288,90 @@ dialog::backdrop {
   background: #0008;
 }
 
-#example-json-descriptor {
-  margin: 0.5rem auto;
-}
-
-#spritesheet-file-explanations {
-  max-width: 800px;
-  margin: 1.5rem auto;
-
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  justify-items: center;
-  justify-content: center;
-  gap: 2rem;
-
-  .file-explanation {
-    display: flex;
+// controls section
+#help-controls {
+  #controls-grid {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: 2.5rem 1fr 2.5rem 1fr;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem 0.5rem;
   }
 }
-#sprite-gradient-map-table {
-  margin-top: 0.5rem;
-  table-layout: fixed;
-  border: 1px solid var(--smtx-primary);
-  border-collapse: collapse;
 
-  tr td, th {
-    padding: 0 0.5rem;
+// spritesheets section
+#help-spritesheets {
+  #example-json-descriptor {
+    margin: 0.5rem auto;
+  }
+
+  #spritesheet-file-explanations {
+    max-width: 800px;
+    margin: 1.5rem auto;
+
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+    gap: 2rem;
+
+    .file-explanation {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+  #sprite-gradient-map-table {
+    margin-top: 0.5rem;
+    table-layout: fixed;
     border: 1px solid var(--smtx-primary);
+    border-collapse: collapse;
+    overflow-x: auto;
+
+    tr td,
+    th {
+      padding: 0 0.5rem;
+      border: 1px solid var(--smtx-primary);
+    }
+    th {
+      text-align: start;
+      background: var(--smtx-primary);
+    }
+    tr td:first-child {
+      padding: 0;
+      width: 64px;
+    }
+    tr td:nth-child(2) {
+      width: 64px;
+    }
+    tr td:nth-child(3),
+    tr td:nth-child(4),
+    tr td:nth-child(5),
+    tr td:nth-child(6) {
+      width: 5ch;
+    }
   }
-  th {
-    text-align: start;
-    background: var(--smtx-primary);
-  }
-  tr td:first-child {
-    padding: 0;
-    width: 64px;
-  };
-  tr td:nth-child(2) {
-    width: 64px;
-  };
-  tr td:nth-child(3),
-  tr td:nth-child(4),
-  tr td:nth-child(5),
-  tr td:nth-child(6) {
-    width: 5ch;
-  };
+}
+#help-credits {
+  position: relative;
 }
 
+#sleeping-cat {
+  position: absolute;
+  bottom: 0;
+  right: 1rem;
+  opacity: 0.5;
+  user-select: none;
+  pointer-events: none;
+}
+
+// generic classes
 .text-block {
   margin: 2rem auto;
   display: flex;
   flex-direction: column;
+  overflow-x: auto;
   img {
     margin: 0.5rem auto;
     max-width: 100%;
@@ -281,15 +380,21 @@ dialog::backdrop {
 .text-block:last-of-type {
   margin-bottom: 0;
 }
-.subscript { font-size: 0.675rem; color: #888; }
 .color-block {
-  width:64px;
+  width: 64px;
   height: 2rem;
-  &.light { background: #dddddd;}
-  &.exact { background: #aaaaaa;}
-  &.dark { background: #555555;}
+  &.light {
+    background: #dddddd;
+  }
+  &.exact {
+    background: #aaaaaa;
+  }
+  &.dark {
+    background: #555555;
+  }
 }
 
+// media queries
 @media screen and (max-width: 1199px) {
   dialog {
     max-width: 80%;
@@ -300,9 +405,19 @@ dialog::backdrop {
     width: 100%;
     max-width: calc(100% - 2rem);
   }
-  div#spritesheet-file-explanations {
-    grid-template-columns: auto;
-    margin: 1.5rem;
+  #help-controls {
+    #controls-grid {
+      grid-template-columns: 2.5rem 1fr;
+    }
+  }
+  #help-spritesheets {
+    #spritesheet-file-explanations {
+      grid-template-columns: auto;
+      margin: 1.5rem;
+    }
+  }
+  #sleeping-cat {
+    top: -36px;
   }
 }
 </style>

@@ -43,7 +43,7 @@ export async function initAppSpritesheet() {
 
 export async function loadDefaultObjectSpritesheet() {
   const img = await loadImage(defaultObjSpritesheetURL);
-  drawImageOntoCanvas(img, async (_, ctx) => {
+  await drawImageOntoCanvas(img, async (_, ctx) => {
     await cutSpritesheet('object-default', ctx, defaultObjSpritesheetDescriptor.regions);
     SMTX_SPRITESHEET_REGISTRY.value.push({
       width: img.naturalWidth,
@@ -51,6 +51,7 @@ export async function loadDefaultObjectSpritesheet() {
       source: 'object-default',
       descriptor: defaultObjSpritesheetDescriptor,
     });
+    EventBus.sendSpritesheetInitEvent();
   });
 }
 
@@ -78,7 +79,6 @@ export async function loadUsermadeObjectSpritesheet(
       source: 'object-usermade',
       descriptor,
     });
-    console.log(SMTX_SPRITESHEET_REGISTRY.value);
     EventBus.sendSpritesheetReloadEvent();
   });
 }

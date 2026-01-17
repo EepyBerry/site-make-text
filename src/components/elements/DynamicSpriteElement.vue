@@ -66,8 +66,8 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 
   const rawCanvas: OffscreenCanvas = new OffscreenCanvas(SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
   const scaleCanvas: OffscreenCanvas = new OffscreenCanvas(scaledImageSize, scaledImageSize);
-  const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
-  const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
+  const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true, colorSpace: 'srgb' });
+  const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true, colorSpace: 'srgb' });
   if (!rawCtx || !scaleCtx) throw new Error('Cannot extract frames: context was not properly initialized');
 
   // prepare raw canvas
@@ -81,7 +81,7 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 
   // skip empty words
   if (!letterSprites.value || letterSprites.value.length === 0) {
-    return { x: $props.x, y: $props.y, frames: [] };
+    return { x: $props.x, y: $props.y, frames: [], isEmpty: true };
   }
 
   // iterate on frames and draw them one by one on canvas first, and then as a gif frame
@@ -189,7 +189,7 @@ function _reloadLetterSprites() {
 }
 
 function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })! as
+  const ctx = canvas.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' })! as
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D;
   if (!ctx) return;

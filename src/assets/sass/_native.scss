@@ -7,6 +7,7 @@ input {
   color: var(--smtx-text);
   text-align: center;
 }
+
 button {
   position: relative;
   border: none;
@@ -60,6 +61,20 @@ a:not(:has(div)):hover {
   filter: brightness(1.5);
 }
 
-span[emphasis], p[emphasis] {
+span[emphasis],
+p[emphasis] {
   color: var(--smtx-text-highlight);
+  font-style: italic;
+}
+span[subscript],
+p[subscript] {
+  font-size: 0.675rem;
+  color: var(--smtx-text-subscript);
+}
+
+ul,
+ol {
+  list-style-position: inside;
+  list-style-type: none;
+  padding: 0;
 }

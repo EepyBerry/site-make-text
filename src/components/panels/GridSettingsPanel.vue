@@ -1,6 +1,6 @@
 <template>
-  <section id="section-grid-settings">
-    <StaticSprite width="2.5rem" sprite="width" />
+  <section id="grid-settings">
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="width" />
     <SliderElement
       id="setting-width"
       v-model="gridSettings.x"
@@ -12,7 +12,7 @@
     />
     <p>{{ gridSettings.x }}</p>
 
-    <StaticSprite width="2.5rem" sprite="height" />
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="height" />
     <SliderElement
       id="setting-height"
       v-model="gridSettings.y"
@@ -26,7 +26,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import type { Vector2 } from '@/types';
+import type { Vector2 } from '@/core/types';
 import { ref, type Ref } from 'vue';
 import SliderElement from '../elements/SliderElement.vue';
 
@@ -37,7 +37,7 @@ const gridSettings: Ref<Vector2> = ref({
 defineEmits(['change']);
 </script>
 <style lang="scss">
-#section-grid-settings {
+#grid-settings {
   width: 100%;
   padding: 0.5rem;
   background: var(--smtx-panel);

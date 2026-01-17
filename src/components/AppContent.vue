@@ -2,7 +2,7 @@
   <main>
     <!-- export "loader" -->
     <div id="export-loader" :class="{ visible: isExporting }">
-      <StaticSprite width="5rem" sprite="wait" />
+      <StaticSprite width="5rem" height="5rem" sprite="wait" />
       <p>&lt;exporting...&gt;</p>
     </div>
 
@@ -21,15 +21,15 @@
         aria-label="Toggle word properties panel"
         title="Toggle word properties panel"
       >
-        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" sprite="properties-opened" />
-        <StaticSprite v-else width="2.5rem" sprite="properties-closed" />
+        <StaticSprite v-if="wordPropertiesToggle" width="2.5rem" height="2.5rem" sprite="properties-opened" />
+        <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="properties-closed" />
       </button>
       <WordPropertiesPanel :show-hint="!selectedWord" v-model="selectedWord" />
     </aside>
 
     <!-- main section -->
-    <section id="section-words">
-      <div ref="sectionRef" id="section-words-scrollzone">
+    <section id="words">
+      <div ref="sectionRef" id="words-scrollzone">
         <!-- main content -->
         <WordGridElement
           ref="wordGridRef"
@@ -40,6 +40,23 @@
           @select="handleGridSelect"
           @delete="handleGridDelete"
         />
+      </div>
+
+      <!-- spritesheet settings panel -->
+      <div id="spritesheet-settings-panel" :class="{ collapsed: !spritesheetSettingsToggle }">
+        <button
+          id="button-toggle-spritesheet-settings"
+          type="button"
+          class="animated"
+          :class="{ active: !!spritesheetSettingsToggle }"
+          @click="toggleSpritesheetSettingsPanel"
+          aria-label="Toggle spritesheet settings panel"
+          title="Toggle spritesheet settings panel"
+        >
+          <StaticSprite v-if="spritesheetSettingsToggle" width="2.5rem" height="2.5rem" sprite="spritesheet-opened" />
+          <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="spritesheet-closed" />
+        </button>
+        <SpritesheetSettingsPanel />
       </div>
 
       <!-- grid settings panel -->
@@ -53,8 +70,8 @@
           aria-label="Toggle grid settings panel"
           title="Toggle grid settings panel"
         >
-          <StaticSprite v-if="gridSettingsToggle" width="2.5rem" sprite="grid-opened" />
-          <StaticSprite v-else width="2.5rem" sprite="grid-closed" />
+          <StaticSprite v-if="gridSettingsToggle" width="2.5rem" height="2.5rem" sprite="grid-opened" />
+          <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="grid-closed" />
         </button>
         <GridSettingsPanel @change="updateGridSize" />
       </div>
@@ -68,7 +85,7 @@
         aria-label="Remove all words (reset)"
         title="Remove all words (reset)"
       >
-        <StaticSprite width="2.5rem" sprite="reset" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="reset" />
       </button>
 
       <!-- export panel -->
@@ -82,8 +99,8 @@
           aria-label="Toggle export settings panel"
           title="Toggle export settings panel"
         >
-          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" sprite="export-opened" />
-          <StaticSprite v-else width="2.5rem" sprite="export-closed" />
+          <StaticSprite v-if="exportSettingsToggle" width="2.5rem" height="2.5rem" sprite="export-opened" />
+          <StaticSprite v-else width="2.5rem" height="2.5rem" sprite="export-closed" />
         </button>
         <ExportSettingsPanel @export="exportWords" />
       </div>
@@ -99,13 +116,14 @@ import {
   type ExportSettingsOptions,
   type Vector2,
   type WordGridExposes,
-} from '@/types';
+} from '@/core/types';
 import WordPropertiesPanel from '@/components/panels/WordPropertiesPanel.vue';
 import { EventBus } from '@/core/event-bus';
 import ExportSettingsPanel from './panels/ExportSettingsPanel.vue';
 import WordGridElement from './elements/WordGridElement.vue';
 import GridSettingsPanel from './panels/GridSettingsPanel.vue';
 import { exportWordData } from '@/core/helpers/export.helper';
+import SpritesheetSettingsPanel from './panels/SpritesheetSettingsPanel.vue';
 
 // main page refs
 const sectionRef: TemplateRef<HTMLElement> = useTemplateRef('sectionRef');
@@ -115,6 +133,7 @@ const isExporting: Ref<boolean> = ref(false);
 // compact mode & toggle refs
 const compactMode: Ref<boolean> = ref(false);
 const wordPropertiesToggle: Ref<boolean> = ref(false);
+const spritesheetSettingsToggle: Ref<boolean> = ref(false);
 const gridSettingsToggle: Ref<boolean> = ref(false);
 const exportSettingsToggle: Ref<boolean> = ref(false);
 
@@ -128,6 +147,7 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     moreLettersOnTop: true,
     type: WordType.NOUN,
     crossedOut: false,
+    drawObject: false,
   },
   {
     x: 1,
@@ -137,6 +157,7 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     moreLettersOnTop: true,
     type: WordType.NOUN,
     crossedOut: false,
+    drawObject: false,
   },
   {
     x: 2,
@@ -146,6 +167,7 @@ const words: Ref<DynamicSpriteProps[]> = ref([
     moreLettersOnTop: true,
     type: WordType.PROPERTY,
     crossedOut: false,
+    drawObject: false,
   },
 ]);
 const wordGridDimensions: Ref<Vector2> = ref({ x: 3, y: 3 });
@@ -156,9 +178,10 @@ const selectedWord: Ref<DynamicSpriteProps | null> = ref(null);
 
 const checkCompactMode = () => (compactMode.value = window.innerWidth <= 1023);
 const checkPointerTarget = (evt: Event) => {
-  if ((evt.target as HTMLElement).id === 'section-words-scrollzone') {
+  if ((evt.target as HTMLElement).id === 'words-scrollzone') {
     selectedWord.value = null;
     wordPropertiesToggle.value = false;
+    spritesheetSettingsToggle.value = false;
     gridSettingsToggle.value = false;
     exportSettingsToggle.value = false;
     wordGridRef.value?.deselect();
@@ -183,17 +206,26 @@ function togglePropertiesPanel() {
   if (compactMode.value) {
     wordPropertiesToggle.value = !wordPropertiesToggle.value;
   }
+  spritesheetSettingsToggle.value = false;
   gridSettingsToggle.value = false;
   exportSettingsToggle.value = false;
 }
 function toggleExportSettingsPanel() {
   exportSettingsToggle.value = !exportSettingsToggle.value;
   wordPropertiesToggle.value = false;
+  spritesheetSettingsToggle.value = false;
   gridSettingsToggle.value = false;
 }
 function toggleGridSettingsPanel() {
   gridSettingsToggle.value = !gridSettingsToggle.value;
   wordPropertiesToggle.value = false;
+  spritesheetSettingsToggle.value = false;
+  exportSettingsToggle.value = false;
+}
+function toggleSpritesheetSettingsPanel() {
+  spritesheetSettingsToggle.value = !spritesheetSettingsToggle.value;
+  wordPropertiesToggle.value = false;
+  gridSettingsToggle.value = false;
   exportSettingsToggle.value = false;
 }
 
@@ -221,6 +253,8 @@ function handleGridDelete() {
 function resetWords() {
   words.value.splice(0);
   selectedWord.value = null;
+  wordGridDimensions.value.x = 3;
+  wordGridDimensions.value.y = 3;
 }
 
 async function exportWords(opts: ExportSettingsOptions) {
@@ -269,7 +303,7 @@ main {
   }
 }
 
-#section-words {
+#words {
   position: relative;
   overflow: hidden;
   display: flex;
@@ -284,7 +318,7 @@ main {
     border-radius: 8px;
   }
 
-  #section-words-scrollzone {
+  #words-scrollzone {
     flex: 1;
     width: 100%;
     height: 100%;
@@ -293,26 +327,19 @@ main {
     display: flex;
     align-items: center;
   }
-
-  .sprite.caret {
-    transform: none;
-    pointer-events: none;
-    cursor: default;
-    position: absolute;
-    top: -100%;
-  }
 }
+#spritesheet-settings-panel,
 #grid-settings-panel,
 #export-settings-panel {
   position: absolute;
   width: fit-content;
-  max-width: 14rem;
   border-radius: 8px;
 
   display: flex;
   justify-content: center;
 
   #button-toggle-export-settings,
+  #button-toggle-spritesheet-settings,
   #button-toggle-grid-settings {
     padding: 0.5rem;
     background: var(--smtx-panel);
@@ -322,9 +349,22 @@ main {
     display: none;
   }
 }
-#grid-settings-panel {
+#spritesheet-settings-panel {
   top: 1rem;
   left: 1rem;
+  flex-direction: column;
+
+  #button-toggle-spritesheet-settings {
+    align-self: flex-start;
+    &.active {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+}
+#grid-settings-panel {
+  top: 1rem;
+  left: 5.5rem;
   flex-direction: column;
 
   #button-toggle-grid-settings {
@@ -395,10 +435,15 @@ main {
       display: none;
     }
   }
-  #grid-settings-panel {
+  #spritesheet-settings-panel {
     z-index: 10;
     top: 1rem;
     left: 5.5rem;
+  }
+  #grid-settings-panel {
+    z-index: 10;
+    top: 1rem;
+    left: 10rem;
   }
 }
 </style>

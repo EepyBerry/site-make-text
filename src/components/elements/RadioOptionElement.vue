@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import type { WordType } from '@/types';
+import type { WordType } from '@/core/types';
 import { useTemplateRef } from 'vue';
 
 defineProps<{
@@ -31,11 +31,13 @@ defineProps<{
   internalAriaLabel?: string;
   internalTitle?: string;
 }>();
+const $emit = defineEmits(['select']);
 const optionModel = defineModel<string | number | boolean | WordType>();
 const htmlRadio = useTemplateRef('htmlRadio');
 
 function select() {
   (htmlRadio.value as HTMLInputElement).click();
+  $emit('select');
 }
 </script>
 

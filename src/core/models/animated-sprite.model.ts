@@ -1,5 +1,6 @@
-import type { Sprite, SpritesheetRegion } from '@/types';
+import type { Sprite, SpritesheetRegion } from '@/core/types';
 
+export type SpritesheetSource = 'main' | 'object-default' | 'object-usermade';
 export class AnimatedSprite {
   private _key: string;
   public get key(): string {
@@ -17,8 +18,17 @@ export class AnimatedSprite {
     this._frames = value;
   }
 
-  constructor(key: string, frames: Sprite[]) {
+  private _source: SpritesheetSource;
+  public get source(): SpritesheetSource {
+    return this._source;
+  }
+  public set source(value: SpritesheetSource) {
+    this._source = value;
+  }
+
+  constructor(key: string, source: SpritesheetSource, frames: Sprite[]) {
     this._key = key;
+    this._source = source;
     this._frames = frames;
   }
 

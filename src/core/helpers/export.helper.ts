@@ -1,4 +1,4 @@
-import type { DynamicSpriteFrameData, ExportSettingsOptions, Vector2 } from '@/types';
+import type { DynamicSpriteFrameData, ExportSettingsOptions, Vector2 } from '@/core/types';
 import { SPRITESHEET_CELL_SIZE } from '../globals';
 import { clamp } from '../utils/math.utils';
 import GIFImageDataEncoder from '../encoders/gif.encoder';
@@ -57,13 +57,15 @@ async function _encodeCombinedGridBlob(
   // Combine frames
   const combinedFrames: ImageData[] = Array<ImageData | null>(3)
     .fill(null)
-    .map((_, frameIdx) => _combineWordDataOnCanvas(wordData, scaledGridDimensions, scaledCellSize, frameIdx));
+    .map((_, frameIdx) =>
+      _combineWordDataOnCanvas(wordData, scaledGridDimensions, scaledCellSize, frameIdx, opts.cropGrid),
+    );
   // Encode using the given format (.gif or .webp)
   if (opts.format === 'gif') {
-    const encoded = gifEncoder.encode(combinedFrames, scaledGridDimensions.x!, scaledGridDimensions.y!);
+    const encoded = gifEncoder.encode(combinedFrames, combinedFrames[0]!.width, combinedFrames[0]!.height);
     return new Blob([encoded], { type: 'image/gif' });
   } else {
-    const encoded = await webpEncoder.encodeAsync(combinedFrames, scaledGridDimensions.x!, scaledGridDimensions.y!);
+    const encoded = await webpEncoder.encodeAsync(combinedFrames, combinedFrames[0]!.width, combinedFrames[0]!.height);
     return new Blob([encoded], { type: 'image/webp' });
   }
 }
@@ -73,25 +75,42 @@ function _combineWordDataOnCanvas(
   scaledGridDimensions: Vector2,
   scaledCellSize: number,
   frameIndex: number,
+  cropGrid: boolean,
 ): ImageData {
-  console.log(
-    `<SiteMakeText> Creating canvas of size [${scaledGridDimensions.x}, ${scaledGridDimensions.y}] -> frame ${frameIndex}`,
-  );
+  // Take all valid words (non-empty & has frames) and set initial canvas data
+  const validWordData = wordData.filter((wd) => wd.frames.length > 0 && !wd.isEmpty);
+  const canvasDimensions = { x: Number(scaledGridDimensions.x), y: Number(scaledGridDimensions.y) };
+  const canvasCroppingOffset = { x: 0, y: 0 };
+
+  // Calculate cropped grid data if cropping is enabled
+  if (cropGrid) {
+    const minFilledCoords = { x: 11, y: 11 };
+    const maxFilledCoords = { x: 0, y: 0 };
+    validWordData.forEach((wd) => {
+      minFilledCoords.x = wd.x < minFilledCoords.x ? wd.x : minFilledCoords.x;
+      minFilledCoords.y = wd.y < minFilledCoords.y ? wd.y : minFilledCoords.y;
+      maxFilledCoords.x = wd.x > maxFilledCoords.x ? wd.x : maxFilledCoords.x;
+      maxFilledCoords.y = wd.y > maxFilledCoords.y ? wd.y : maxFilledCoords.y;
+    });
+    canvasDimensions.x = (maxFilledCoords.x - minFilledCoords.x + 1) * scaledCellSize;
+    canvasDimensions.y = (maxFilledCoords.y - minFilledCoords.y + 1) * scaledCellSize;
+    canvasCroppingOffset.x = -minFilledCoords.x;
+    canvasCroppingOffset.y = -minFilledCoords.y;
+  }
 
   // Create the target canvas
-  const canvas: OffscreenCanvas = new OffscreenCanvas(scaledGridDimensions.x!, scaledGridDimensions.y!);
-  const ctx = canvas.getContext('2d');
+  const canvas: OffscreenCanvas = new OffscreenCanvas(canvasDimensions.x, canvasDimensions.y);
+  const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
   if (!ctx) throw new Error('Cannot combine canvas data: context was not properly initialized');
 
-  // Place individual frame data on the canvas
+  // Place individual frame data on the canvas (canvasCroppingOffset will be non-zero if cropping is enabled; see above)
   const offsets: Vector2 = { x: 0, y: 0 };
-  for (let i = 0; i < wordData.length; i++) {
-    if (wordData[i]!.frames.length === 0) continue;
-    offsets.x = scaledCellSize * wordData[i]!.x!;
-    offsets.y = scaledCellSize * wordData[i]!.y!;
-    ctx.putImageData(wordData[i]!.frames[frameIndex]!, offsets.x, offsets.y);
+  for (let i = 0; i < validWordData.length; i++) {
+    offsets.x = scaledCellSize * (validWordData[i]!.x! + canvasCroppingOffset.x);
+    offsets.y = scaledCellSize * (validWordData[i]!.y! + canvasCroppingOffset.y);
+    ctx.putImageData(validWordData[i]!.frames[frameIndex]!, offsets.x, offsets.y);
   }
-  return ctx.getImageData(0, 0, scaledGridDimensions.x!, scaledGridDimensions.y!);
+  return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
 
 // ----------------------------------------------------------------------------

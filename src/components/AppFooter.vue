@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import StaticSprite from './elements/StaticSpriteElement.vue';
-</script>
-
 <template>
   <footer id="smtx-footer">
     <div>
@@ -14,8 +10,13 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
     </div>
     <ul id="footer-links">
       <li>
+        <button type="button" class="animated" @click="openHelpDialog">
+          <StaticSprite sprite="help" width="3rem" height="3rem" />
+        </button>
+      </li>
+      <li>
         <a class="image-link" href="https://eepyberry.me" target="_blank" title="EepyBerry's website">
-          <StaticSprite sprite="eepyberry" width="3rem" />
+          <StaticSprite sprite="eepyberry" width="3rem" height="3rem" />
         </a>
       </li>
       <li>
@@ -25,12 +26,26 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
           target="_blank"
           title="GitHub project page"
         >
-          <StaticSprite sprite="github" width="3rem" />
+          <StaticSprite sprite="github" width="3rem" height="3rem" />
         </a>
       </li>
     </ul>
   </footer>
+  <HelpDialog ref="helpDialogRef" />
 </template>
+
+<script setup lang="ts">
+import { useTemplateRef, type TemplateRef } from 'vue';
+import HelpDialog from './dialogs/HelpDialog.vue';
+import StaticSprite from './elements/StaticSpriteElement.vue';
+import type { DialogExposes } from '@/core/types';
+
+const helpDialogRef: TemplateRef<DialogExposes> = useTemplateRef('helpDialogRef');
+
+function openHelpDialog() {
+  helpDialogRef.value!.open();
+}
+</script>
 
 <style lang="scss">
 #smtx-footer {
@@ -54,7 +69,7 @@ import StaticSprite from './elements/StaticSpriteElement.vue';
 
     a:hover .sprite {
       cursor: pointer;
-      transform: scale(1.075);
+      transform: scale(1.0625);
     }
     a:active .sprite {
       transform: scale(0.9);

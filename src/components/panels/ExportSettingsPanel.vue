@@ -1,6 +1,6 @@
 <template>
-  <section id="section-export-settings">
-    <StaticSprite width="2.5rem" sprite="export-scale" />
+  <section id="export-settings">
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="export-scale" />
     <div class="setting-wrapper">
       <SliderElement
         id="setting-scale"
@@ -13,7 +13,31 @@
       <p>{{ exportSettings.scale }}</p>
     </div>
 
-    <StaticSprite width="2.5rem" sprite="export-type" />
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="export-crop" />
+    <RadioElement>
+      <RadioOptionElement
+        v-model="exportSettings.cropGrid"
+        pid="setting-crop"
+        id="nocrop"
+        :value="false"
+        internal-aria-label="Export grid as-is"
+        internal-title="Export grid as-is"
+      >
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="off" />
+      </RadioOptionElement>
+      <RadioOptionElement
+        v-model="exportSettings.cropGrid"
+        pid="setting-crop"
+        id="docrop"
+        :value="true"
+        internal-aria-label="Crop grid to remove excess space"
+        internal-title="Crop grid to remove excess space"
+      >
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="on" />
+      </RadioOptionElement>
+    </RadioElement>
+
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="export-type" />
     <RadioElement>
       <RadioOptionElement
         v-model="exportSettings.combinedOnly"
@@ -27,7 +51,7 @@
       </RadioOptionElement>
       <RadioOptionElement
         v-model="exportSettings.combinedOnly"
-        pid="setting-format"
+        pid="setting-type"
         id="combined"
         :value="true"
         internal-aria-label="Export combined image only"
@@ -37,7 +61,7 @@
       </RadioOptionElement>
     </RadioElement>
 
-    <StaticSprite width="2.5rem" sprite="export-format" />
+    <StaticSprite width="2.5rem" height="2.5rem" sprite="export-format" />
     <RadioElement>
       <RadioOptionElement
         v-model="exportSettings.format"
@@ -47,7 +71,7 @@
         internal-aria-label="Set word as a noun"
         internal-title="Export words as .gif"
       >
-        <StaticSprite width="2.5rem" sprite="format-gif" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="format-gif" />
       </RadioOptionElement>
       <RadioOptionElement
         v-model="exportSettings.format"
@@ -57,7 +81,7 @@
         internal-aria-label="Set word as a property (adds background)"
         internal-title="Export words as .webp"
       >
-        <StaticSprite width="2.5rem" sprite="format-webp" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="format-webp" />
       </RadioOptionElement>
     </RadioElement>
 
@@ -69,8 +93,8 @@
       aria-label="Export words"
       title="Export words"
     >
-      <StaticSprite width="2.5rem" sprite="export-exp" />
-      <StaticSprite width="2.5rem" sprite="export-ort" />
+      <StaticSprite width="2.5rem" height="2.5rem" sprite="export-exp" />
+      <StaticSprite width="2.5rem" height="2.5rem" sprite="export-ort" />
     </button>
   </section>
 </template>
@@ -78,21 +102,22 @@
 <script setup lang="ts">
 import RadioElement from '@/components/elements/RadioElement.vue';
 import RadioOptionElement from '@/components/elements/RadioOptionElement.vue';
-import type { ExportSettingsOptions } from '@/types';
+import type { ExportSettingsOptions } from '@/core/types';
 import { ref, type Ref } from 'vue';
 import SliderElement from '../elements/SliderElement.vue';
 
 const exportSettings: Ref<ExportSettingsOptions> = ref({
   scale: 3,
+  cropGrid: true,
   format: 'webp',
-  combinedOnly: false,
+  combinedOnly: true,
 });
 
 defineEmits(['export']);
 </script>
 
 <style lang="scss">
-#section-export-settings {
+#export-settings {
   width: 100%;
   padding: 0.5rem;
   background: var(--smtx-panel);

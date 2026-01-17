@@ -1,4 +1,4 @@
-import type { Vector2 } from '@/types';
+import type { Vector2 } from '@/core/types';
 
 export function clamp(x: number, min: number, max: number) {
   return Math.max(min, Math.min(x, max));

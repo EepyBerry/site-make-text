@@ -7,6 +7,7 @@ input {
   color: var(--smtx-text);
   text-align: center;
 }
+
 button {
   position: relative;
   border: none;
@@ -28,7 +29,7 @@ button {
     transform: none;
   }
   &.animated:hover > * {
-    transform: scale(1.05);
+    transform: scale(1.0625);
   }
   &.animated:active > * {
     transform: scale(0.9);
@@ -58,4 +59,22 @@ a:not(:has(div)):visited {
 }
 a:not(:has(div)):hover {
   filter: brightness(1.5);
+}
+
+span[emphasis],
+p[emphasis] {
+  color: var(--smtx-text-highlight);
+  font-style: italic;
+}
+span[subscript],
+p[subscript] {
+  font-size: 0.675rem;
+  color: var(--smtx-text-subscript);
+}
+
+ul,
+ol {
+  list-style-position: inside;
+  list-style-type: none;
+  padding: 0;
 }

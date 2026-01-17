@@ -39,7 +39,7 @@ input[type='range'] {
     margin-top: -0.5rem;
     z-index: 1;
     background-color: transparent;
-    background: url('@/assets/spritesheet/slider-thumb.png');
+    background: url('@/assets/spritesheets/slider-thumb.png');
     border: none;
     height: 1.5rem;
     width: 1.5rem;
@@ -64,7 +64,7 @@ input[type='range'] {
     margin-top: -0.5rem;
     z-index: 1;
     background-color: transparent;
-    background: url('@/assets/spritesheet/slider-thumb.png');
+    background: url('@/assets/spritesheets/slider-thumb.png');
     border: none;
     height: 1.5rem;
     width: 1.5rem;
@@ -89,7 +89,7 @@ input[type='range'] {
     margin-top: -0.5rem;
     z-index: 1;
     background-color: transparent;
-    background: url('@/assets/spritesheet/slider-thumb.png');
+    background: url('@/assets/spritesheets/slider-thumb.png');
     border: none;
     height: 1.5rem;
     width: 1.5rem;
@@ -98,17 +98,17 @@ input[type='range'] {
 
   &:focus::-webkit-slider-thumb {
     outline: none;
-    background: url('@/assets/spritesheet/slider-thumb-focus.png');
+    background: url('@/assets/spritesheets/slider-thumb-focus.png');
   }
 
   &:focus::-moz-range-thumb {
     outline: none;
-    background: url('@/assets/spritesheet/slider-thumb-focus.png');
+    background: url('@/assets/spritesheets/slider-thumb-focus.png');
   }
 
   &:focus::-ms-thumb {
     outline: none;
-    background: url('@/assets/spritesheet/slider-thumb-focus.png');
+    background: url('@/assets/spritesheets/slider-thumb-focus.png');
   }
 }
 </style>

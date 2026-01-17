@@ -5,23 +5,32 @@
 <script setup lang="ts">
 import { EventBus } from '@/core/event-bus';
 import type { AnimatedSprite } from '@/core/models/animated-sprite.model';
-import { getAnimatedSprite } from '@/core/helpers/spritesheet.helper';
-import { updateFrameIndex, updateRawFrameIndex } from '@/core/utils/spritesheet-utils';
+import {
+  getAnimatedSprite,
+  getWordObject,
+  isWordSpecial,
+  updateFrameIndex,
+  updateRawFrameIndex,
+} from '@/core/helpers/spritesheet.helper';
 import { onMounted, ref, useTemplateRef, watch, type Ref } from 'vue';
-import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/types';
+import { WordType, type DynamicSpriteFrameData, type DynamicSpriteProps } from '@/core/types';
 import { SPRITESHEET_CELL_SIZE } from '@/core/globals';
+import { allComponentsEqualTo } from '@/core/utils/color.utils';
+import tinycolor from 'tinycolor2';
 
 const spriteCanvas = useTemplateRef('spriteCanvas')!;
 const emptySprite: Ref<AnimatedSprite | null> = ref(null);
 const blockSprite: Ref<AnimatedSprite | null> = ref(null);
 const crossSprite: Ref<AnimatedSprite | null> = ref(null);
 const letterSprites: Ref<AnimatedSprite[]> = ref([]);
+const specialObjectSprite: Ref<AnimatedSprite | null> = ref(null);
 const spriteFrameIndex: Ref<number> = ref(0);
 
 const $props = withDefaults(defineProps<DynamicSpriteProps>(), { x: -1, y: -1 });
 
 onMounted(() => {
   if (!EventBus.spritesheetInitEvent.value) return;
+  _checkSpecialMode();
   _loadEmptySprite();
   _loadBlockSprite();
   _loadCrossSprite();
@@ -29,10 +38,20 @@ onMounted(() => {
   _updateCanvas(spriteCanvas.value!);
 });
 watch($props, () => {
+  _checkSpecialMode();
   _reloadLetterSprites();
   _updateCanvas(spriteCanvas.value!);
 });
 watch(EventBus.spritesheetInitEvent, () => {
+  _checkSpecialMode();
+  _loadEmptySprite();
+  _loadBlockSprite();
+  _loadCrossSprite();
+  _reloadLetterSprites();
+  _updateCanvas(spriteCanvas.value!);
+});
+watch(EventBus.spritesheetReloadEvent, () => {
+  _checkSpecialMode();
   _loadEmptySprite();
   _loadBlockSprite();
   _loadCrossSprite();
@@ -53,8 +72,8 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 
   const rawCanvas: OffscreenCanvas = new OffscreenCanvas(SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
   const scaleCanvas: OffscreenCanvas = new OffscreenCanvas(scaledImageSize, scaledImageSize);
-  const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
-  const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true });
+  const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true, alpha: true, colorSpace: 'srgb' });
+  const scaleCtx = scaleCanvas.getContext('2d', { willReadFrequently: true, alpha: true, colorSpace: 'srgb' });
   if (!rawCtx || !scaleCtx) throw new Error('Cannot extract frames: context was not properly initialized');
 
   // prepare raw canvas
@@ -68,13 +87,24 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
 
   // skip empty words
   if (!letterSprites.value || letterSprites.value.length === 0) {
-    return { x: $props.x, y: $props.y, frames: [] };
+    return { x: $props.x, y: $props.y, frames: [], isEmpty: true };
   }
 
   // iterate on frames and draw them one by one on canvas first, and then as a gif frame
   const frames: ImageData[] = [];
   for (let i = 0; i < 3; i++) {
     _clearCanvas(rawCtx);
+
+    // early skip if we draw the object instead of the letters
+    if ($props.drawObject === true && specialObjectSprite.value !== null) {
+      _drawObject(rawCtx, i);
+      _clearCanvas(scaleCtx);
+      scaleCtx.drawImage(rawCanvas, 0, 0);
+      frames.push(scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize));
+      continue;
+    }
+
+    // Draw letters
     switch (letterSprites.value.length) {
       case 1:
         _drawLetter(rawCtx, i);
@@ -110,11 +140,20 @@ function extractFrames(scale: number = 2): DynamicSpriteFrameData {
     scaleCtx.drawImage(rawCanvas, 0, 0);
     frames.push(scaleCtx.getImageData(0, 0, scaledImageSize, scaledImageSize));
   }
-  return { x: $props.x, y: $props.y, frames };
+  return { x: $props.x, y: $props.y, frames, isEmpty: $props.word?.length === 0 };
 }
 
 // ----------------------------------------------------------------------------
 // internal functions
+
+function _checkSpecialMode() {
+  if (!isWordSpecial($props.word)) {
+    specialObjectSprite.value = null;
+    return;
+  }
+  const objectAnimSprite = getAnimatedSprite(getWordObject($props.word!));
+  specialObjectSprite.value = objectAnimSprite ?? null;
+}
 
 function _loadEmptySprite() {
   const emptyAnimSprite = getAnimatedSprite('empty');
@@ -156,18 +195,26 @@ function _reloadLetterSprites() {
 }
 
 function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })! as
+  const ctx = canvas.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' })! as
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D;
   if (!ctx) return;
   _clearCanvas(ctx);
   ctx.globalCompositeOperation = 'source-in';
 
+  // early return if the word is empty
   if (!letterSprites.value || letterSprites.value.length === 0) {
     _drawEmpty(ctx, spriteFrameIndex.value);
     return;
   }
 
+  // early return if we draw the object instead of the letters
+  if ($props.drawObject === true && specialObjectSprite.value !== null) {
+    _drawObject(ctx, spriteFrameIndex.value);
+    return;
+  }
+
+  // continue here if we draw the letters
   switch (letterSprites.value.length) {
     case 1:
       _drawLetter(ctx, spriteFrameIndex.value);
@@ -195,7 +242,6 @@ function _updateCanvas(canvas: HTMLCanvasElement | OffscreenCanvas) {
       break;
   }
   _applyColor(ctx);
-
   if ($props.type === WordType.PROPERTY) {
     _drawBlock(ctx, spriteFrameIndex.value);
   }
@@ -312,16 +358,74 @@ function _drawBlock(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingCont
  * @param ctx
  */
 function _drawCross(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, frameIndex: number) {
-  const wordImgData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
+  const canvasData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
 
   const crossFrameData = crossSprite.value!.frames[frameIndex]!.data;
   for (let i = 0; i < crossFrameData.data.length; i += 4) {
-    wordImgData.data[i + 0] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 0]! : wordImgData.data[i + 0]!;
-    wordImgData.data[i + 1] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 1]! : wordImgData.data[i + 1]!;
-    wordImgData.data[i + 2] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 2]! : wordImgData.data[i + 2]!;
-    wordImgData.data[i + 3] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 3]! : wordImgData.data[i + 3]!;
+    canvasData.data[i + 0] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 0]! : canvasData.data[i + 0]!;
+    canvasData.data[i + 1] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 1]! : canvasData.data[i + 1]!;
+    canvasData.data[i + 2] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 2]! : canvasData.data[i + 2]!;
+    canvasData.data[i + 3] = crossFrameData.data[i + 3]! > 0 ? crossFrameData.data[i + 3]! : canvasData.data[i + 3]!;
   }
-  ctx.putImageData(wordImgData, 0, 0);
+  ctx.putImageData(canvasData, 0, 0);
+}
+
+// ----------------------------------------------------------------------------
+// special mode functions (when a word corresponds to an object and object drawing is enabled)
+
+function _drawObject(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, frameIndex: number) {
+  const canvasData = ctx.getImageData(0, 0, SPRITESHEET_CELL_SIZE, SPRITESHEET_CELL_SIZE);
+  const objectFrameData = specialObjectSprite.value!.frames[frameIndex]!.data;
+  let propsColorRGB: tinycolor.Instance | null = null;
+  for (let i = 0; i < objectFrameData.data.length; i += 4) {
+    if (
+      allComponentsEqualTo(
+        objectFrameData.data[i + 0]!,
+        objectFrameData.data[i + 1]!,
+        objectFrameData.data[i + 2]!,
+        221,
+      )
+    ) {
+      propsColorRGB = tinycolor($props.color);
+      propsColorRGB.lighten(30);
+      canvasData.data[i + 0] = propsColorRGB.toRgb().r;
+      canvasData.data[i + 1] = propsColorRGB.toRgb().g;
+      canvasData.data[i + 2] = propsColorRGB.toRgb().b;
+      canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
+      continue;
+    }
+    if (
+      allComponentsEqualTo(
+        objectFrameData.data[i + 0]!,
+        objectFrameData.data[i + 1]!,
+        objectFrameData.data[i + 2]!,
+        170,
+      )
+    ) {
+      propsColorRGB = tinycolor($props.color);
+      canvasData.data[i + 0] = propsColorRGB.toRgb().r;
+      canvasData.data[i + 1] = propsColorRGB.toRgb().g;
+      canvasData.data[i + 2] = propsColorRGB.toRgb().b;
+      canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
+      continue;
+    }
+    if (
+      allComponentsEqualTo(objectFrameData.data[i + 0]!, objectFrameData.data[i + 1]!, objectFrameData.data[i + 2]!, 85)
+    ) {
+      propsColorRGB = tinycolor($props.color);
+      propsColorRGB.darken(15);
+      canvasData.data[i + 0] = propsColorRGB.toRgb().r;
+      canvasData.data[i + 1] = propsColorRGB.toRgb().g;
+      canvasData.data[i + 2] = propsColorRGB.toRgb().b;
+      canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
+      continue;
+    }
+    canvasData.data[i + 0] = objectFrameData.data[i + 0]!;
+    canvasData.data[i + 1] = objectFrameData.data[i + 1]!;
+    canvasData.data[i + 2] = objectFrameData.data[i + 2]!;
+    canvasData.data[i + 3] = objectFrameData.data[i + 3]!;
+  }
+  ctx.putImageData(canvasData, 0, 0);
 }
 </script>
 

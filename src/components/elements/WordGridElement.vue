@@ -21,8 +21,16 @@
               :type="getGridElement($model, x, y)?.type"
               :more-letters-on-top="getGridElement($model, x, y)?.moreLettersOnTop"
               :crossed-out="getGridElement($model, x, y)?.crossedOut"
+              :draw-object="getGridElement($model, x, y)?.drawObject"
               width="5rem"
               :class="{ empty: getGridElement($model, x, y)?.word?.length === 0 }"
+            />
+            <StaticSprite
+              v-if="isWordSpecial(getGridElement($model, x, y)?.word)"
+              class="word-special-hint"
+              sprite="special-sparkle"
+              width="5rem"
+              height="5rem"
             />
           </button>
           <span v-else>
@@ -33,7 +41,7 @@
               aria-label="Add new word"
               title="Add new word"
             >
-              <StaticSprite width="2rem" sprite="plus" />
+              <StaticSprite width="2rem" height="2rem" sprite="plus" />
             </button>
           </span>
         </template>
@@ -56,7 +64,7 @@
           title="Delete word"
           @click="_deleteSelectedWord"
         >
-          <StaticSprite width="3rem" sprite="trash" />
+          <StaticSprite width="3rem" height="3rem" sprite="trash" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.x, 1, width)"
@@ -67,7 +75,7 @@
           title="Move word left"
           @click="_moveSelectedWord(-1, 0)"
         >
-          <StaticSprite width="3rem" sprite="left" />
+          <StaticSprite width="3rem" height="3rem" sprite="left" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.y, 1, height)"
@@ -78,7 +86,7 @@
           title="Move word up"
           @click="_moveSelectedWord(0, -1)"
         >
-          <StaticSprite width="3rem" sprite="up" />
+          <StaticSprite width="3rem" height="3rem" sprite="up" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.x, 0, width - 2)"
@@ -89,7 +97,7 @@
           title="Move word right"
           @click="_moveSelectedWord(1, 0)"
         >
-          <StaticSprite width="3rem" sprite="right" />
+          <StaticSprite width="3rem" height="3rem" sprite="right" />
         </button>
         <button
           v-show="isBetween(selectedWordCoords.y, 0, height - 2)"
@@ -100,7 +108,7 @@
           title="Move word down"
           @click="_moveSelectedWord(0, 1)"
         >
-          <StaticSprite width="3rem" sprite="down" />
+          <StaticSprite width="3rem" height="3rem" sprite="down" />
         </button>
       </div>
     </div>
@@ -115,9 +123,10 @@ import {
   type DynamicSpriteFrameData,
   type DynamicSpriteProps,
   type Vector2,
-} from '@/types';
+} from '@/core/types';
 import { useFloating, offset, autoUpdate } from '@floating-ui/vue';
 import { ref, useTemplateRef, type Ref, type TemplateRef } from 'vue';
+import { isWordSpecial } from '@/core/helpers/spritesheet.helper';
 
 // vue component data
 withDefaults(
@@ -172,6 +181,7 @@ function _addWord(x: number, y: number): void {
     type: WordType.NOUN,
     moreLettersOnTop: true,
     crossedOut: false,
+    drawObject: false,
   });
   setTimeout(() => _selectWord(document.getElementById(`button-word-${x}-${y}`)!, x, y));
 }
@@ -227,12 +237,12 @@ function _deleteSelectedWord() {
   pointer-events: all;
 
   display: grid;
-  grid-template-columns: repeat(var(--width), 5.5rem);
-  grid-template-rows: repeat(var(--height), 5.5rem);
+  grid-template-columns: repeat(var(--width), 5rem);
+  grid-template-rows: repeat(var(--height), 5rem);
 
   & > * {
-    width: 5.5rem;
-    height: 5.5rem;
+    width: 5rem;
+    height: 5rem;
     border-right: 1px dashed var(--smtx-grid-border);
     border-bottom: 1px dashed var(--smtx-grid-border);
 
@@ -258,6 +268,11 @@ function _deleteSelectedWord() {
       opacity: 1;
     }
   }
+}
+.word-special-hint {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
 }
 
 #word-actions-panel {

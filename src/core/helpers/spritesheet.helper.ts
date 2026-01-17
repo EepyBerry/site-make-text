@@ -1,53 +1,169 @@
-import type { Sprite, SpritesheetRegion } from '@/types';
-import appSpritesheetJson from '@/assets/spritesheet/app-spritesheet.json';
-import appSpritesheet from '@/assets/spritesheet/app-spritesheet.png';
+import type { JsonSpritesheetDescriptor, Sprite, Spritesheet, SpritesheetRegion } from '@/core/types';
 import { EventBus } from '../event-bus';
 import { ref, type Ref } from 'vue';
-import { AnimatedSprite } from '../models/animated-sprite.model';
-import { SPRITESHEET_HEIGHT, SPRITESHEET_WIDTH } from '../globals';
+import { AnimatedSprite, type SpritesheetSource } from '../models/animated-sprite.model';
+import mainSpritesheetURL from '@/assets/spritesheets/app-spritesheet.png';
+import mainSpritesheetDescriptor from '@/assets/spritesheets/app-spritesheet.json';
+import defaultObjSpritesheetURL from '@/assets/spritesheets/object-spritesheet.png';
+import defaultObjSpritesheetDescriptor from '@/assets/spritesheets/object-spritesheet.json';
+import { loadImage, drawImageOntoCanvas } from './image.helper';
 
-const SPRITESHEET_CANVAS: OffscreenCanvas = new OffscreenCanvas(SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT);
-const SPRITESHEET_ANIMSPRITES: Record<string, SpritesheetRegion[]> = appSpritesheetJson;
+/**
+ * Main {@link AnimatedSprite} registry for the application.
+ */
+export const SMTX_ANIMSPRITE_REGISTRY: Ref<AnimatedSprite[]> = ref([]);
 
-export const SMTX_ANIMATED_SPRITES: Ref<AnimatedSprite[]> = ref([]);
+/**
+ * Main spritesheet registry for the application.
+ *
+ * Contains at most three spritesheets: `main`, `object-default` and `object-usermade` (optional).
+ */
+export const SMTX_SPRITESHEET_REGISTRY: Ref<Spritesheet[]> = ref([]);
 
-export async function initSpritesheetCanvas() {
-  const ctx = SPRITESHEET_CANVAS.getContext('2d', { willReadFrequently: true })!;
-  const img = new Image(SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT);
-  img.onload = () => {
-    ctx.drawImage(img, 0, 0);
-    ctx.imageSmoothingEnabled = false;
-    cutSpritesheet();
-  };
-  img.src = appSpritesheet;
+/**
+ * App-wide toggle for user-made object spritesheet (overrides default sprites if enabled)
+ */
+export const SMTX_ENABLE_USERMADE_SPRITESHEET: Ref<boolean> = ref(false);
+
+/**
+ * Loads the main spritesheet and extract each {@link AnimatedSprite} according to its JSON descriptor file.
+ */
+export async function initAppSpritesheet() {
+  const img = await loadImage(mainSpritesheetURL);
+  drawImageOntoCanvas(img, async (_, ctx) => {
+    await cutSpritesheet('main', ctx, mainSpritesheetDescriptor.regions);
+    SMTX_SPRITESHEET_REGISTRY.value.push({
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+      source: 'main',
+      descriptor: mainSpritesheetDescriptor,
+    });
+  });
 }
 
+export async function loadDefaultObjectSpritesheet() {
+  const img = await loadImage(defaultObjSpritesheetURL);
+  await drawImageOntoCanvas(img, async (_, ctx) => {
+    await cutSpritesheet('object-default', ctx, defaultObjSpritesheetDescriptor.regions);
+    SMTX_SPRITESHEET_REGISTRY.value.push({
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+      source: 'object-default',
+      descriptor: defaultObjSpritesheetDescriptor,
+    });
+    EventBus.sendSpritesheetInitEvent();
+  });
+}
+
+export function removeUsermadeObjectSprites() {
+  // remove all custom object sprites from registry
+  const objSprites = SMTX_ANIMSPRITE_REGISTRY.value.filter((as) => as.source !== 'object-usermade');
+  SMTX_ANIMSPRITE_REGISTRY.value.splice(0);
+  SMTX_ANIMSPRITE_REGISTRY.value.push(...objSprites);
+
+  // remove existing custom spritesheet
+  const usermadeSpritesheetIdx = SMTX_SPRITESHEET_REGISTRY.value.findIndex((as) => as.source === 'object-usermade');
+  if (usermadeSpritesheetIdx >= 0) {
+    SMTX_SPRITESHEET_REGISTRY.value.splice(usermadeSpritesheetIdx, 1);
+  }
+  EventBus.sendSpritesheetReloadEvent();
+}
+
+export async function loadUsermadeObjectSpritesheet(
+  spritesheetFile: ImageBitmapSource,
+  descriptor: JsonSpritesheetDescriptor,
+) {
+  drawImageOntoCanvas(spritesheetFile, async (canvas, ctx) => {
+    await cutSpritesheet('object-usermade', ctx, descriptor.regions);
+    SMTX_SPRITESHEET_REGISTRY.value.push({
+      width: canvas.width,
+      height: canvas.height,
+      source: 'object-usermade',
+      descriptor,
+    });
+    EventBus.sendSpritesheetReloadEvent();
+  });
+}
+
+export function setEnableUsermadeObjectSpritesheet(value: boolean) {
+  SMTX_ENABLE_USERMADE_SPRITESHEET.value = value;
+  EventBus.sendSpritesheetReloadEvent();
+}
+
+// ----------------------------------------------------------------------------
+// update functions
+
+export function updateFrameIndex(current: Ref<number>): void {
+  current.value++;
+  if (current.value === 3) current.value = 0;
+}
+export function updateRawFrameIndex(index: number): number {
+  index++;
+  if (index === 3) index = 0;
+  return index;
+}
+
+export function isWordSpecial(word?: string) {
+  return getObjectWordMap()[word?.toLowerCase() ?? ''] !== undefined;
+}
+
+export function getWordObject(word: string): string {
+  return getObjectWordMap()[word.toLowerCase()]!.toLowerCase();
+}
+
+// ----------------------------------------------------------------------------
+// getter functions
+
+export function getObjectWordMap(): Record<string, string> {
+  return {
+    ...SMTX_SPRITESHEET_REGISTRY.value[1]?.descriptor.wordmap, // default object spritesheet
+    ...(!!SMTX_ENABLE_USERMADE_SPRITESHEET.value
+      ? SMTX_SPRITESHEET_REGISTRY.value[2]?.descriptor.wordmap // usermade object spritesheet
+      : undefined),
+  };
+}
+export function getSpritesheet(source: SpritesheetSource) {
+  return SMTX_SPRITESHEET_REGISTRY.value.find((as) => as.source === source);
+}
 export function getAnimatedSprite(key: string): AnimatedSprite | undefined {
-  return SMTX_ANIMATED_SPRITES.value.find((as) => as.key === key);
+  // look from the end of the array to get the last sprite matching the given key
+  // (accounts for custom spritesheet overrides)
+  return SMTX_ANIMSPRITE_REGISTRY.value
+    .slice()
+    .reverse()
+    .filter((s) => (SMTX_ENABLE_USERMADE_SPRITESHEET.value ? true : s.source !== 'object-usermade'))
+    .find((as) => as.key === key);
 }
 
 // ----------------------------------------------------------------------------
 // internal functions
 
-async function cutSpritesheet(): Promise<void> {
-  for (const region of Object.entries(SPRITESHEET_ANIMSPRITES)) {
-    const sprites: Sprite[] = await cutSpritesheetRegion(region[0], region[1]);
-    SMTX_ANIMATED_SPRITES.value.push(new AnimatedSprite(region[0], sprites));
+async function cutSpritesheet(
+  source: SpritesheetSource,
+  canvasContext: OffscreenCanvasRenderingContext2D,
+  jsonRegions: Record<string, SpritesheetRegion[]>,
+): Promise<void> {
+  for (const jsonKey of Object.keys(jsonRegions)) {
+    const sprites: Sprite[] = await cutSpritesheetRegion(canvasContext, jsonRegions, jsonKey);
+    SMTX_ANIMSPRITE_REGISTRY.value.push(new AnimatedSprite(jsonKey, source, sprites));
   }
-  EventBus.sendSpritesheetInitEvent();
 }
 
-async function cutSpritesheetRegion(key: string, regionsRef: SpritesheetRegion[]): Promise<Sprite[]> {
-  const frames: SpritesheetRegion[] | undefined = SPRITESHEET_ANIMSPRITES[key];
-  if (!frames || frames.length === 0) throw new Error('Region does not exist for key: ' + key);
+async function cutSpritesheetRegion(
+  canvasContext: OffscreenCanvasRenderingContext2D,
+  jsonRegions: Record<string, SpritesheetRegion[]>,
+  key: string,
+): Promise<Sprite[]> {
+  const regions: SpritesheetRegion[] | undefined = jsonRegions[key];
+  if (!regions || regions.length < 1) throw new Error('Region does not exist for key: ' + key);
 
-  const spritesheetCtx = SPRITESHEET_CANVAS.getContext('2d', { willReadFrequently: true })!;
   const resultSprites: Sprite[] = [];
-  for (let idx = 0; idx < frames.length; idx++) {
-    const f = frames[idx]!;
-    const imageData = spritesheetCtx.getImageData(f.x, f.y, f.w, f.h);
+  let curRegion: SpritesheetRegion | null = null;
+  for (let idx = 0; idx < 3; idx++) {
+    curRegion = regions[idx] ?? regions[idx - 1]!;
+    const imageData = canvasContext.getImageData(curRegion.x, curRegion.y, curRegion.w ?? 24, curRegion.h ?? 24);
     resultSprites.push({
-      region: regionsRef[idx]!,
+      region: curRegion,
       data: imageData,
     });
   }

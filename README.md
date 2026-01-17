@@ -37,12 +37,13 @@ Huge thanks to the awesome people below:
 <ul>
   <li><a href="https://hempuli.com">Arvi "Hempuli" Teikari</a> and the entire team behind Baba Is You!</li>
   <li>The people behind <a href="https://github.com/ApeironTsuka/node-webpmux">node-webpmux</a> and <a href="https://github.com/mattdesl/gifenc">gifenc</a>, without whom my exporting efforts would be MUCH harder!</li>
+  <li>All the people who helped me test this small project &lt;3</li>
 </ul>
 
 ## 📓 Licensing
 
 The spritesheets used by this application are released to the public domain under the Creative Commons Zero 1.0 Universal license ([CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)).
-Please consult the spritesheet [license file](src/assets/spritesheets/LICENCE) for full information.
+Please consult the spritesheet [license file](src/assets/spritesheets/LICENCE) for full information. This also applies to the spritesheets in the [examples](public/examples/LICENCE) folder.
 
 The rest of the assets and source code from this project are provided under the "I'm So Tired" Software License 1.0 - No-Resale version.<br>
 Please consult the main [license file](LICENSE) for full information.

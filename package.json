@@ -24,7 +24,7 @@
     "jszip": "^3.10.1",
     "node-webpmux": "^3.2.1",
     "tinycolor2": "^1.6.0",
-    "vite-plugin-node-polyfills": "^0.24.0",
+    "vite-plugin-node-polyfills": "^0.25.0",
     "vue": "^3.5.25",
     "vue-accessible-color-picker": "^5.3.1",
     "ws": "^8.18.3",

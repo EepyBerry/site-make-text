@@ -59,8 +59,11 @@
         </p>
       </div>
       <div class="text-block">
-        <p>Another, more advanced feature is the ability to use special tints to lighten/darken the selected color. You can see this above on the sprites.</p>
-        <p>To do this, here is a small table with the exact values needed in your sprites, and their effect when the pixel is colored:</p>
+        <p>
+          Another, more advanced feature is the ability to use special tints to lighten/darken the selected color.
+          Try comparing the sprites above with the example spritesheet!
+        </p>
+        <p>To do this, here is a small table with the exact colors needed in your sprites, and their effect when the pixel is colored:</p>
         <table id="sprite-gradient-map-table">
           <thead>
             <tr>

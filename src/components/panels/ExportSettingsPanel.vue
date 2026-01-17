@@ -23,7 +23,7 @@
         internal-aria-label="Export grid as-is"
         internal-title="Export grid as-is"
       >
-      <StaticSprite width="2.5rem" height="2.5rem" sprite="off" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="off" />
       </RadioOptionElement>
       <RadioOptionElement
         v-model="exportSettings.cropGrid"
@@ -33,7 +33,7 @@
         internal-aria-label="Crop grid to remove excess space"
         internal-title="Crop grid to remove excess space"
       >
-      <StaticSprite width="2.5rem" height="2.5rem" sprite="on" />
+        <StaticSprite width="2.5rem" height="2.5rem" sprite="on" />
       </RadioOptionElement>
     </RadioElement>
 
@@ -110,7 +110,7 @@ const exportSettings: Ref<ExportSettingsOptions> = ref({
   scale: 3,
   cropGrid: true,
   format: 'webp',
-  combinedOnly: false,
+  combinedOnly: true,
 });
 
 defineEmits(['export']);

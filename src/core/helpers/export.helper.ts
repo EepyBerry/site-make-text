@@ -57,13 +57,15 @@ async function _encodeCombinedGridBlob(
   // Combine frames
   const combinedFrames: ImageData[] = Array<ImageData | null>(3)
     .fill(null)
-    .map((_, frameIdx) => _combineWordDataOnCanvas(wordData, scaledGridDimensions, scaledCellSize, frameIdx));
+    .map((_, frameIdx) =>
+      _combineWordDataOnCanvas(wordData, scaledGridDimensions, scaledCellSize, frameIdx, opts.cropGrid),
+    );
   // Encode using the given format (.gif or .webp)
   if (opts.format === 'gif') {
-    const encoded = gifEncoder.encode(combinedFrames, scaledGridDimensions.x!, scaledGridDimensions.y!);
+    const encoded = gifEncoder.encode(combinedFrames, combinedFrames[0]!.width, combinedFrames[0]!.height);
     return new Blob([encoded], { type: 'image/gif' });
   } else {
-    const encoded = await webpEncoder.encodeAsync(combinedFrames, scaledGridDimensions.x!, scaledGridDimensions.y!);
+    const encoded = await webpEncoder.encodeAsync(combinedFrames, combinedFrames[0]!.width, combinedFrames[0]!.height);
     return new Blob([encoded], { type: 'image/webp' });
   }
 }
@@ -73,25 +75,38 @@ function _combineWordDataOnCanvas(
   scaledGridDimensions: Vector2,
   scaledCellSize: number,
   frameIndex: number,
+  cropGrid: boolean,
 ): ImageData {
-  console.log(
-    `<SiteMakeText> Creating canvas of size [${scaledGridDimensions.x}, ${scaledGridDimensions.y}] -> frame ${frameIndex}`,
-  );
+  // Calculate cropped grid data; will be needed if cropping is enabled
+  const minFilledCoords = { x: 11, y: 11 };
+  const maxFilledCoords = { x: 0, y: 0 };
+  wordData.forEach((wd) => {
+    minFilledCoords.x = wd.x < minFilledCoords.x ? wd.x : minFilledCoords.x;
+    minFilledCoords.y = wd.y < minFilledCoords.y ? wd.y : minFilledCoords.y;
+    maxFilledCoords.x = wd.x > maxFilledCoords.x ? wd.x : maxFilledCoords.x;
+    maxFilledCoords.y = wd.y > maxFilledCoords.y ? wd.y : maxFilledCoords.y;
+  });
+  const croppedScaledGridDimensions = {
+    x: (maxFilledCoords.x - minFilledCoords.x + 1) * scaledCellSize,
+    y: (maxFilledCoords.y - minFilledCoords.y + 1) * scaledCellSize,
+  };
 
   // Create the target canvas
-  const canvas: OffscreenCanvas = new OffscreenCanvas(scaledGridDimensions.x!, scaledGridDimensions.y!);
+  const canvas: OffscreenCanvas = new OffscreenCanvas(
+    cropGrid ? croppedScaledGridDimensions.x : scaledGridDimensions.x!,
+    cropGrid ? croppedScaledGridDimensions.y : scaledGridDimensions.y!,
+  );
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Cannot combine canvas data: context was not properly initialized');
 
   // Place individual frame data on the canvas
   const offsets: Vector2 = { x: 0, y: 0 };
-  for (let i = 0; i < wordData.length; i++) {
-    if (wordData[i]!.frames.length === 0) continue;
-    offsets.x = scaledCellSize * wordData[i]!.x!;
-    offsets.y = scaledCellSize * wordData[i]!.y!;
+  for (let i = 0; i < wordData.filter((wd) => wd.frames.length > 0).length; i++) {
+    offsets.x = scaledCellSize * (wordData[i]!.x! - (cropGrid ? minFilledCoords.x : 0));
+    offsets.y = scaledCellSize * (wordData[i]!.y! - (cropGrid ? minFilledCoords.y : 0));
     ctx.putImageData(wordData[i]!.frames[frameIndex]!, offsets.x, offsets.y);
   }
-  return ctx.getImageData(0, 0, scaledGridDimensions.x!, scaledGridDimensions.y!);
+  return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
 
 // ----------------------------------------------------------------------------
